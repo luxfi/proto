@@ -1,0 +1,59 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package executor
+
+import (
+	"context"
+	"reflect"
+
+	"github.com/luxfi/codec"
+	consContext "github.com/luxfi/consensus/context"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/log"
+	"github.com/luxfi/node/vms/exchangevm/config"
+	"github.com/luxfi/protocol/x/fxs"
+	"github.com/luxfi/vm/chains/atomic"
+	"github.com/luxfi/vm/components/verify"
+)
+
+type Backend struct {
+	Ctx           context.Context
+	LuxCtx        *consContext.Context // Lux consensus context
+	Config        *config.Config
+	Fxs           []*fxs.ParsedFx
+	TypeToFxIndex map[reflect.Type]int
+	Codec         codec.Manager
+	// Note: FeeAssetID may be different than ctx.XAssetID if this XVM is
+	// running in a chain.
+	FeeAssetID   ids.ID
+	Bootstrapped bool
+
+	// Chain IDs for cross-chain operations
+	XChainID ids.ID
+	CChainID ids.ID
+
+	// Logger for this backend
+	Log log.Logger
+
+	// SharedMemory provides cross-chain atomic operations
+	SharedMemory atomic.SharedMemory
+}
+
+// ToChainContext creates a verify.ChainContext from this backend
+func (b *Backend) ToChainContext() *verify.ChainContext {
+	return &verify.ChainContext{
+		ChainID:        b.LuxCtx.ChainID,
+		NetID:          b.LuxCtx.ChainID,
+		ValidatorState: &validatorStateAdapter{vs: b.LuxCtx.ValidatorState.(consContext.ValidatorState)},
+	}
+}
+
+// validatorStateAdapter adapts consensusctx.ValidatorState to verify.ValidatorState
+type validatorStateAdapter struct {
+	vs consContext.ValidatorState
+}
+
+func (v *validatorStateAdapter) GetNetID(ctx context.Context, chainID ids.ID) (ids.ID, error) {
+	return v.vs.GetNetworkID(chainID)
+}

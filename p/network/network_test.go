@@ -17,15 +17,15 @@ import (
 	validators "github.com/luxfi/consensus/validator"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/txs/mempool"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/txs/mempool"
 	"github.com/luxfi/warp"
 
-	pmempool "github.com/luxfi/protocol/p/txs/mempool"
+	pmempool "github.com/luxfi/protocol/txs/mempool"
 )
 
 // testSender implements warp.Sender for testing with optional call tracking
@@ -155,7 +155,7 @@ func (t testTxVerifier) VerifyTx(*txs.Tx) error {
 func TestNetworkIssueTxFromRPC(t *testing.T) {
 	type test struct {
 		name          string
-		mempool       *pmempool.Mempool
+		mempool       pmempool.Mempool[*txs.Tx]
 		txVerifier    testTxVerifier
 		appSenderFunc func(*gomock.Controller) warp.Sender
 		tx            *txs.Tx
@@ -165,9 +165,10 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 	tests := []test{
 		{
 			name: "mempool has transaction",
-			mempool: func() *pmempool.Mempool {
-				mempool, err := pmempool.New("", metric.NewRegistry())
+			mempool: func() pmempool.Mempool[*txs.Tx] {
+				mempoolMetrics, err := pmempool.NewMetrics("", metric.NewRegistry())
 				require.NoError(t, err)
+				mempool := pmempool.New[*txs.Tx](mempoolMetrics)
 				require.NoError(t, mempool.Add(&txs.Tx{Unsigned: &txs.BaseTx{}}))
 				return mempool
 			}(),
@@ -179,9 +180,10 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 		},
 		{
 			name: "transaction marked as dropped in mempool",
-			mempool: func() *pmempool.Mempool {
-				mempool, err := pmempool.New("", metric.NewRegistry())
+			mempool: func() pmempool.Mempool[*txs.Tx] {
+				mempoolMetrics, err := pmempool.NewMetrics("", metric.NewRegistry())
 				require.NoError(t, err)
+				mempool := pmempool.New[*txs.Tx](mempoolMetrics)
 				mempool.MarkDropped(ids.Empty, errTest)
 				return mempool
 			}(),
@@ -194,9 +196,10 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 		},
 		{
 			name: "tx dropped",
-			mempool: func() *pmempool.Mempool {
-				mempool, err := pmempool.New("", metric.NewRegistry())
+			mempool: func() pmempool.Mempool[*txs.Tx] {
+				mempoolMetrics, err := pmempool.NewMetrics("", metric.NewRegistry())
 				require.NoError(t, err)
+				mempool := pmempool.New[*txs.Tx](mempoolMetrics)
 				return mempool
 			}(),
 			txVerifier: testTxVerifier{err: errTest},
@@ -209,9 +212,10 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 		},
 		{
 			name: "tx too big",
-			mempool: func() *pmempool.Mempool {
-				mempool, err := pmempool.New("", metric.NewRegistry())
+			mempool: func() pmempool.Mempool[*txs.Tx] {
+				mempoolMetrics, err := pmempool.NewMetrics("", metric.NewRegistry())
 				require.NoError(t, err)
+				mempool := pmempool.New[*txs.Tx](mempoolMetrics)
 				return mempool
 			}(),
 			appSenderFunc: func(ctrl *gomock.Controller) warp.Sender {
@@ -220,7 +224,7 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 			},
 			tx: func() *txs.Tx {
 				tx := &txs.Tx{Unsigned: &txs.BaseTx{}}
-				bytes := make([]byte, mempool.MaxTxSize+1)
+				bytes := make([]byte, pmempool.MaxTxSize+1)
 				tx.SetBytes(bytes, bytes)
 				return tx
 			}(),
@@ -228,9 +232,10 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 		},
 		{
 			name: "tx conflicts",
-			mempool: func() *pmempool.Mempool {
-				mempool, err := pmempool.New("", metric.NewRegistry())
+			mempool: func() pmempool.Mempool[*txs.Tx] {
+				mempoolMetrics, err := pmempool.NewMetrics("", metric.NewRegistry())
 				require.NoError(t, err)
+				mempool := pmempool.New[*txs.Tx](mempoolMetrics)
 
 				tx := &txs.Tx{
 					Unsigned: &txs.BaseTx{
@@ -270,20 +275,21 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 		},
 		{
 			name: "mempool full",
-			mempool: func() *pmempool.Mempool {
-				m, err := pmempool.New("", metric.NewRegistry())
+			mempool: func() pmempool.Mempool[*txs.Tx] {
+				mempoolMetrics, err := pmempool.NewMetrics("", metric.NewRegistry())
 				require.NoError(t, err)
+				mempool := pmempool.New[*txs.Tx](mempoolMetrics)
 
 				// Fill the mempool to capacity (64 MiB / 2 MiB per tx = 32 txs)
 				for i := 0; i < 32; i++ {
 					tx := &txs.Tx{Unsigned: &txs.BaseTx{}}
-					bytes := make([]byte, mempool.MaxTxSize)
+					bytes := make([]byte, pmempool.MaxTxSize)
 					tx.SetBytes(bytes, bytes)
 					tx.TxID = ids.GenerateTestID()
-					require.NoError(t, m.Add(tx))
+					require.NoError(t, mempool.Add(tx))
 				}
 
-				return m
+				return mempool
 			}(),
 			appSenderFunc: func(ctrl *gomock.Controller) warp.Sender {
 				// Shouldn't gossip the tx
@@ -298,9 +304,10 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 		},
 		{
 			name: "happy path",
-			mempool: func() *pmempool.Mempool {
-				mempool, err := pmempool.New("", metric.NewRegistry())
+			mempool: func() pmempool.Mempool[*txs.Tx] {
+				mempoolMetrics, err := pmempool.NewMetrics("", metric.NewRegistry())
 				require.NoError(t, err)
+				mempool := pmempool.New[*txs.Tx](mempoolMetrics)
 				return mempool
 			}(),
 			appSenderFunc: func(ctrl *gomock.Controller) warp.Sender {

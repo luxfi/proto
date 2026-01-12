@@ -8,7 +8,7 @@ import (
 	consensusctx "github.com/luxfi/consensus/context"
 	"github.com/luxfi/consensus/validator/uptime"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/fx"
 	"github.com/luxfi/protocol/p/reward"

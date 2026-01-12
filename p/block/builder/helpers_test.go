@@ -20,9 +20,10 @@ import (
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/p2p"
 
+	"github.com/luxfi/atomic"
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/constants"
@@ -35,24 +36,23 @@ import (
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/state/statetest"
 	"github.com/luxfi/protocol/p/status"
+	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/txs/txstest"
 	"github.com/luxfi/protocol/p/utxo"
 	"github.com/luxfi/protocol/p/validators/validatorstest"
-	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/protocol/p/txs/mempool"
-	"github.com/luxfi/protocol/p/txs/txstest"
+	"github.com/luxfi/protocol/txs/mempool"
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/utils"
 	"github.com/luxfi/vm/chains"
-	"github.com/luxfi/vm/chains/atomic"
-	"github.com/luxfi/vm/secp256k1fx"
+	chainatomic "github.com/luxfi/vm/chains/atomic"
+	"github.com/luxfi/utxo/secp256k1fx"
 
 	blockexecutor "github.com/luxfi/protocol/p/block/executor"
 	"github.com/luxfi/protocol/p/testcontext"
-	"github.com/luxfi/protocol/p/warp"
 	txexecutor "github.com/luxfi/protocol/p/txs/executor"
-	txmempool "github.com/luxfi/vm/txs/mempool"
+	"github.com/luxfi/protocol/p/warp"
+	txmempool "github.com/luxfi/protocol/txs/mempool"
 
 	validators "github.com/luxfi/consensus/validator"
 )
@@ -93,7 +93,7 @@ func (m *mockValidatorState) GetMinimumHeight(ctx context.Context) (uint64, erro
 }
 
 type mutableSharedMemory struct {
-	atomic.SharedMemory
+	chainatomic.SharedMemory
 }
 
 type environment struct {
@@ -128,7 +128,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 
 	res.baseDB = versiondb.New(memdb.New())
 	atomicDB := prefixdb.New([]byte{1}, res.baseDB)
-	m := atomic.NewMemory(atomicDB)
+	m := chainatomic.NewMemory(atomicDB)
 
 	// Create test context with Lock
 	// Use PlatformChainID to match genesis transactions
@@ -208,8 +208,9 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 	platformMetrics, err := metrics.New(registerer)
 	require.NoError(err)
 
-	res.mempool, err = mempool.New("mempool", registerer)
+	mempoolMetrics, err := mempool.NewMetrics("mempool", registerer)
 	require.NoError(err)
+	res.mempool = mempool.New[*txs.Tx](mempoolMetrics)
 
 	res.blkManager = blockexecutor.NewManager(
 		res.mempool,

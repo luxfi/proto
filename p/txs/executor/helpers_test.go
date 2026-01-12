@@ -22,13 +22,13 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/utils"
 	"github.com/luxfi/vm/chains"
-	"github.com/luxfi/vm/chains/atomic"
+	chainatomic "github.com/luxfi/vm/chains/atomic"
 
+	"github.com/luxfi/atomic"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/timer/mockable"
 
@@ -41,12 +41,12 @@ import (
 	"github.com/luxfi/protocol/p/status"
 	"github.com/luxfi/protocol/p/testcontext"
 
-	"github.com/luxfi/protocol/p/utxo"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/p/txs/txstest"
+	"github.com/luxfi/protocol/p/utxo"
 
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 const (
@@ -65,7 +65,7 @@ var (
 )
 
 type mutableSharedMemory struct {
-	atomic.SharedMemory
+	chainatomic.SharedMemory
 }
 
 type environment struct {
@@ -110,7 +110,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 	ctx.CChainID = ids.GenerateTestID() // Set a test C-Chain ID
 	ctx.XAssetID = xAssetID
 	ctx.NetworkID = constants.UnitTestID
-	m := atomic.NewMemory(baseDB)
+	m := chainatomic.NewMemory(baseDB)
 	msm := &mutableSharedMemory{
 		SharedMemory: m.NewSharedMemory(ctx.ChainID),
 	}

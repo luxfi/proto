@@ -18,12 +18,12 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
+	"github.com/luxfi/ordering"
 	"github.com/luxfi/protocol/p/block"
-	"github.com/luxfi/utils"
 )
 
 var (
-	_ btree.LessFunc[L1Validator] = L1Validator.Less
+	_ btree.LessFunc[L1Validator]    = L1Validator.Less
 	_ ordering.Sortable[L1Validator] = L1Validator{}
 
 	ErrMutatedL1Validator     = errors.New("L1 validator contains mutated constant fields")
@@ -130,7 +130,7 @@ func (v L1Validator) Less(o L1Validator) bool {
 
 // Compare determines a canonical ordering of L1 validators based on their
 // EndAccumulatedFees and ValidationIDs. Lower EndAccumulatedFees result in an
-// earlier ordering.
+// earlier utils.
 func (v L1Validator) Compare(o L1Validator) int {
 	switch {
 	case v.EndAccumulatedFee < o.EndAccumulatedFee:

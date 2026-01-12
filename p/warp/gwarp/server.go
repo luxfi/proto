@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/warp"
 
-	pb "github.com/luxfi/vm/proto/pb/warp"
+	pb "github.com/luxfi/node/proto/pb/warp"
 )
 
 var _ pb.SignerServer = (*Server)(nil)

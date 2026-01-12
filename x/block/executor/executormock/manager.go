@@ -16,7 +16,7 @@ import (
 	ids "github.com/luxfi/ids"
 	set "github.com/luxfi/math/set"
 	block "github.com/luxfi/protocol/x/block"
-	state "github.com/luxfi/node/vms/exchangevm/state"
+	state "github.com/luxfi/protocol/x/state"
 	txs "github.com/luxfi/protocol/x/txs"
 	gomock "go.uber.org/mock/gomock"
 )

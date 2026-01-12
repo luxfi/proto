@@ -5,7 +5,7 @@ package executor
 
 import (
 	core "github.com/luxfi/consensus/core"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/block"
 )
 

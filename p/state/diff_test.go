@@ -13,14 +13,15 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/container/iterator"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/ordering"
 	"github.com/luxfi/protocol/p/fx/fxmock"
 	"github.com/luxfi/protocol/p/status"
 	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/utils"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/gas"
 )

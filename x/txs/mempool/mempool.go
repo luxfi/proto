@@ -5,8 +5,8 @@ package mempool
 
 import (
 	"github.com/luxfi/metric"
+	txmempool "github.com/luxfi/protocol/txs/mempool"
 	"github.com/luxfi/protocol/x/txs"
-	txmempool "github.com/luxfi/vm/txs/mempool"
 )
 
 type Mempool struct {

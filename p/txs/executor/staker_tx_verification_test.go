@@ -9,6 +9,7 @@ import (
 
 	consensusctx "github.com/luxfi/consensus/context"
 
+	"github.com/luxfi/atomic"
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/database"
@@ -16,14 +17,13 @@ import (
 	"github.com/luxfi/mock/gomock"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/utxo/utxomock"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/utxo/utxomock"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/utils"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/stretchr/testify/require"
 )
 

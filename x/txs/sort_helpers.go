@@ -14,7 +14,7 @@ func sortByCompare[T interface{ Compare(T) int }](s []T) {
 	})
 }
 
-func isSortedAndUniqueByCompare[T interface{ Compare(T) int }](s []T) bool {
+func IsSortedAndUniqueByCompare[T interface{ Compare(T) int }](s []T) bool {
 	for i := 1; i < len(s); i++ {
 		if s[i-1].Compare(s[i]) >= 0 {
 			return false

@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/utils"
+	"github.com/luxfi/ordering"
 )
 
 // expiryEntry = [timestamp] + [validationID]
@@ -21,7 +21,7 @@ const expiryEntryLength = database.Uint64Size + ids.IDLen
 var (
 	errUnexpectedExpiryEntryLength = fmt.Errorf("expected expiry entry length %d", expiryEntryLength)
 
-	_ btree.LessFunc[ExpiryEntry] = ExpiryEntry.Less
+	_ btree.LessFunc[ExpiryEntry]    = ExpiryEntry.Less
 	_ ordering.Sortable[ExpiryEntry] = ExpiryEntry{}
 )
 

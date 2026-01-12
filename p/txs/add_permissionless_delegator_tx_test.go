@@ -17,10 +17,9 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/fx/fxmock"
 	"github.com/luxfi/protocol/p/stakeable"
-	"github.com/luxfi/utils"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/luxmock"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/types"
 
 	safemath "github.com/luxfi/math"

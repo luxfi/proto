@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/protocol/p/warp/message"
 	"github.com/luxfi/protocol/p/warp/payload"
 	"github.com/luxfi/p2p"
-	"github.com/luxfi/vm/proto/pb/platformvm"
+	"github.com/luxfi/node/proto/pb/platformvm"
 	"github.com/luxfi/warp"
 )
 

@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/protocol/x/block"
-	"github.com/luxfi/node/vms/exchangevm/state/statemock"
+	"github.com/luxfi/protocol/x/state/statemock"
 	"github.com/luxfi/protocol/x/txs"
 	"github.com/luxfi/protocol/x/txs/txsmock"
 )

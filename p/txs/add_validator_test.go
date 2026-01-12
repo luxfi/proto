@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/protocol/p/stakeable"
 	"github.com/luxfi/timer/mockable"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestAddValidatorTxSyntacticVerify(t *testing.T) {

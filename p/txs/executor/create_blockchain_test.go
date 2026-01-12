@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 // Ensure Execute fails when there are not enough control sigs

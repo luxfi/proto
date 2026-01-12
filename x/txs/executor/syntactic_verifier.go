@@ -12,7 +12,6 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/protocol/x/txs"
-	"github.com/luxfi/utils"
 	lux "github.com/luxfi/utxo"
 )
 
@@ -134,7 +133,7 @@ func (v *SyntacticVerifier) CreateAssetTx(tx *txs.CreateAssetTx) error {
 			return err
 		}
 	}
-	if !isSortedAndUniqueByCompare(tx.States) {
+	if !txs.IsSortedAndUniqueByCompare(tx.States) {
 		return errInitialStatesNotSortedUnique
 	}
 

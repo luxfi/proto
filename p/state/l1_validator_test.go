@@ -12,12 +12,12 @@ import (
 	"github.com/luxfi/cache"
 	"github.com/luxfi/cache/lru"
 	"github.com/luxfi/container/maybe"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/block"
-	"github.com/luxfi/utils"
 )
 
 func TestL1Validator_Compare(t *testing.T) {

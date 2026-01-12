@@ -12,11 +12,11 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/protocol/txs/mempool"
 	"github.com/luxfi/protocol/x/block"
-	"github.com/luxfi/node/vms/exchangevm/state"
+	"github.com/luxfi/protocol/x/state"
 	"github.com/luxfi/protocol/x/txs"
 	"github.com/luxfi/timer/mockable"
-	"github.com/luxfi/vm/txs/mempool"
 
 	blockexecutor "github.com/luxfi/protocol/x/block/executor"
 	txexecutor "github.com/luxfi/protocol/x/txs/executor"

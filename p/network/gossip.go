@@ -11,14 +11,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/metric"
 	"github.com/luxfi/p2p"
 	"github.com/luxfi/p2p/gossip"
 	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/vm/txs/mempool"
+	"github.com/luxfi/protocol/txs/mempool"
 	"github.com/luxfi/warp"
 )
 

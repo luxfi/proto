@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/metric"
 
 	"github.com/luxfi/cache"
@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/p2p"
 	"github.com/luxfi/p2p/gossip"
 	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/vm/txs/mempool"
+	"github.com/luxfi/protocol/txs/mempool"
 	extwarp "github.com/luxfi/warp"
 )
 

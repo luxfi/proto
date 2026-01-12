@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/genesis/genesistest"
 	"github.com/luxfi/protocol/p/metrics"

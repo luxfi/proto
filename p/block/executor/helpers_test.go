@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
+	"github.com/luxfi/atomic"
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
 	consensustest "github.com/luxfi/consensus/test/helpers"
@@ -25,7 +26,7 @@ import (
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/fx"
@@ -37,20 +38,19 @@ import (
 	"github.com/luxfi/protocol/p/status"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/p/txs/executor"
-	"github.com/luxfi/protocol/p/txs/mempool"
+	"github.com/luxfi/protocol/txs/mempool"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/utils"
 	"github.com/luxfi/vm/chains"
-	"github.com/luxfi/vm/chains/atomic"
+	chainatomic "github.com/luxfi/vm/chains/atomic"
 
+	"github.com/luxfi/protocol/p/txs/txstest"
 	"github.com/luxfi/protocol/p/utxo"
 	"github.com/luxfi/protocol/p/validators/validatorstest"
-	"github.com/luxfi/protocol/p/txs/txstest"
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 
-	txmempool "github.com/luxfi/vm/txs/mempool"
+	txmempool "github.com/luxfi/protocol/txs/mempool"
 )
 
 const (
@@ -93,7 +93,7 @@ type testContext struct {
 	XAssetID        ids.ID
 	Log             log.Logger
 	Lock            *sync.RWMutex
-	SharedMemory    atomic.SharedMemory
+	SharedMemory    chainatomic.SharedMemory
 }
 
 type environment struct {
@@ -123,7 +123,7 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 
 	res.baseDB = versiondb.New(memdb.New())
 	atomicDB := prefixdb.New([]byte{1}, res.baseDB)
-	m := atomic.NewMemory(atomicDB)
+	m := chainatomic.NewMemory(atomicDB)
 
 	// Create consensus context from consensustest
 	consensusCtx := consensustest.Context(t, consensustest.PChainID)
@@ -185,11 +185,11 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 
 	platformMetrics := metrics.Noop
 
-	var err error
-	res.mempool, err = mempool.New("mempool", registerer)
+	mempoolMetrics, err := mempool.NewMetrics("mempool", registerer)
 	if err != nil {
-		panic(fmt.Errorf("failed to create mempool: %w", err))
+		panic(fmt.Errorf("failed to create mempool metrics: %w", err))
 	}
+	res.mempool = mempool.New[*txs.Tx](mempoolMetrics)
 
 	if ctrl == nil {
 		res.blkManager = NewManager(

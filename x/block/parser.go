@@ -8,7 +8,7 @@ import (
 	"reflect"
 
 	"github.com/luxfi/codec"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/x/fxs"
 	"github.com/luxfi/protocol/x/txs"
 	"github.com/luxfi/timer/mockable"

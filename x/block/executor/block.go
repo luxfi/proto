@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 
 	"github.com/luxfi/consensus/core/choices"
 	"github.com/luxfi/consensus/protocol/chain"
@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/protocol/x/block"
-	"github.com/luxfi/node/vms/exchangevm/state"
+	"github.com/luxfi/protocol/x/state"
 	"github.com/luxfi/protocol/x/txs/executor"
 	"github.com/luxfi/vm/chains/atomic"
 )

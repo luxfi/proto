@@ -25,15 +25,16 @@ import (
 	validators "github.com/luxfi/consensus/validator"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/container/iterator"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/ordering"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/utils"
 
 	"github.com/luxfi/codec/wrappers"
 
@@ -53,7 +54,7 @@ import (
 
 	"github.com/luxfi/protocol/p/txs"
 
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 
 	"github.com/luxfi/vm/types"
 

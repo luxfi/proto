@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestAcceptorVisitProposalBlock(t *testing.T) {

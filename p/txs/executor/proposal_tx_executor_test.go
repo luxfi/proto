@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/protocol/p/status"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestProposalTxExecuteAddDelegator(t *testing.T) {

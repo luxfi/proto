@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/upgrade/upgradetest"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestNewExportTx(t *testing.T) {

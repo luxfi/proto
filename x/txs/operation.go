@@ -35,7 +35,7 @@ func (op *Operation) Verify() error {
 		return ErrNilOperation
 	case op.Op == nil:
 		return ErrNilFxOperation
-	case !isSortedAndUniqueByCompare(op.UTXOIDs):
+	case !IsSortedAndUniqueByCompare(op.UTXOIDs):
 		return ErrNotSortedAndUniqueUTXOIDs
 	default:
 		return verify.All(&op.Asset, op.Op)
@@ -82,7 +82,7 @@ func IsSortedAndUniqueOperations(ops []*Operation, c codec.Manager) bool {
 			codec: c,
 		}
 	}
-	return isSortedAndUniqueByCompare(sortableOps)
+	return IsSortedAndUniqueByCompare(sortableOps)
 }
 
 type innerSortOperationsWithSigners struct {

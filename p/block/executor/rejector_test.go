@@ -19,9 +19,9 @@ import (
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/testcontext"
 	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/protocol/p/txs/mempool"
+	"github.com/luxfi/protocol/txs/mempool"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestRejectBlock(t *testing.T) {
@@ -122,8 +122,9 @@ func TestRejectBlock(t *testing.T) {
 			blk, err := tt.newBlockFunc()
 			require.NoError(err)
 
-			mempool, err := mempool.New("", metric.NewRegistry())
+			mempoolMetrics, err := mempool.NewMetrics("", metric.NewRegistry())
 			require.NoError(err)
+			mempool := mempool.New[*txs.Tx](mempoolMetrics)
 			state := state.NewMockState(ctrl)
 			blkIDToState := map[ids.ID]*blockState{
 				blk.Parent(): nil,

@@ -14,17 +14,17 @@ import (
 
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/utils"
 
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/protocol/p/signer"
 	"github.com/luxfi/protocol/p/stakeable"
 	"github.com/luxfi/protocol/p/warp/message"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/types"
 )
 

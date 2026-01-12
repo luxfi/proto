@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/ids"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 // FuzzTransactionParsing tests transaction parsing with random data

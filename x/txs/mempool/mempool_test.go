@@ -8,10 +8,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/metric"
-
-	"github.com/luxfi/utils"
 
 	"github.com/luxfi/protocol/x/txs"
 

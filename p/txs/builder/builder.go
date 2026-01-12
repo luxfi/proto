@@ -6,6 +6,7 @@ package builder
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	consensusctx "github.com/luxfi/consensus/context"
@@ -15,13 +16,18 @@ import (
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/fx"
 	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/utxo"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/utxo"
 	"github.com/luxfi/timer/mockable"
-	"github.com/luxfi/utils"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
+
+func sortByCompare[T interface{ Compare(T) int }](s []T) {
+	slices.SortFunc(s, func(a, b T) int {
+		return a.Compare(b)
+	})
+}
 
 // Max number of items allowed in a page
 const MaxPageSize = 1024

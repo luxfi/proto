@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/codec"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/vms/exchangevm/state"
+	"github.com/luxfi/protocol/x/state"
 	"github.com/luxfi/protocol/x/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/chains/atomic"

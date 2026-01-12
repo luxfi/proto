@@ -7,16 +7,16 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/metric"
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/txs"
 
-	"github.com/luxfi/vm/txs/mempool"
+	"github.com/luxfi/protocol/txs/mempool"
 
-	pmempool "github.com/luxfi/protocol/p/txs/mempool"
+	pmempool "github.com/luxfi/protocol/txs/mempool"
 )
 
 var errFoo = errors.New("foo")
@@ -30,8 +30,9 @@ func TestGossipMempoolAddVerificationError(t *testing.T) {
 		TxID: txID,
 	}
 
-	mempool, err := pmempool.New("", metric.NewRegistry())
+	mempoolMetrics, err := pmempool.NewMetrics("", metric.NewRegistry())
 	require.NoError(err)
+	mempool := pmempool.New[*txs.Tx](mempoolMetrics)
 	txVerifier := testTxVerifier{err: errFoo}
 
 	gossipMempool, err := newGossipMempool(
@@ -54,8 +55,9 @@ func TestGossipMempoolAddVerificationError(t *testing.T) {
 func TestMempoolDuplicate(t *testing.T) {
 	require := require.New(t)
 
-	testMempool, err := pmempool.New("", metric.NewRegistry())
+	mempoolMetrics, err := pmempool.NewMetrics("", metric.NewRegistry())
 	require.NoError(err)
+	testMempool := pmempool.New[*txs.Tx](mempoolMetrics)
 	txVerifier := testTxVerifier{}
 
 	txID := ids.GenerateTestID()
@@ -92,8 +94,9 @@ func TestGossipAddBloomFilter(t *testing.T) {
 	}
 
 	txVerifier := testTxVerifier{}
-	mempool, err := pmempool.New("", metric.NewRegistry())
+	mempoolMetrics, err := pmempool.NewMetrics("", metric.NewRegistry())
 	require.NoError(err)
+	mempool := pmempool.New[*txs.Tx](mempoolMetrics)
 
 	gossipMempool, err := newGossipMempool(
 		mempool,

@@ -75,11 +75,11 @@ func GetCanonicalValidatorSetFromSubchainID(
 		return CanonicalValidatorSet{}, err
 	}
 
-	// Convert the validator set into the canonical ordering.
+	// Convert the validator set into the canonical utils.
 	return FlattenValidatorSet(vdrSet)
 }
 
-// FlattenValidatorSet converts the provided [vdrSet] into a canonical ordering.
+// FlattenValidatorSet converts the provided [vdrSet] into a canonical utils.
 // Also returns the total weight of the validator set.
 func FlattenValidatorSet(vdrSet map[ids.NodeID]*ValidatorData) (CanonicalValidatorSet, error) {
 	var (

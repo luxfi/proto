@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/ids"
 	wkeychain "github.com/luxfi/keychain"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/vms/exchangevm/config"
-	"github.com/luxfi/node/vms/exchangevm/state"
+	"github.com/luxfi/protocol/x/config"
+	"github.com/luxfi/protocol/x/state"
 	"github.com/luxfi/protocol/x/txs"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	"github.com/luxfi/sdk/wallet/chain/x/signer"
@@ -20,7 +20,7 @@ import (
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 type Builder struct {

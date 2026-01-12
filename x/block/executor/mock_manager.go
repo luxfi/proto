@@ -17,7 +17,7 @@ import (
 	set "github.com/luxfi/math/set"
 	gomock "github.com/luxfi/mock/gomock"
 	block "github.com/luxfi/protocol/x/block"
-	state "github.com/luxfi/node/vms/exchangevm/state"
+	state "github.com/luxfi/protocol/x/state"
 	txs "github.com/luxfi/protocol/x/txs"
 )
 

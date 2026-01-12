@@ -26,7 +26,7 @@ import (
 	"github.com/luxfi/upgrade/upgradetest"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/gas"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestApricotStandardBlockTimeVerification(t *testing.T) {

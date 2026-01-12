@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/timer/mockable"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 // Note: Consider refactoring to use table tests for better test organization

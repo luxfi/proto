@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/p/txs/fee"
-	"github.com/luxfi/vm/chains/atomic"
+	chainatomic "github.com/luxfi/vm/chains/atomic"
 )
 
 var _ txs.Visitor = (*atomicTxExecutor)(nil)
@@ -27,7 +27,7 @@ func AtomicTx(
 	parentID ids.ID,
 	stateVersions state.Versions,
 	tx *txs.Tx,
-) (state.Diff, set.Set[ids.ID], map[ids.ID]*atomic.Requests, error) {
+) (state.Diff, set.Set[ids.ID], map[ids.ID]*chainatomic.Requests, error) {
 	atomicExecutor := atomicTxExecutor{
 		backend:       backend,
 		feeCalculator: feeCalculator,
@@ -53,7 +53,7 @@ type atomicTxExecutor struct {
 	// outputs of visitor execution
 	onAccept       state.Diff
 	inputs         set.Set[ids.ID]
-	atomicRequests map[ids.ID]*atomic.Requests
+	atomicRequests map[ids.ID]*chainatomic.Requests
 }
 
 func (*atomicTxExecutor) AddValidatorTx(*txs.AddValidatorTx) error {

@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/block"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/reward"

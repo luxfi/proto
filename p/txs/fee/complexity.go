@@ -22,7 +22,7 @@ import (
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/gas"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 // Signature verification costs were conservatively based on benchmarks run on

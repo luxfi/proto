@@ -19,15 +19,15 @@ import (
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/exchangevm/state"
-	"github.com/luxfi/node/vms/exchangevm/state/statemock"
 	"github.com/luxfi/protocol/x/fxs"
+	"github.com/luxfi/protocol/x/state"
+	"github.com/luxfi/protocol/x/state/statemock"
 	"github.com/luxfi/protocol/x/txs"
 	"github.com/luxfi/timer/mockable"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestSemanticVerifierBaseTx(t *testing.T) {

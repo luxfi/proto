@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/utxo"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestCreateNetworkTxAP3FeeChange(t *testing.T) {

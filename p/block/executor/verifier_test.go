@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
+	"github.com/luxfi/atomic"
 	consensuscontext "github.com/luxfi/consensus/context"
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
@@ -22,7 +23,7 @@ import (
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/genesis/builder"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/metric"
 	"github.com/luxfi/protocol/p/block"
@@ -32,23 +33,22 @@ import (
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/state/statetest"
 	"github.com/luxfi/protocol/p/status"
-	"github.com/luxfi/protocol/p/utxo"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/p/txs/executor"
-	"github.com/luxfi/protocol/p/txs/mempool"
 	"github.com/luxfi/protocol/p/txs/txstest"
+	"github.com/luxfi/protocol/p/utxo"
+	"github.com/luxfi/protocol/txs/mempool"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/utils"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/chains/atomic"
+	chainatomic "github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/gas"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 
-	validatorfee "github.com/luxfi/protocol/p/validators/fee"
 	txfee "github.com/luxfi/protocol/p/txs/fee"
+	validatorfee "github.com/luxfi/protocol/p/validators/fee"
 )
 
 type testVerifierConfig struct {
@@ -74,8 +74,9 @@ func newTestVerifier(t testing.TB, c testVerifierConfig) *verifier {
 		c.ValidatorFeeConfig = builder.LocalValidatorFeeConfig
 	}
 
-	mempool, err := mempool.New("", metric.NewRegistry())
+	mempoolMetrics, err := mempool.NewMetrics("", metric.NewRegistry())
 	require.NoError(err)
+	mempool := mempool.New[*txs.Tx](mempoolMetrics)
 
 	var (
 		state = statetest.New(t, statetest.Config{
@@ -276,9 +277,9 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 			onAcceptState: onAccept,
 
 			timestamp: initialTimestamp,
-			atomicRequests: map[ids.ID]*atomic.Requests{
+			atomicRequests: map[ids.ID]*chainatomic.Requests{
 				verifier.ctx.XChainID: {
-					PutRequests: []*atomic.Element{
+					PutRequests: []*chainatomic.Element{
 						{
 							Key:    exportedUTXOID[:],
 							Value:  exportedUTXOBytes,
@@ -308,7 +309,7 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 		stateDB = prefixdb.New([]byte{0}, baseDB)
 		amDB    = prefixdb.New([]byte{1}, baseDB)
 
-		am       = atomic.NewMemory(amDB)
+		am       = chainatomic.NewMemory(amDB)
 		sm       = am.NewSharedMemory(ctx.ChainID)
 		xChainSM = am.NewSharedMemory(ctx.XChainID)
 
@@ -333,9 +334,9 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 	utxoBytes, err := txs.Codec.Marshal(txs.CodecVersion, utxo)
 	require.NoError(err)
 
-	require.NoError(xChainSM.Apply(map[ids.ID]*atomic.Requests{
+	require.NoError(xChainSM.Apply(map[ids.ID]*chainatomic.Requests{
 		ctx.ChainID: {
-			PutRequests: []*atomic.Element{
+			PutRequests: []*chainatomic.Element{
 				{
 					Key:   inputID[:],
 					Value: utxoBytes,
@@ -424,7 +425,7 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 			require.True(atomicBlockState.inputs.Contains(id), "inputs should contain %s", id)
 		}
 		require.Equal(initialTimestamp, atomicBlockState.timestamp)
-		require.Equal(map[ids.ID]*atomic.Requests{
+		require.Equal(map[ids.ID]*chainatomic.Requests{
 			verifier.ctx.XChainID: {
 				RemoveRequests: [][]byte{
 					inputID[:],
@@ -469,8 +470,9 @@ func TestVerifierVisitCommitBlock(t *testing.T) {
 
 	// Create mocked dependencies.
 	s := state.NewMockState(ctrl)
-	mempool, err := mempool.New("", metric.NewRegistry())
+	mempoolMetrics, err := mempool.NewMetrics("", metric.NewRegistry())
 	require.NoError(err)
+	mempool := mempool.New[*txs.Tx](mempoolMetrics)
 	parentID := ids.GenerateTestID()
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	parentOnDecisionState := state.NewMockDiff(ctrl)
@@ -544,8 +546,9 @@ func TestVerifierVisitAbortBlock(t *testing.T) {
 
 	// Create mocked dependencies.
 	s := state.NewMockState(ctrl)
-	mempool, err := mempool.New("", metric.NewRegistry())
+	mempoolMetrics, err := mempool.NewMetrics("", metric.NewRegistry())
 	require.NoError(err)
+	mempool := mempool.New[*txs.Tx](mempoolMetrics)
 	parentID := ids.GenerateTestID()
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	parentOnDecisionState := state.NewMockDiff(ctrl)
@@ -620,8 +623,9 @@ func TestVerifyUnverifiedParent(t *testing.T) {
 
 	// Create mocked dependencies.
 	s := state.NewMockState(ctrl)
-	mempool, err := mempool.New("", metric.NewRegistry())
+	mempoolMetrics, err := mempool.NewMetrics("", metric.NewRegistry())
 	require.NoError(err)
+	mempool := mempool.New[*txs.Tx](mempoolMetrics)
 	parentID := ids.GenerateTestID()
 
 	backend := &backend{
@@ -692,8 +696,9 @@ func TestBanffAbortBlockTimestampChecks(t *testing.T) {
 
 			// Create mocked dependencies.
 			s := state.NewMockState(ctrl)
-			mempool, err := mempool.New("", metric.NewRegistry())
+			mempoolMetrics, err := mempool.NewMetrics("", metric.NewRegistry())
 			require.NoError(err)
+			mempool := mempool.New[*txs.Tx](mempoolMetrics)
 			parentID := ids.GenerateTestID()
 			parentStatelessBlk := block.NewMockBlock(ctrl)
 			parentHeight := uint64(1)
@@ -794,8 +799,9 @@ func TestBanffCommitBlockTimestampChecks(t *testing.T) {
 
 			// Create mocked dependencies.
 			s := state.NewMockState(ctrl)
-			mempool, err := mempool.New("", metric.NewRegistry())
+			mempoolMetrics, err := mempool.NewMetrics("", metric.NewRegistry())
 			require.NoError(err)
+			mempool := mempool.New[*txs.Tx](mempoolMetrics)
 			parentID := ids.GenerateTestID()
 			parentStatelessBlk := block.NewMockBlock(ctrl)
 			parentHeight := uint64(1)
@@ -864,8 +870,9 @@ func TestVerifierVisitApricotStandardBlockWithProposalBlockParent(t *testing.T) 
 
 	// Create mocked dependencies.
 	s := state.NewMockState(ctrl)
-	mempool, err := mempool.New("", metric.NewRegistry())
+	mempoolMetrics, err := mempool.NewMetrics("", metric.NewRegistry())
 	require.NoError(err)
+	mempool := mempool.New[*txs.Tx](mempoolMetrics)
 	parentID := ids.GenerateTestID()
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	parentOnCommitState := state.NewMockDiff(ctrl)
@@ -922,8 +929,9 @@ func TestVerifierVisitBanffStandardBlockWithProposalBlockParent(t *testing.T) {
 
 	// Create mocked dependencies.
 	s := state.NewMockState(ctrl)
-	mempool, err := mempool.New("", metric.NewRegistry())
+	mempoolMetrics, err := mempool.NewMetrics("", metric.NewRegistry())
 	require.NoError(err)
+	mempool := mempool.New[*txs.Tx](mempoolMetrics)
 	parentID := ids.GenerateTestID()
 	parentStatelessBlk := block.NewMockBlock(ctrl)
 	parentTime := time.Now()

@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/consensus/validator/uptime"
 	"github.com/luxfi/constants"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/block"
 	"github.com/luxfi/protocol/p/reward"
 	"github.com/luxfi/protocol/p/state"

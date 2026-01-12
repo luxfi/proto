@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
 	platformblock "github.com/luxfi/protocol/p/block"
 	"github.com/luxfi/protocol/p/metrics"
@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/p/txs/executor"
 	"github.com/luxfi/protocol/p/txs/fee"
-	"github.com/luxfi/vm/txs/mempool"
+	"github.com/luxfi/protocol/txs/mempool"
 )
 
 var (

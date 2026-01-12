@@ -12,7 +12,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 
 	consensuscore "github.com/luxfi/consensus/core"
 	validators "github.com/luxfi/consensus/validator"
@@ -25,7 +25,7 @@ import (
 	"github.com/luxfi/protocol/p/txs/fee"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/vm/components/gas"
-	"github.com/luxfi/vm/txs/mempool"
+	"github.com/luxfi/protocol/txs/mempool"
 
 	consensusctx "github.com/luxfi/consensus/context"
 	chainblock "github.com/luxfi/consensus/engine/chain/block"

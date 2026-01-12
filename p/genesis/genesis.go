@@ -11,13 +11,13 @@ import (
 	"github.com/luxfi/address"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
+	"github.com/luxfi/ordering"
 	"github.com/luxfi/protocol/p/signer"
 	"github.com/luxfi/protocol/p/stakeable"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/p/txs/txheap"
-	"github.com/luxfi/utils"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 // Note that since a Lux network has exactly one Platform Chain,

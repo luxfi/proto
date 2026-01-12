@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
@@ -18,15 +18,15 @@ import (
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/protocol/p/signer"
 	"github.com/luxfi/protocol/p/state"
+	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/txs/fee"
 	"github.com/luxfi/protocol/p/warp"
 	"github.com/luxfi/protocol/p/warp/message"
 	"github.com/luxfi/protocol/p/warp/payload"
-	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/protocol/p/txs/fee"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/chains/atomic"
+	chainatomic "github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/gas"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 // TODO: Before Etna, ensure that the maximum number of expiries to track is
@@ -76,7 +76,7 @@ func StandardTx(
 	feeCalculator fee.Calculator,
 	tx *txs.Tx,
 	state state.Diff,
-) (set.Set[ids.ID], map[ids.ID]*atomic.Requests, func(), error) {
+) (set.Set[ids.ID], map[ids.ID]*chainatomic.Requests, func(), error) {
 	standardExecutor := standardTxExecutor{
 		backend:       backend,
 		feeCalculator: feeCalculator,
@@ -100,7 +100,7 @@ type standardTxExecutor struct {
 	// outputs of visitor execution
 	onAccept       func() // may be nil
 	inputs         set.Set[ids.ID]
-	atomicRequests map[ids.ID]*atomic.Requests // may be nil
+	atomicRequests map[ids.ID]*chainatomic.Requests // may be nil
 }
 
 func (*standardTxExecutor) AdvanceTimeTx(*txs.AdvanceTimeTx) error {
@@ -321,7 +321,7 @@ func (e *standardTxExecutor) ImportTx(tx *txs.ImportTx) error {
 		// }
 
 		if e.backend.Ctx.SharedMemory != nil {
-			if sm, ok := e.backend.Ctx.SharedMemory.(atomic.SharedMemory); ok {
+			if sm, ok := e.backend.Ctx.SharedMemory.(chainatomic.SharedMemory); ok {
 				var err error
 				allUTXOBytes, err = sm.Get(tx.SourceChain, utxoIDs)
 				if err != nil {
@@ -379,7 +379,7 @@ func (e *standardTxExecutor) ImportTx(tx *txs.ImportTx) error {
 	// Note: We apply atomic requests even if we are not verifying atomic
 	// requests to ensure the shared state will be correct if we later start
 	// verifying the requests.
-	e.atomicRequests = map[ids.ID]*atomic.Requests{
+	e.atomicRequests = map[ids.ID]*chainatomic.Requests{
 		tx.SourceChain: {
 			RemoveRequests: utxoIDs,
 		},
@@ -439,7 +439,7 @@ func (e *standardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 	// Note: We apply atomic requests even if we are not verifying atomic
 	// requests to ensure the shared state will be correct if we later start
 	// verifying the requests.
-	elems := make([]*atomic.Element, len(tx.ExportedOutputs))
+	elems := make([]*chainatomic.Element, len(tx.ExportedOutputs))
 	for i, out := range tx.ExportedOutputs {
 		utxo := &lux.UTXO{
 			UTXOID: lux.UTXOID{
@@ -455,7 +455,7 @@ func (e *standardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 			return fmt.Errorf("failed to marshal UTXO: %w", err)
 		}
 		utxoID := utxo.InputID()
-		elem := &atomic.Element{
+		elem := &chainatomic.Element{
 			Key:   utxoID[:],
 			Value: utxoBytes,
 		}
@@ -465,7 +465,7 @@ func (e *standardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 
 		elems[i] = elem
 	}
-	e.atomicRequests = map[ids.ID]*atomic.Requests{
+	e.atomicRequests = map[ids.ID]*chainatomic.Requests{
 		tx.DestinationChain: {
 			PutRequests: elems,
 		},

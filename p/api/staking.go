@@ -7,6 +7,7 @@ import (
 	"github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/signer"
+	"github.com/luxfi/vm/types"
 )
 
 // Staker is the representation of a staker sent via RPC.
@@ -33,6 +34,13 @@ type Delegator struct {
 	PotentialReward *json.Uint64 `json:"potentialReward,omitempty"`
 }
 
+// PrimaryDelegator is the representation of a primary delegator sent via RPC.
+type PrimaryDelegator struct {
+	Staker
+	RewardOwner     *Owner       `json:"rewardOwner,omitempty"`
+	PotentialReward *json.Uint64 `json:"potentialReward,omitempty"`
+}
+
 // PermissionlessValidator is the representation of a permissionless validator sent via RPC.
 type PermissionlessValidator struct {
 	Staker
@@ -54,5 +62,23 @@ type PermissionlessValidator struct {
 	Signer                 *signer.ProofOfPossession   `json:"signer,omitempty"`
 	DelegatorCount         *json.Uint64                `json:"delegatorCount,omitempty"`
 	DelegatorWeight        *json.Uint64                `json:"delegatorWeight,omitempty"`
-	Delegators             *[]Delegator                `json:"delegators,omitempty"`
+	Delegators             *[]PrimaryDelegator         `json:"delegators,omitempty"`
+}
+
+// BaseL1Validator contains the shared fields for L1 validators.
+type BaseL1Validator struct {
+	ValidationID          *ids.ID               `json:"validationID,omitempty"`
+	PublicKey             *types.JSONByteSlice  `json:"publicKey,omitempty"`
+	RemainingBalanceOwner *Owner                `json:"remainingBalanceOwner,omitempty"`
+	DeactivationOwner     *Owner                `json:"deactivationOwner,omitempty"`
+	MinNonce              *json.Uint64          `json:"minNonce,omitempty"`
+}
+
+// APIL1Validator is the representation of an L1 validator sent via RPC.
+type APIL1Validator struct {
+	NodeID    ids.NodeID   `json:"nodeID"`
+	StartTime json.Uint64  `json:"startTime"`
+	Weight    json.Uint64  `json:"weight"`
+	Balance   *json.Uint64 `json:"balance,omitempty"`
+	BaseL1Validator
 }

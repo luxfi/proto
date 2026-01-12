@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/metric"
 	"github.com/luxfi/mock/gomock"
 	"github.com/stretchr/testify/require"
@@ -26,17 +26,17 @@ import (
 	"github.com/luxfi/protocol/x/block"
 	blkexecutor "github.com/luxfi/protocol/x/block/executor"
 	"github.com/luxfi/protocol/x/block/executor/executormock"
-	xvmmetrics "github.com/luxfi/node/vms/exchangevm/metrics"
-	"github.com/luxfi/node/vms/exchangevm/state"
-	"github.com/luxfi/node/vms/exchangevm/state/statemock"
 	"github.com/luxfi/protocol/x/fxs"
+	xvmmetrics "github.com/luxfi/protocol/x/metrics"
+	"github.com/luxfi/protocol/x/state"
+	"github.com/luxfi/protocol/x/state/statemock"
 	"github.com/luxfi/protocol/x/txs"
 	txexecutor "github.com/luxfi/protocol/x/txs/executor"
 	"github.com/luxfi/protocol/x/txs/mempool"
 	"github.com/luxfi/protocol/x/txs/txsmock"
 	"github.com/luxfi/timer/mockable"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 const trackChecksums = false

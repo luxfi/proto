@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
@@ -33,11 +33,11 @@ type ImportTx struct {
 	ImportedInputs []*lux.TransferableInput `serialize:"true" json:"importedInputs"`
 }
 
-// InitCtx sets the FxID fields in the inputs and outputs of this
+// InitRuntime sets the FxID fields in the inputs and outputs of this
 // [ImportTx]. Also sets the [ctx] to the given [vm.ctx] so that
 // the addresses can be json marshalled into human readable format
-func (tx *ImportTx) InitCtx(ctx *consensusctx.Context) {
-	tx.BaseTx.InitCtx(ctx)
+func (tx *ImportTx) InitRuntime(rt *runtime.Runtime) {
+	tx.BaseTx.InitRuntime(rt)
 	for _, in := range tx.ImportedInputs {
 		in.FxID = secp256k1fx.ID
 	}
@@ -59,7 +59,7 @@ func (tx *ImportTx) InputIDs() set.Set[ids.ID] {
 }
 
 // SyntacticVerify this transaction is well-formed
-func (tx *ImportTx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *ImportTx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
@@ -69,7 +69,7 @@ func (tx *ImportTx) SyntacticVerify(ctx *consensusctx.Context) error {
 		return errNoImportInputs
 	}
 
-	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {
+	if err := tx.BaseTx.SyntacticVerify(rt); err != nil {
 		return err
 	}
 

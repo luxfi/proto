@@ -4,7 +4,7 @@
 package txs
 
 import (
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"encoding/json"
 	"testing"
@@ -71,13 +71,13 @@ func TestBaseTxSerialization(t *testing.T) {
 		},
 	}
 	testChainID := ids.Empty // Use empty for serialization test
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:  testChainID,
 		XAssetID: luxAssetID,
 	}
-	require.NoError(simpleBaseTx.SyntacticVerify(ctx))
+	require.NoError(simpleBaseTx.SyntacticVerify(rt))
 
 	expectedUnsignedSimpleBaseTxBytes := []byte{
 		// Codec version
@@ -219,7 +219,7 @@ func TestBaseTxSerialization(t *testing.T) {
 	}
 	lux.SortTransferableOutputs(complexBaseTx.Outs, Codec)
 	sortByCompare(complexBaseTx.Ins)
-	ctx2 := &consensusctx.Context{
+	ctx2 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:  testChainID,
@@ -369,13 +369,13 @@ func TestBaseTxSerialization(t *testing.T) {
 	// Remove aliaser as BCLookup field doesn't exist in consensus.Context
 	// This functionality is now handled differently
 
-	ctx3 := &consensusctx.Context{
+	ctx3 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:  testChainID,
 		XAssetID: luxAssetID,
 	}
-	unsignedComplexBaseTx.InitCtx(ctx3)
+	unsignedComplexBaseTx.InitRuntime(ctx3)
 
 	unsignedComplexBaseTxJSONBytes, err := json.MarshalIndent(unsignedComplexBaseTx, "", "\t")
 	require.NoError(err)

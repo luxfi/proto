@@ -18,8 +18,8 @@ import (
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
 	consensustest "github.com/luxfi/consensus/test/helpers"
-	validators "github.com/luxfi/consensus/validator"
-	"github.com/luxfi/consensus/validator/uptime"
+	validators "github.com/luxfi/validators"
+	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database/memdb"
@@ -41,7 +41,7 @@ import (
 	"github.com/luxfi/protocol/txs/mempool"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/vm/chains"
+	"github.com/luxfi/node/chains"
 	chainatomic "github.com/luxfi/vm/chains/atomic"
 
 	"github.com/luxfi/protocol/p/txs/txstest"
@@ -126,20 +126,20 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 	m := chainatomic.NewMemory(atomicDB)
 
 	// Create consensus context from consensustest
-	consensusCtx := consensustest.Context(t, consensustest.PChainID)
+	rt := consensustest.Runtime(t, consensustest.PChainID)
 
 	// Build our testContext from the consensus context
 	res.ctx = &testContext{
 		Context:      context.Background(),
-		NetworkID:    consensusCtx.NetworkID,
-		ChainID:      consensusCtx.ChainID,
-		NodeID:       consensusCtx.NodeID,
-		XChainID:     consensusCtx.XChainID,
-		CChainID:     consensusCtx.CChainID,
-		XAssetID:     consensusCtx.XAssetID,
-		Log:          consensusCtx.Log.(log.Logger),
-		Lock:         &consensusCtx.Lock,
-		SharedMemory: m.NewSharedMemory(consensusCtx.ChainID),
+		NetworkID:    rt.NetworkID,
+		ChainID:      rt.ChainID,
+		NodeID:       rt.NodeID,
+		XChainID:     rt.XChainID,
+		CChainID:     rt.CChainID,
+		XAssetID:     rt.XAssetID,
+		Log:          rt.Log.(log.Logger),
+		Lock:         &rt.Lock,
+		SharedMemory: m.NewSharedMemory(rt.ChainID),
 	}
 
 	res.fx = defaultFx(res.clk, res.ctx.Log, res.isBootstrapped.Get())
@@ -155,7 +155,7 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 			DB:         res.baseDB,
 			Genesis:    genesistest.NewBytes(t, genesistest.Config{}),
 			Validators: res.config.Validators,
-			Context:    consensusCtx,
+			Context:    rt,
 			Rewards:    rewardsCalc,
 		})
 
@@ -172,7 +172,7 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 
 	res.backend = &executor.Backend{
 		Config:       res.config,
-		Ctx:          consensusCtx,
+		Ctx:          rt,
 		Clk:          res.clk,
 		Bootstrapped: res.isBootstrapped,
 		Fx:           res.fx,
@@ -246,11 +246,11 @@ func newWallet(t testing.TB, e *environment, c walletConfig) wallet.Wallet {
 	}
 
 	// Get consensus context
-	consensusCtx := consensustest.Context(t, consensustest.PChainID)
+	rt := consensustest.Runtime(t, consensustest.PChainID)
 
 	return txstest.NewWallet(
 		t,
-		consensusCtx,
+		rt,
 		&config.Config{
 			TrackedChains:          e.config.TrackedChains,
 			SybilProtectionEnabled: e.config.SybilProtectionEnabled,

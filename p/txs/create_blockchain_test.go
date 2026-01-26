@@ -4,7 +4,7 @@
 package txs
 
 import (
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"testing"
 
@@ -18,7 +18,7 @@ import (
 )
 
 func TestUnsignedCreateChainTxVerify(t *testing.T) {
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: constants.UnitTestID,
 		ChainID:   ids.GenerateTestID(),
 	}
@@ -146,8 +146,8 @@ func TestUnsignedCreateChainTxVerify(t *testing.T) {
 
 			createChainTx := &CreateChainTx{
 				BaseTx: BaseTx{BaseTx: lux.BaseTx{
-					NetworkID:    ctx.NetworkID,
-					BlockchainID: ctx.ChainID,
+					NetworkID:    rt.NetworkID,
+					BlockchainID: rt.ChainID,
 					Ins:          inputs,
 					Outs:         outputs,
 				}},
@@ -166,7 +166,7 @@ func TestUnsignedCreateChainTxVerify(t *testing.T) {
 			createChainTx.SyntacticallyVerified = false
 			stx.Unsigned = test.setup(createChainTx)
 
-			err = stx.SyntacticVerify(ctx)
+			err = stx.SyntacticVerify(rt)
 			require.ErrorIs(err, test.expectedErr)
 		})
 	}

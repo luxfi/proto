@@ -113,8 +113,8 @@ func TestConfigUnmarshal(t *testing.T) {
 			CreateAssetTxFee:              15,
 			CreateNetworkTxFee:            16,
 			CreateChainTxFee:              17,
-			AddPrimaryNetworkValidatorFee: 18,
-			AddPrimaryNetworkDelegatorFee: 19,
+			AddNetworkValidatorFee: 18,
+			AddNetworkDelegatorFee: 19,
 		}
 		verifyInitializedStruct(t, *expected)
 		verifyInitializedStruct(t, expected.Network)

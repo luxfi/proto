@@ -5,8 +5,8 @@ package executor
 
 import (
 	"github.com/luxfi/atomic"
-	consensusctx "github.com/luxfi/consensus/context"
-	"github.com/luxfi/consensus/validator/uptime"
+	"github.com/luxfi/runtime"
+	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/config"
@@ -18,7 +18,7 @@ import (
 
 type Backend struct {
 	Config       *config.Internal
-	Ctx          *consensusctx.Context
+	Ctx          *runtime.Runtime
 	Clk          *mockable.Clock
 	Fx           fx.Fx
 	FlowChecker  utxo.Verifier

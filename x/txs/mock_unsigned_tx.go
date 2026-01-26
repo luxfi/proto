@@ -10,12 +10,13 @@
 package txs
 
 import (
-	context "context"
+	"context"
 	reflect "reflect"
 
 	ids "github.com/luxfi/ids"
 	set "github.com/luxfi/math/set"
 	gomock "github.com/luxfi/mock/gomock"
+	runtime "github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
 )
 
@@ -57,16 +58,16 @@ func (mr *MockUnsignedTxMockRecorder) Bytes() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bytes", reflect.TypeOf((*MockUnsignedTx)(nil).Bytes))
 }
 
-// InitCtx mocks base method.
-func (m *MockUnsignedTx) InitCtx(arg0 context.Context) {
+// InitRuntime mocks base method.
+func (m *MockUnsignedTx) InitRuntime(arg0 *runtime.Runtime) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "InitCtx", arg0)
+	m.ctrl.Call(m, "InitRuntime", arg0)
 }
 
-// InitCtx indicates an expected call of InitCtx.
-func (mr *MockUnsignedTxMockRecorder) InitCtx(arg0 any) *gomock.Call {
+// InitRuntime indicates an expected call of InitRuntime.
+func (mr *MockUnsignedTxMockRecorder) InitRuntime(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitCtx", reflect.TypeOf((*MockUnsignedTx)(nil).InitCtx), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitRuntime", reflect.TypeOf((*MockUnsignedTx)(nil).InitRuntime), arg0)
 }
 
 // InitializeContext mocks base method.

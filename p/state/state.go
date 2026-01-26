@@ -22,9 +22,9 @@ import (
 	"github.com/luxfi/cache/lru"
 	"github.com/luxfi/cache/metercacher"
 	"github.com/luxfi/codec"
-	"github.com/luxfi/consensus"
-	validators "github.com/luxfi/consensus/validator"
-	"github.com/luxfi/consensus/validator/uptime"
+	"github.com/luxfi/runtime"
+	validators "github.com/luxfi/validators"
+	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/container/maybe"
@@ -180,7 +180,7 @@ type State interface {
 
 	GetRewardUTXOs(txID ids.ID) ([]*lux.UTXO, error)
 	GetChainIDs() ([]ids.ID, error)
-	GetNetIDs() ([]ids.ID, error)
+	GetChainIDs() ([]ids.ID, error)
 	GetChains(netID ids.ID) ([]*txs.Tx, error)
 
 	// ApplyValidatorWeightDiffs iterates from [startHeight] towards the genesis
@@ -363,7 +363,7 @@ type state struct {
 	validatorState
 
 	validators validators.Manager
-	ctx        *consensus.Context
+	ctx        *runtime.Runtime
 	upgrades   upgrade.Config
 	metrics    metrics.Metrics
 	rewards    reward.Calculator
@@ -569,7 +569,7 @@ func New(
 	validators validators.Manager,
 	upgrades upgrade.Config,
 	execCfg *config.Config,
-	ctx *consensus.Context,
+	rt *runtime.Runtime,
 	metrics metrics.Metrics,
 	rewards reward.Calculator,
 ) (State, error) {
@@ -915,7 +915,7 @@ func (s *state) GetCurrentValidators(ctx context.Context, chainID ids.ID) ([]*St
 	defer validationIDIter.Release()
 
 	for validationIDIter.Next() {
-		if err := ctx.Err(); err != nil {
+		if err := rt.Err(); err != nil {
 			return nil, nil, 0, err
 		}
 
@@ -1101,7 +1101,7 @@ func (s *state) GetChainIDs() ([]ids.ID, error) {
 	return chainIDs, nil
 }
 
-func (s *state) GetNetIDs() ([]ids.ID, error) {
+func (s *state) GetChainIDs() ([]ids.ID, error) {
 	return s.GetChainIDs()
 }
 
@@ -1521,7 +1521,7 @@ func (s *state) ApplyValidatorWeightDiffs(
 
 	prevHeight := startHeight + 1
 	for diffIter.Next() {
-		if err := ctx.Err(); err != nil {
+		if err := rt.Err(); err != nil {
 			return err
 		}
 
@@ -1624,7 +1624,7 @@ func (s *state) ApplyValidatorPublicKeyDiffs(
 	defer diffIter.Release()
 
 	for diffIter.Next() {
-		if err := ctx.Err(); err != nil {
+		if err := rt.Err(); err != nil {
 			return err
 		}
 
@@ -1734,7 +1734,7 @@ func (s *state) syncGenesis(genesisBlk block.Block, genesis *genesis.Genesis) er
 
 		// Ensure all chains that the genesis bytes say to create have the right
 		// network ID
-		networkID := s.ctx.NetworkID
+		networkID := s.rt.NetworkID
 		if false && unsignedChain.NetworkID != networkID { // Temporarily disabled for genesis compatibility
 			return lux.ErrWrongNetworkID
 		}
@@ -2240,7 +2240,7 @@ func (s *state) initValidatorSets() error {
 		}
 	}
 
-	s.metrics.SetLocalStake(s.validators.GetWeight(constants.PrimaryNetworkID, s.ctx.NodeID))
+	s.metrics.SetLocalStake(s.validators.GetWeight(constants.PrimaryNetworkID, s.rt.NodeID))
 	totalWeight, err := s.validators.TotalWeight(constants.PrimaryNetworkID)
 	if err != nil {
 		return fmt.Errorf("failed to get total weight of primary network validators: %w", err)
@@ -2662,7 +2662,7 @@ func (s *state) updateValidatorManager(updateValidators bool) error {
 		return fmt.Errorf("failed to get total weight of primary network: %w", err)
 	}
 
-	s.metrics.SetLocalStake(s.validators.GetWeight(constants.PrimaryNetworkID, s.ctx.NodeID))
+	s.metrics.SetLocalStake(s.validators.GetWeight(constants.PrimaryNetworkID, s.rt.NodeID))
 	s.metrics.SetTotalStake(totalWeight)
 	return nil
 }

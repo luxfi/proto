@@ -4,7 +4,7 @@
 package txs
 
 import (
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"encoding/json"
 	"testing"
@@ -93,13 +93,13 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 		},
 	}
 	testChainID := ids.Empty // Use empty chain ID for serialization test to match expected bytes
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:  testChainID,
 		XAssetID: luxAssetID,
 	}
-	require.NoError(simpleTransferChainOwnershipTx.SyntacticVerify(ctx))
+	require.NoError(simpleTransferChainOwnershipTx.SyntacticVerify(rt))
 
 	expectedUnsignedSimpleTransferChainOwnershipTxBytes := []byte{
 		// Codec version
@@ -277,7 +277,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 	}
 	lux.SortTransferableOutputs(complexTransferChainOwnershipTx.Outs, Codec)
 	sortByCompare(complexTransferChainOwnershipTx.Ins)
-	ctx2 := &consensusctx.Context{
+	ctx2 := &runtime.Runtime{
 		NetworkID: constants.MainnetID,
 
 		ChainID:  testChainID,
@@ -448,13 +448,13 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 	// Remove aliaser as BCLookup field doesn't exist in consensus.Context
 	// This functionality is now handled differently
 
-	ctx3 := &consensusctx.Context{
+	ctx3 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID for "P-lux1..." address encoding
 
 		ChainID:  testChainID,
 		XAssetID: luxAssetID,
 	}
-	unsignedComplexTransferChainOwnershipTx.InitCtx(ctx3)
+	unsignedComplexTransferChainOwnershipTx.InitRuntime(ctx3)
 
 	unsignedComplexTransferChainOwnershipTxJSONBytes, err := json.MarshalIndent(unsignedComplexTransferChainOwnershipTx, "", "\t")
 	require.NoError(err)
@@ -558,7 +558,7 @@ func TestTransferChainOwnershipTxSyntacticVerify(t *testing.T) {
 		chainID   = ids.GenerateTestID()
 	)
 
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: networkID,
 
 		ChainID: chainID,
@@ -569,7 +569,7 @@ func TestTransferChainOwnershipTxSyntacticVerify(t *testing.T) {
 		SyntacticallyVerified: true,
 	}
 	// Sanity check.
-	require.NoError(t, verifiedBaseTx.SyntacticVerify(ctx))
+	require.NoError(t, verifiedBaseTx.SyntacticVerify(rt))
 
 	// A BaseTx that passes syntactic verification.
 	validBaseTx := BaseTx{
@@ -579,7 +579,7 @@ func TestTransferChainOwnershipTxSyntacticVerify(t *testing.T) {
 		},
 	}
 	// Sanity check.
-	require.NoError(t, validBaseTx.SyntacticVerify(ctx))
+	require.NoError(t, validBaseTx.SyntacticVerify(rt))
 	// Make sure we're not caching the verification result.
 	require.False(t, validBaseTx.SyntacticallyVerified)
 
@@ -663,7 +663,7 @@ func TestTransferChainOwnershipTxSyntacticVerify(t *testing.T) {
 			ctrl := gomock.NewController(t)
 
 			tx := tt.txFunc(ctrl)
-			err := tx.SyntacticVerify(ctx)
+			err := tx.SyntacticVerify(rt)
 			require.ErrorIs(err, tt.expectedErr)
 			if tt.expectedErr != nil {
 				return

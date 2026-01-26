@@ -11,7 +11,7 @@ import (
 	"github.com/google/btree"
 
 	"github.com/luxfi/cache"
-	validators "github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/validators"
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/container/maybe"
 	"github.com/luxfi/crypto/bls"

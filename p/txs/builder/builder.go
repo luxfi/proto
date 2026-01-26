@@ -9,7 +9,7 @@ import (
 	"slices"
 	"time"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
@@ -199,7 +199,7 @@ type ProposalTxBuilder interface {
 }
 
 func New(
-	ctx *consensusctx.Context,
+	rt *runtime.Runtime,
 	cfg *config.Config,
 	clk *mockable.Clock,
 	fx fx.Fx,
@@ -212,10 +212,10 @@ func New(
 		Spender:           utxoSpender,
 		state:             state,
 		cfg:               cfg,
-		ctx:               ctx,
-		NetworkID:         ctx.NetworkID,
-		ChainID:           ctx.ChainID,
-		XAssetID:          ctx.XAssetID,
+		rt:               rt,
+		NetworkID:         rt.NetworkID,
+		ChainID:           rt.ChainID,
+		XAssetID:          rt.XAssetID,
 		clk:               clk,
 		fx:                fx,
 	}
@@ -227,7 +227,7 @@ type builder struct {
 	state state.State
 
 	cfg       *config.Config
-	ctx       *consensusctx.Context
+	rt       *runtime.Runtime
 	NetworkID uint32
 	ChainID   ids.ID
 	XAssetID  ids.ID
@@ -331,7 +331,7 @@ func (b *builder) NewImportTx(
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewExportTx(
@@ -375,7 +375,7 @@ func (b *builder) NewExportTx(
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewCreateChainTx(
@@ -421,7 +421,7 @@ func (b *builder) NewCreateChainTx(
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewCreateNetworkTx(
@@ -456,7 +456,7 @@ func (b *builder) NewCreateNetworkTx(
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewAddValidatorTx(
@@ -469,7 +469,7 @@ func (b *builder) NewAddValidatorTx(
 	keys []*secp256k1.PrivateKey,
 	changeAddr ids.ShortID,
 ) (*txs.Tx, error) {
-	ins, unstakedOuts, stakedOuts, signers, err := b.Spend(b.state, keys, stakeAmount, b.cfg.AddPrimaryNetworkValidatorFee, changeAddr)
+	ins, unstakedOuts, stakedOuts, signers, err := b.Spend(b.state, keys, stakeAmount, b.cfg.AddNetworkValidatorFee, changeAddr)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't generate tx inputs/outputs: %w", err)
 	}
@@ -499,7 +499,7 @@ func (b *builder) NewAddValidatorTx(
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewAddDelegatorTx(
@@ -511,7 +511,7 @@ func (b *builder) NewAddDelegatorTx(
 	keys []*secp256k1.PrivateKey,
 	changeAddr ids.ShortID,
 ) (*txs.Tx, error) {
-	ins, unlockedOuts, lockedOuts, signers, err := b.Spend(b.state, keys, stakeAmount, b.cfg.AddPrimaryNetworkDelegatorFee, changeAddr)
+	ins, unlockedOuts, lockedOuts, signers, err := b.Spend(b.state, keys, stakeAmount, b.cfg.AddNetworkDelegatorFee, changeAddr)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't generate tx inputs/outputs: %w", err)
 	}
@@ -540,7 +540,7 @@ func (b *builder) NewAddDelegatorTx(
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewAddChainValidatorTx(
@@ -586,7 +586,7 @@ func (b *builder) NewAddChainValidatorTx(
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewRemoveChainValidatorTx(
@@ -622,7 +622,7 @@ func (b *builder) NewRemoveChainValidatorTx(
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewAdvanceTimeTx(timestamp time.Time) (*txs.Tx, error) {
@@ -631,7 +631,7 @@ func (b *builder) NewAdvanceTimeTx(timestamp time.Time) (*txs.Tx, error) {
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewRewardValidatorTx(txID ids.ID) (*txs.Tx, error) {
@@ -641,7 +641,7 @@ func (b *builder) NewRewardValidatorTx(txID ids.ID) (*txs.Tx, error) {
 		return nil, err
 	}
 
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewTransferChainOwnershipTx(
@@ -680,7 +680,7 @@ func (b *builder) NewTransferChainOwnershipTx(
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }
 
 func (b *builder) NewBaseTx(
@@ -720,5 +720,5 @@ func (b *builder) NewBaseTx(
 	if err != nil {
 		return nil, err
 	}
-	return tx, tx.SyntacticVerify(b.ctx)
+	return tx, tx.SyntacticVerify(b.rt)
 }

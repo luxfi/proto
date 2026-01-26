@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 
-	consensusctx "github.com/luxfi/consensus/context"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
@@ -16,9 +15,10 @@ import (
 	"github.com/luxfi/protocol/p/fx"
 	"github.com/luxfi/protocol/p/reward"
 	"github.com/luxfi/protocol/p/signer"
+	"github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 var (
@@ -59,18 +59,18 @@ type AddPermissionlessValidatorTx struct {
 	DelegationShares uint32 `serialize:"true" json:"shares"`
 }
 
-// InitCtx sets the FxID fields in the inputs and outputs of this
+// InitRuntime sets the FxID fields in the inputs and outputs of this
 // [AddPermissionlessValidatorTx]. Also sets the [ctx] to the given [vm.ctx] so
 // that the addresses can be json marshalled into human readable format
-func (tx *AddPermissionlessValidatorTx) InitCtx(ctx *consensusctx.Context) {
-	tx.BaseTx.InitCtx(ctx)
+func (tx *AddPermissionlessValidatorTx) InitRuntime(rt *runtime.Runtime) {
+	tx.BaseTx.InitRuntime(rt)
 	for _, out := range tx.StakeOuts {
 		out.FxID = secp256k1fx.ID
-		out.InitCtx(ctx)
+		out.InitRuntime(rt)
 	}
-	// Owner doesn't have InitCtx method
-	// tx.ValidatorRewardsOwner.InitCtx(ctx)
-	// tx.DelegatorRewardsOwner.InitCtx(ctx)
+	// Owner doesn't have InitRuntime method
+	// tx.ValidatorRewardsOwner.InitRuntime(rt)
+	// tx.DelegatorRewardsOwner.InitRuntime(rt)
 }
 
 func (tx *AddPermissionlessValidatorTx) ChainID() ids.ID {
@@ -120,7 +120,7 @@ func (tx *AddPermissionlessValidatorTx) Shares() uint32 {
 }
 
 // SyntacticVerify returns nil iff [tx] is valid
-func (tx *AddPermissionlessValidatorTx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *AddPermissionlessValidatorTx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
@@ -134,7 +134,7 @@ func (tx *AddPermissionlessValidatorTx) SyntacticVerify(ctx *consensusctx.Contex
 		return errTooManyShares
 	}
 
-	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {
+	if err := tx.BaseTx.SyntacticVerify(rt); err != nil {
 		return fmt.Errorf("failed to verify BaseTx: %w", err)
 	}
 	if err := verify.All(&tx.Validator, tx.Signer, tx.ValidatorRewardsOwner, tx.DelegatorRewardsOwner); err != nil {

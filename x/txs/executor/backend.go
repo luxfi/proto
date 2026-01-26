@@ -8,7 +8,7 @@ import (
 	"reflect"
 
 	"github.com/luxfi/codec"
-	consContext "github.com/luxfi/consensus/context"
+	consContext "github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/x/config"
@@ -49,11 +49,11 @@ func (b *Backend) ToChainContext() *verify.ChainContext {
 	}
 }
 
-// validatorStateAdapter adapts consensusctx.ValidatorState to verify.ValidatorState
+// validatorStateAdapter adapts runtime.ValidatorState to verify.ValidatorState
 type validatorStateAdapter struct {
 	vs consContext.ValidatorState
 }
 
-func (v *validatorStateAdapter) GetNetID(ctx context.Context, chainID ids.ID) (ids.ID, error) {
+func (v *validatorStateAdapter) GetChainID(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 	return v.vs.GetNetworkID(chainID)
 }

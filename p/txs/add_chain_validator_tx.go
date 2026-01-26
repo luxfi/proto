@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 
-	consensusctx "github.com/luxfi/consensus/context"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/vm/components/verify"
 )
 
@@ -48,7 +48,7 @@ func (*AddChainValidatorTx) CurrentPriority() Priority {
 }
 
 // SyntacticVerify returns nil iff [tx] is valid
-func (tx *AddChainValidatorTx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *AddChainValidatorTx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
@@ -58,7 +58,7 @@ func (tx *AddChainValidatorTx) SyntacticVerify(ctx *consensusctx.Context) error 
 		return errAddPrimaryNetworkValidator
 	}
 
-	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {
+	if err := tx.BaseTx.SyntacticVerify(rt); err != nil {
 		return err
 	}
 	if err := verify.All(&tx.Validator, tx.ChainAuth); err != nil {

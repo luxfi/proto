@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/vm/chains"
+	"github.com/luxfi/node/chains"
 )
 
 var Default = Config{
@@ -33,8 +33,8 @@ var Default = Config{
 	CreateAssetTxFee:              constants.MilliLux,
 	CreateNetworkTxFee:            constants.Lux,
 	CreateChainTxFee:              constants.Lux,
-	AddPrimaryNetworkValidatorFee: 0,
-	AddPrimaryNetworkDelegatorFee: 0,
+	AddNetworkValidatorFee: 0,
+	AddNetworkDelegatorFee: 0,
 }
 
 // Config contains all of the user-configurable parameters of the PlatformVM.
@@ -63,8 +63,8 @@ type Config struct {
 	CreateAssetTxFee              uint64 `json:"create-asset-tx-fee"`
 	CreateNetworkTxFee            uint64 `json:"create-network-tx-fee"`
 	CreateChainTxFee              uint64 `json:"create-chain-tx-fee"`
-	AddPrimaryNetworkValidatorFee uint64 `json:"add-primary-network-validator-fee"`
-	AddPrimaryNetworkDelegatorFee uint64 `json:"add-primary-network-delegator-fee"`
+	AddNetworkValidatorFee uint64 `json:"add-primary-network-validator-fee"`
+	AddNetworkDelegatorFee uint64 `json:"add-primary-network-delegator-fee"`
 }
 
 // GetConfig returns a Config from the provided json encoded bytes. If a

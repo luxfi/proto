@@ -13,13 +13,13 @@ import (
 	"time"
 
 	"github.com/luxfi/cache/lru"
-	validators "github.com/luxfi/consensus/validator"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/metric"
 	"github.com/luxfi/upgrade"
+	validators "github.com/luxfi/validators"
 )
 
 var (

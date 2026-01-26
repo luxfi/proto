@@ -7,15 +7,15 @@ import (
 	"context"
 	"fmt"
 
-	consensusctx "github.com/luxfi/consensus/context"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	safemath "github.com/luxfi/math"
 	"github.com/luxfi/protocol/p/fx"
+	"github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 var (
@@ -37,16 +37,16 @@ type AddPermissionlessDelegatorTx struct {
 	DelegationRewardsOwner fx.Owner `serialize:"true" json:"rewardsOwner"`
 }
 
-// InitCtx sets the FxID fields in the inputs and outputs of this
+// InitRuntime sets the FxID fields in the inputs and outputs of this
 // [AddPermissionlessDelegatorTx]. Also sets the [ctx] to the given [vm.ctx] so
 // that the addresses can be json marshalled into human readable format
-func (tx *AddPermissionlessDelegatorTx) InitCtx(ctx *consensusctx.Context) {
-	tx.BaseTx.InitCtx(ctx)
+func (tx *AddPermissionlessDelegatorTx) InitRuntime(rt *runtime.Runtime) {
+	tx.BaseTx.InitRuntime(rt)
 	for _, out := range tx.StakeOuts {
 		out.FxID = secp256k1fx.ID
-		out.InitCtx(ctx)
+		out.InitRuntime(rt)
 	}
-	// Owner doesn't have InitCtx method
+	// Owner doesn't have InitRuntime method
 }
 
 func (tx *AddPermissionlessDelegatorTx) ChainID() ids.ID {
@@ -84,7 +84,7 @@ func (tx *AddPermissionlessDelegatorTx) RewardsOwner() fx.Owner {
 }
 
 // SyntacticVerify returns nil iff [tx] is valid
-func (tx *AddPermissionlessDelegatorTx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *AddPermissionlessDelegatorTx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
@@ -94,7 +94,7 @@ func (tx *AddPermissionlessDelegatorTx) SyntacticVerify(ctx *consensusctx.Contex
 		return errNoStake
 	}
 
-	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {
+	if err := tx.BaseTx.SyntacticVerify(rt); err != nil {
 		return fmt.Errorf("failed to verify BaseTx: %w", err)
 	}
 	if err := verify.All(&tx.Validator, tx.DelegationRewardsOwner); err != nil {

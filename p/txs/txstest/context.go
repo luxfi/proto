@@ -6,7 +6,7 @@ package txstest
 import (
 	"time"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/txs/fee"
@@ -15,7 +15,7 @@ import (
 )
 
 func newContext(
-	ctx *consensusctx.Context,
+	rt *runtime.Runtime,
 	networkID uint32,
 	luxAssetID ids.ID,
 	cfg *config.Config,
@@ -24,7 +24,7 @@ func newContext(
 ) *builder.Context {
 	builderContext := &builder.Context{
 		NetworkID: networkID,
-		ChainID:   ctx.ChainID,
+		ChainID:   rt.ChainID,
 		XAssetID:  luxAssetID,
 	}
 

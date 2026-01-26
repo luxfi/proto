@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/ids"
 
-	consensusvalidators "github.com/luxfi/consensus/validator"
+	consensusvalidators "github.com/luxfi/validators"
 	vmvalidators "github.com/luxfi/protocol/p/validators"
 )
 
@@ -24,7 +24,7 @@ func (manager) GetCurrentHeight(context.Context) (uint64, error) {
 	return 0, nil
 }
 
-func (manager) GetNetID(context.Context, ids.ID) (ids.ID, error) {
+func (manager) GetChainID(context.Context, ids.ID) (ids.ID, error) {
 	return ids.Empty, nil
 }
 

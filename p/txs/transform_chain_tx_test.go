@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"github.com/luxfi/mock/gomock"
 	"github.com/stretchr/testify/require"
@@ -114,13 +114,13 @@ func TestTransformChainTxSerialization(t *testing.T) {
 		},
 	}
 	testChainID := ids.Empty // Use empty chain ID for serialization test to match expected bytes
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:  testChainID,
 		XAssetID: luxAssetID,
 	}
-	require.NoError(simpleTransformTx.SyntacticVerify(ctx))
+	require.NoError(simpleTransformTx.SyntacticVerify(rt))
 
 	expectedUnsignedSimpleTransformTxBytes := []byte{
 		// Codec version
@@ -342,7 +342,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 	}
 	lux.SortTransferableOutputs(complexTransformTx.Outs, Codec)
 	sortByCompare(complexTransformTx.Ins)
-	ctx2 := &consensusctx.Context{
+	ctx2 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:  testChainID,
@@ -530,13 +530,13 @@ func TestTransformChainTxSerialization(t *testing.T) {
 	// Remove aliaser as BCLookup field doesn't exist in consensus.Context
 	// This functionality is now handled differently
 
-	ctx3 := &consensusctx.Context{
+	ctx3 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:  testChainID,
 		XAssetID: luxAssetID,
 	}
-	unsignedComplexTransformTx.InitCtx(ctx3)
+	unsignedComplexTransformTx.InitRuntime(ctx3)
 
 	unsignedComplexTransformTxJSONBytes, err := json.MarshalIndent(unsignedComplexTransformTx, "", "\t")
 	require.NoError(err)
@@ -647,7 +647,7 @@ func TestTransformChainTxSyntacticVerify(t *testing.T) {
 		luxAssetID = ids.GenerateTestID()
 	)
 
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: networkID, // Must match tx.NetworkID
 
 		ChainID:  chainID,
@@ -1049,7 +1049,7 @@ func TestTransformChainTxSyntacticVerify(t *testing.T) {
 			ctrl := gomock.NewController(t)
 
 			tx := tt.txFunc(ctrl)
-			err := tx.SyntacticVerify(ctx)
+			err := tx.SyntacticVerify(rt)
 			require.ErrorIs(t, err, tt.err)
 		})
 	}

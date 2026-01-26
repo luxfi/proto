@@ -4,7 +4,7 @@
 package txs
 
 import (
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"bytes"
 	"errors"
@@ -13,16 +13,18 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/signer"
 	"github.com/luxfi/protocol/p/warp/message"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/vm/types"
 )
 
 const MaxChainAddressLength = 4096
 
 var (
-	_ UnsignedTx                                 = (*ConvertChainToL1Tx)(nil)
-	_ interface{ Compare(*ConvertChainToL1Validator) int } = (*ConvertChainToL1Validator)(nil)
+	_ UnsignedTx = (*ConvertChainToL1Tx)(nil)
+	_ interface {
+		Compare(*ConvertChainToL1Validator) int
+	} = (*ConvertChainToL1Validator)(nil)
 
 	ErrConvertPermissionlessChain          = errors.New("cannot convert a permissionless chain")
 	ErrAddressTooLong                      = errors.New("address is too long")
@@ -46,7 +48,7 @@ type ConvertChainToL1Tx struct {
 	ChainAuth verify.Verifiable `serialize:"true" json:"chainAuthorization"`
 }
 
-func (tx *ConvertChainToL1Tx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *ConvertChainToL1Tx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
@@ -63,7 +65,7 @@ func (tx *ConvertChainToL1Tx) SyntacticVerify(ctx *consensusctx.Context) error {
 		return ErrConvertValidatorsNotSortedAndUnique
 	}
 
-	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {
+	if err := tx.BaseTx.SyntacticVerify(rt); err != nil {
 		return err
 	}
 	for _, vdr := range tx.Validators {

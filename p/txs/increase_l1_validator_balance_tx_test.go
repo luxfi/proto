@@ -302,8 +302,8 @@ func TestIncreaseL1ValidatorBalanceTxSerialization(t *testing.T) {
 	}
 	require.Equal(expectedBytes, txBytes)
 
-	ctx := consensustest.Context(t, constants.PlatformChainID)
-	unsignedTx.InitCtx(ctx)
+	rt := consensustest.Runtime(t, constants.PlatformChainID)
+	unsignedTx.InitRuntime(rt)
 
 	txJSON, err := json.MarshalIndent(unsignedTx, "", "\t")
 	require.NoError(err)
@@ -312,11 +312,11 @@ func TestIncreaseL1ValidatorBalanceTxSerialization(t *testing.T) {
 
 func TestIncreaseL1ValidatorBalanceTxSyntacticVerify(t *testing.T) {
 	var (
-		ctx         = consensustest.Context(t, ids.GenerateTestID())
+		rt         = consensustest.Runtime(t, ids.GenerateTestID())
 		validBaseTx = BaseTx{
 			BaseTx: lux.BaseTx{
-				NetworkID:    ctx.NetworkID,
-				BlockchainID: ctx.ChainID,
+				NetworkID:    rt.NetworkID,
+				BlockchainID: rt.ChainID,
 			},
 		}
 	)
@@ -372,7 +372,7 @@ func TestIncreaseL1ValidatorBalanceTxSyntacticVerify(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
 
-			err := test.tx.SyntacticVerify(ctx)
+			err := test.tx.SyntacticVerify(rt)
 			require.ErrorIs(err, test.expectedErr)
 			if test.expectedErr != nil {
 				return

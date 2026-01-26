@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
@@ -114,7 +114,7 @@ type TransformChainTx struct {
 	ChainAuth verify.Verifiable `serialize:"true" json:"chainAuthorization"`
 }
 
-func (tx *TransformChainTx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *TransformChainTx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
@@ -124,7 +124,7 @@ func (tx *TransformChainTx) SyntacticVerify(ctx *consensusctx.Context) error {
 		return errCantTransformPrimaryNetwork
 	case tx.AssetID == ids.Empty:
 		return errEmptyAssetID
-	case tx.AssetID == ctx.XAssetID:
+	case tx.AssetID == rt.XAssetID:
 		return errAssetIDCantBeLUX
 	case tx.InitialSupply == 0:
 		return errInitialSupplyZero
@@ -156,7 +156,7 @@ func (tx *TransformChainTx) SyntacticVerify(ctx *consensusctx.Context) error {
 		return errUptimeRequirementTooLarge
 	}
 
-	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {
+	if err := tx.BaseTx.SyntacticVerify(rt); err != nil {
 		return err
 	}
 	if err := tx.ChainAuth.Verify(); err != nil {

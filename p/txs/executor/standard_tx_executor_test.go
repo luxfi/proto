@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/atomic"
 	"github.com/luxfi/codec"
 	"github.com/luxfi/consensus"
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto"
@@ -1779,7 +1779,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1808,7 +1808,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1837,7 +1837,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1869,7 +1869,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1898,7 +1898,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1930,7 +1930,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1995,7 +1995,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2154,7 +2154,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2182,7 +2182,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2215,7 +2215,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2255,7 +2255,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2341,7 +2341,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensusctx.Context{},
+						Ctx:          &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2374,7 +2374,7 @@ func TestStandardExecutorConvertChainToL1Tx(t *testing.T) {
 	require.NoError(t, fx.InitializeVM(vm))
 
 	var (
-		ctx           = consensustest.Context(t, constants.PlatformChainID)
+		ctx           = consensustest.Runtime(t, constants.PlatformChainID)
 		defaultConfig = &config.Internal{
 			DynamicFeeConfig:   builder.LocalDynamicFeeConfig,
 			ValidatorFeeConfig: builder.LocalValidatorFeeConfig,
@@ -2457,7 +2457,7 @@ func TestStandardExecutorConvertChainToL1Tx(t *testing.T) {
 		{
 			name: "tx fails syntactic verification",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.backend.Ctx = consensustest.Context(t, ids.GenerateTestID())
+				e.backend.Ctx = consensustest.Runtime(t, ids.GenerateTestID())
 				return nil
 			},
 			expectedErr: lux.ErrWrongChainID,
@@ -2709,7 +2709,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 	require.NoError(t, fx.InitializeVM(vm))
 
 	var (
-		ctx           = consensustest.Context(t, constants.PlatformChainID)
+		ctx           = consensustest.Runtime(t, constants.PlatformChainID)
 		defaultConfig = &config.Internal{
 			DynamicFeeConfig:   builder.LocalDynamicFeeConfig,
 			ValidatorFeeConfig: builder.LocalValidatorFeeConfig,
@@ -2893,7 +2893,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		{
 			name: "tx fails syntactic verification",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.backend.Ctx = consensustest.Context(t, ids.GenerateTestID())
+				e.backend.Ctx = consensustest.Runtime(t, ids.GenerateTestID())
 				return nil
 			},
 			expectedErr: lux.ErrWrongChainID,
@@ -3244,7 +3244,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 	require.NoError(t, fx.InitializeVM(vm))
 
 	var (
-		ctx           = consensustest.Context(t, constants.PlatformChainID)
+		ctx           = consensustest.Runtime(t, constants.PlatformChainID)
 		defaultConfig = &config.Internal{
 			DynamicFeeConfig:   builder.LocalDynamicFeeConfig,
 			ValidatorFeeConfig: builder.LocalValidatorFeeConfig,
@@ -3442,7 +3442,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		{
 			name: "tx fails syntactic verification",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.backend.Ctx = consensustest.Context(t, ids.GenerateTestID())
+				e.backend.Ctx = consensustest.Runtime(t, ids.GenerateTestID())
 				return nil
 			},
 			expectedErr: lux.ErrWrongChainID,
@@ -3754,7 +3754,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 	require.NoError(t, fx.InitializeVM(vm))
 
 	var (
-		ctx           = consensustest.Context(t, constants.PlatformChainID)
+		ctx           = consensustest.Runtime(t, constants.PlatformChainID)
 		defaultConfig = &config.Internal{
 			DynamicFeeConfig:   builder.LocalDynamicFeeConfig,
 			ValidatorFeeConfig: builder.LocalValidatorFeeConfig,
@@ -3897,7 +3897,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 		{
 			name: "tx fails syntactic verification",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.backend.Ctx = consensustest.Context(t, ids.GenerateTestID())
+				e.backend.Ctx = consensustest.Runtime(t, ids.GenerateTestID())
 				return nil
 			},
 			expectedErr: lux.ErrWrongChainID,
@@ -4055,7 +4055,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 	require.NoError(t, fx.Bootstrapped())
 
 	var (
-		ctx           = consensustest.Context(t, constants.PlatformChainID)
+		ctx           = consensustest.Runtime(t, constants.PlatformChainID)
 		defaultConfig = &config.Internal{
 			DynamicFeeConfig:   builder.LocalDynamicFeeConfig,
 			ValidatorFeeConfig: builder.LocalValidatorFeeConfig,
@@ -4201,7 +4201,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 		{
 			name: "tx fails syntactic verification",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.backend.Ctx = consensustest.Context(t, ids.GenerateTestID())
+				e.backend.Ctx = consensustest.Runtime(t, ids.GenerateTestID())
 				return nil
 			},
 			expectedErr: lux.ErrWrongChainID,

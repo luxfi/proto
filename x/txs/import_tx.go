@@ -4,7 +4,7 @@
 package txs
 
 import (
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
@@ -51,17 +51,17 @@ func (t *ImportTx) NumCredentials() int {
 	return t.BaseTx.NumCredentials() + len(t.ImportedIns)
 }
 
-func (t *ImportTx) InitCtx(ctx *consensusctx.Context) {
-	// TransferableInput doesn't have InitCtx
+func (t *ImportTx) InitRuntime(rt *runtime.Runtime) {
+	// TransferableInput doesn't have InitRuntime
 	// for _, in := range t.ImportedIns {
-	//     in.InitCtx(ctx)
+	//     in.InitRuntime(rt)
 	// }
-	t.BaseTx.InitCtx(ctx)
+	t.BaseTx.InitRuntime(rt)
 }
 
 // InitializeContext initializes the context for this transaction
-func (t *ImportTx) InitializeContext(ctx *consensusctx.Context) error {
-	t.InitCtx(ctx)
+func (t *ImportTx) InitializeRuntime(rt *runtime.Runtime) error {
+	t.InitRuntime(rt)
 	return nil
 }
 
@@ -70,7 +70,7 @@ func (t *ImportTx) Visit(v Visitor) error {
 }
 
 // InitializeWithContext initializes the transaction with consensus context
-func (tx *ImportTx) InitializeWithContext(ctx *consensusctx.Context) error {
+func (tx *ImportTx) InitializeWithContext(rt *runtime.Runtime) error {
 	// Initialize any context-dependent fields here
 	return nil
 }

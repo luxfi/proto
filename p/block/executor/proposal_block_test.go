@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 
@@ -1518,10 +1518,10 @@ func newRewardValidatorTx(t testing.TB, txID ids.ID) (*txs.Tx, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Create a context with the proper IDs
-	ctx := &consensusctx.Context{
+	// Create a runtime with the proper IDs
+	rt := &runtime.Runtime{
 		NetworkID: constants.UnitTestID,
 		ChainID:   constants.PlatformChainID,
 	}
-	return tx, tx.SyntacticVerify(ctx)
+	return tx, tx.SyntacticVerify(rt)
 }

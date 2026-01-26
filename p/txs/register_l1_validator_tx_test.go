@@ -328,8 +328,8 @@ func TestRegisterL1ValidatorTxSerialization(t *testing.T) {
 		require.Equal(len(expectedBytes), len(txBytes), "serialized length should match")
 	}
 
-	ctx := consensustest.Context(t, constants.PlatformChainID)
-	unsignedTx.InitCtx(ctx)
+	rt := consensustest.Runtime(t, constants.PlatformChainID)
+	unsignedTx.InitRuntime(rt)
 
 	txJSON, err := json.MarshalIndent(unsignedTx, "", "\t")
 	require.NoError(err)
@@ -337,7 +337,7 @@ func TestRegisterL1ValidatorTxSerialization(t *testing.T) {
 }
 
 func TestRegisterL1ValidatorTxSyntacticVerify(t *testing.T) {
-	ctx := consensustest.Context(t, ids.GenerateTestID())
+	rt := consensustest.Runtime(t, ids.GenerateTestID())
 	tests := []struct {
 		name        string
 		tx          *RegisterL1ValidatorTx
@@ -371,8 +371,8 @@ func TestRegisterL1ValidatorTxSyntacticVerify(t *testing.T) {
 			tx: &RegisterL1ValidatorTx{
 				BaseTx: BaseTx{
 					BaseTx: lux.BaseTx{
-						NetworkID:    ctx.NetworkID,
-						BlockchainID: ctx.ChainID,
+						NetworkID:    rt.NetworkID,
+						BlockchainID: rt.ChainID,
 					},
 				},
 			},
@@ -384,7 +384,7 @@ func TestRegisterL1ValidatorTxSyntacticVerify(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
 
-			err := test.tx.SyntacticVerify(ctx)
+			err := test.tx.SyntacticVerify(rt)
 			require.ErrorIs(err, test.expectedErr)
 			if test.expectedErr != nil {
 				return

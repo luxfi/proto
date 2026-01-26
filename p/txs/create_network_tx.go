@@ -6,7 +6,7 @@ package txs
 import (
 	"context"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"github.com/luxfi/protocol/p/fx"
 )
@@ -21,16 +21,16 @@ type CreateNetworkTx struct {
 	Owner fx.Owner `serialize:"true" json:"owner"`
 }
 
-// InitCtx sets the FxID fields in the inputs and outputs of this
+// InitRuntime sets the FxID fields in the inputs and outputs of this
 // [CreateNetworkTx]. Also sets the [ctx] to the given [vm.ctx] so that
 // the addresses can be json marshalled into human readable format
-func (tx *CreateNetworkTx) InitCtx(ctx *consensusctx.Context) {
-	tx.BaseTx.InitCtx(ctx)
-	// Owner doesn't have InitCtx method
+func (tx *CreateNetworkTx) InitRuntime(rt *runtime.Runtime) {
+	tx.BaseTx.InitRuntime(rt)
+	// Owner doesn't have InitRuntime method
 }
 
 // SyntacticVerify verifies that this transaction is well-formed
-func (tx *CreateNetworkTx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *CreateNetworkTx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
@@ -38,7 +38,7 @@ func (tx *CreateNetworkTx) SyntacticVerify(ctx *consensusctx.Context) error {
 		return nil
 	}
 
-	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {
+	if err := tx.BaseTx.SyntacticVerify(rt); err != nil {
 		return err
 	}
 	if err := tx.Owner.Verify(); err != nil {

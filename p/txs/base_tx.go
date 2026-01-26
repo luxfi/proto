@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 
-	consensusctx "github.com/luxfi/consensus/context"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
@@ -55,36 +55,33 @@ func (tx *BaseTx) Outputs() []*lux.TransferableOutput {
 	return tx.Outs
 }
 
-// InitCtx sets the FxID fields in the inputs and outputs of this [BaseTx]. Also
+// InitRuntime sets the FxID fields in the inputs and outputs of this [BaseTx]. Also
 // sets the [ctx] to the given [vm.ctx] so that the addresses can be json
 // marshalled into human readable format
-func (tx *BaseTx) InitCtx(ctx *consensusctx.Context) {
+func (tx *BaseTx) InitRuntime(rt *runtime.Runtime) {
 	for _, in := range tx.BaseTx.Ins {
 		in.FxID = secp256k1fx.ID
 	}
 	for _, out := range tx.BaseTx.Outs {
 		out.FxID = secp256k1fx.ID
-		out.InitCtx(ctx)
+		out.InitRuntime(rt)
 	}
 }
 
-// InitializeContext initializes the context for this transaction
+// InitializeContext is a no-op. Runtime is passed explicitly.
 func (tx *BaseTx) InitializeContext(ctx context.Context) error {
-	if consensusCtx := consensusctx.FromContext(ctx); consensusCtx != nil {
-		tx.InitCtx(consensusCtx)
-	}
 	return nil
 }
 
 // SyntacticVerify returns nil iff this tx is well formed
-func (tx *BaseTx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *BaseTx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
 	case tx.SyntacticallyVerified: // already passed syntactic verification
 		return nil
 	}
-	if err := tx.BaseTx.Verify(ctx); err != nil {
+	if err := tx.BaseTx.Verify(rt); err != nil {
 		return fmt.Errorf("metadata failed verification: %w", err)
 	}
 	for _, out := range tx.Outs {

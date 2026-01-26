@@ -15,7 +15,7 @@ import (
 	log "github.com/luxfi/log"
 
 	consensuscore "github.com/luxfi/consensus/core"
-	validators "github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/validators"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
@@ -27,16 +27,16 @@ import (
 	"github.com/luxfi/vm/components/gas"
 	"github.com/luxfi/protocol/txs/mempool"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	chainblock "github.com/luxfi/consensus/engine/chain/block"
 	platformblock "github.com/luxfi/protocol/p/block"
 	blockexecutor "github.com/luxfi/protocol/p/block/executor"
 	txexecutor "github.com/luxfi/protocol/p/txs/executor"
 )
 
-// validatorStateAdapter adapts consensusctx.ValidatorState to validators.State
+// validatorStateAdapter adapts runtime.ValidatorState to validators.State
 type validatorStateAdapter struct {
-	state consensusctx.ValidatorState
+	state runtime.ValidatorState
 }
 
 func (a *validatorStateAdapter) GetValidatorSet(ctx context.Context, height uint64, netID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
@@ -648,13 +648,13 @@ func executeTx(
 	logger := backend.Ctx.Log.(log.Logger)
 	txID := tx.ID()
 
-	// Get validator state - handle both validators.State (from node) and consensusctx.ValidatorState (from tests)
+	// Get validator state - handle both validators.State (from node) and runtime.ValidatorState (from tests)
 	var stateAdapter validators.State
 	if vs, ok := backend.Ctx.ValidatorState.(validators.State); ok {
 		// Node provides validators.State directly
 		stateAdapter = vs
-	} else if vs, ok := backend.Ctx.ValidatorState.(consensusctx.ValidatorState); ok {
-		// Tests may provide consensusctx.ValidatorState, wrap it
+	} else if vs, ok := backend.Ctx.ValidatorState.(runtime.ValidatorState); ok {
+		// Tests may provide runtime.ValidatorState, wrap it
 		stateAdapter = &validatorStateAdapter{state: vs}
 	} else {
 		return false, fmt.Errorf("invalid validator state type: %T", backend.Ctx.ValidatorState)

@@ -544,8 +544,8 @@ func TestConvertChainToL1TxSerialization(t *testing.T) {
 				require.Equal(len(test.expectedBytes), len(txBytes), "serialized length should match")
 			}
 
-			ctx := consensustest.Context(t, constants.PlatformChainID)
-			test.tx.InitCtx(ctx)
+			rt := consensustest.Runtime(t, constants.PlatformChainID)
+			test.tx.InitRuntime(rt)
 
 			txJSON, err := json.MarshalIndent(test.tx, "", "\t")
 			require.NoError(err)
@@ -561,11 +561,11 @@ func TestConvertChainToL1TxSyntacticVerify(t *testing.T) {
 	require.NoError(t, err)
 
 	var (
-		ctx         = consensustest.Context(t, ids.GenerateTestID())
+		rt         = consensustest.Runtime(t, ids.GenerateTestID())
 		validBaseTx = BaseTx{
 			BaseTx: lux.BaseTx{
-				NetworkID:    ctx.NetworkID,
-				BlockchainID: ctx.ChainID,
+				NetworkID:    rt.NetworkID,
+				BlockchainID: rt.ChainID,
 			},
 		}
 		validNetID      = ids.GenerateTestID()
@@ -815,7 +815,7 @@ func TestConvertChainToL1TxSyntacticVerify(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
 
-			err := test.tx.SyntacticVerify(ctx)
+			err := test.tx.SyntacticVerify(rt)
 			require.ErrorIs(err, test.expectedErr)
 			if test.expectedErr != nil {
 				return

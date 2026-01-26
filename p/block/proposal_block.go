@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/txs"
 )
@@ -36,11 +36,11 @@ func (b *BanffProposalBlock) initialize(bytes []byte) error {
 	return nil
 }
 
-func (b *BanffProposalBlock) InitCtx(ctx *consensusctx.Context) {
+func (b *BanffProposalBlock) InitRuntime(rt *runtime.Runtime) {
 	for _, tx := range b.Transactions {
-		tx.Unsigned.InitCtx(ctx)
+		tx.Unsigned.InitRuntime(rt)
 	}
-	b.ApricotProposalBlock.InitCtx(ctx)
+	b.ApricotProposalBlock.InitRuntime(rt)
 }
 
 func (b *BanffProposalBlock) Timestamp() time.Time {
@@ -93,8 +93,8 @@ func (b *ApricotProposalBlock) initialize(bytes []byte) error {
 	return nil
 }
 
-func (b *ApricotProposalBlock) InitCtx(ctx *consensusctx.Context) {
-	b.Tx.Unsigned.InitCtx(ctx)
+func (b *ApricotProposalBlock) InitRuntime(rt *runtime.Runtime) {
+	b.Tx.Unsigned.InitRuntime(rt)
 }
 
 func (b *ApricotProposalBlock) Txs() []*txs.Tx {

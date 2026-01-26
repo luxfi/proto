@@ -10,7 +10,7 @@ import (
 	"sort"
 
 	"github.com/luxfi/codec"
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/vm/components/verify"
 )
@@ -30,9 +30,9 @@ type InitialState struct {
 	Outs    []verify.State `serialize:"true"  json:"outputs"`
 }
 
-func (is *InitialState) InitCtx(ctx *consensusctx.Context) {
-	// verify.State doesn't have InitCtx method
-	// The InitCtx is handled at a higher level
+func (is *InitialState) InitRuntime(rt *runtime.Runtime) {
+	// verify.State doesn't have InitRuntime method
+	// The InitRuntime is handled at a higher level
 }
 
 func (is *InitialState) Verify(c codec.Manager, numFxs int) error {

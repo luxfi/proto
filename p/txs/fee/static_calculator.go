@@ -48,18 +48,18 @@ func (*staticVisitor) RewardValidatorTx(*txs.RewardValidatorTx) error {
 }
 
 func (c *staticVisitor) AddValidatorTx(*txs.AddValidatorTx) error {
-	c.fee = c.config.AddPrimaryNetworkValidatorFee
+	c.fee = c.config.AddNetworkValidatorFee
 	return nil
 }
 
 // Removed in regenesis
 // func (c *staticVisitor) AddChainValidatorTx(*txs.AddChainValidatorTx) error {
-// 	c.fee = c.config.AddNetValidatorFee
+// 	c.fee = c.config.AddNetworkValidatorFee
 // 	return nil
 // }
 
 func (c *staticVisitor) AddDelegatorTx(*txs.AddDelegatorTx) error {
-	c.fee = c.config.AddPrimaryNetworkDelegatorFee
+	c.fee = c.config.AddNetworkDelegatorFee
 	return nil
 }
 
@@ -96,7 +96,7 @@ func (c *staticVisitor) AddPermissionlessValidatorTx(tx *txs.AddPermissionlessVa
 	if tx.Chain != constants.PrimaryNetworkID {
 		c.fee = c.config.TxFee // Use TxFee since AddChainValidatorFee was removed in regenesis
 	} else {
-		c.fee = c.config.AddPrimaryNetworkValidatorFee
+		c.fee = c.config.AddNetworkValidatorFee
 	}
 	return nil
 }
@@ -105,7 +105,7 @@ func (c *staticVisitor) AddPermissionlessDelegatorTx(tx *txs.AddPermissionlessDe
 	if tx.Chain != constants.PrimaryNetworkID {
 		c.fee = c.config.TxFee // Use TxFee since AddChainDelegatorFee was removed in regenesis
 	} else {
-		c.fee = c.config.AddPrimaryNetworkDelegatorFee
+		c.fee = c.config.AddNetworkDelegatorFee
 	}
 	return nil
 }

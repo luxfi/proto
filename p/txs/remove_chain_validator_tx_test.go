@@ -8,7 +8,7 @@ import (
 	"errors"
 	"testing"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"github.com/luxfi/mock/gomock"
 	"github.com/stretchr/testify/require"
@@ -94,18 +94,18 @@ func TestRemoveChainValidatorTxSerialization(t *testing.T) {
 		},
 	}
 	testChainID := ids.Empty // Use empty chain ID for serialization test to match expected bytes
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: constants.UnitTestID,
 
 		ChainID: ids.GenerateTestID(),
 	}
-	ctx = &consensusctx.Context{
+	rt = &runtime.Runtime{
 		NetworkID: constants.MainnetID,
 
 		ChainID:  testChainID,
 		XAssetID: luxAssetID,
 	}
-	require.NoError(simpleRemoveValidatorTx.SyntacticVerify(ctx))
+	require.NoError(simpleRemoveValidatorTx.SyntacticVerify(rt))
 
 	expectedUnsignedSimpleRemoveValidatorTxBytes := []byte{
 		// Codec version
@@ -269,7 +269,7 @@ func TestRemoveChainValidatorTxSerialization(t *testing.T) {
 	}
 	lux.SortTransferableOutputs(complexRemoveValidatorTx.Outs, Codec)
 	sortByCompare(complexRemoveValidatorTx.Ins)
-	ctx2 := &consensusctx.Context{
+	ctx2 := &runtime.Runtime{
 		NetworkID: constants.MainnetID,
 
 		ChainID:  testChainID,
@@ -432,13 +432,13 @@ func TestRemoveChainValidatorTxSerialization(t *testing.T) {
 	// Remove aliaser as BCLookup field doesn't exist in consensus.Context
 	// This functionality is now handled differently
 
-	ctx3 := &consensusctx.Context{
+	ctx3 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.ChainworkID for "P-lux1..." address encoding
 
 		ChainID:  testChainID,
 		XAssetID: luxAssetID,
 	}
-	unsignedComplexRemoveValidatorTx.InitCtx(ctx3)
+	unsignedComplexRemoveValidatorTx.InitRuntime(ctx3)
 
 	unsignedComplexRemoveValidatorTxJSONBytes, err := json.MarshalIndent(unsignedComplexRemoveValidatorTx, "", "\t")
 	require.NoError(err)
@@ -536,7 +536,7 @@ func TestRemoveChainValidatorTxSyntacticVerify(t *testing.T) {
 		chainID   = ids.GenerateTestID()
 	)
 
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: networkID,
 
 		ChainID: chainID,
@@ -547,7 +547,7 @@ func TestRemoveChainValidatorTxSyntacticVerify(t *testing.T) {
 		SyntacticallyVerified: true,
 	}
 	// Sanity check.
-	require.NoError(t, verifiedBaseTx.SyntacticVerify(ctx))
+	require.NoError(t, verifiedBaseTx.SyntacticVerify(rt))
 
 	// A BaseTx that passes syntactic verification.
 	validBaseTx := BaseTx{
@@ -557,7 +557,7 @@ func TestRemoveChainValidatorTxSyntacticVerify(t *testing.T) {
 		},
 	}
 	// Sanity check.
-	require.NoError(t, validBaseTx.SyntacticVerify(ctx))
+	require.NoError(t, validBaseTx.SyntacticVerify(rt))
 	// Make sure we're not caching the verification result.
 	require.False(t, validBaseTx.SyntacticallyVerified)
 
@@ -646,7 +646,7 @@ func TestRemoveChainValidatorTxSyntacticVerify(t *testing.T) {
 			ctrl := gomock.NewController(t)
 
 			tx := tt.txFunc(ctrl)
-			err := tx.SyntacticVerify(ctx)
+			err := tx.SyntacticVerify(rt)
 			require.ErrorIs(err, tt.expectedErr)
 			if tt.expectedErr != nil {
 				return

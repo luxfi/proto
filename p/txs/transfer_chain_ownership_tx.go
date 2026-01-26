@@ -6,7 +6,7 @@ package txs
 import (
 	"context"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"errors"
 
@@ -34,18 +34,18 @@ type TransferChainOwnershipTx struct {
 	Owner fx.Owner `serialize:"true" json:"newOwner"`
 }
 
-// InitCtx sets the FxID fields in the inputs and outputs of this
+// InitRuntime sets the FxID fields in the inputs and outputs of this
 // [TransferChainOwnershipTx]. Also sets the [ctx] to the given [vm.ctx] so
 // that the addresses can be json marshalled into human readable format
-func (tx *TransferChainOwnershipTx) InitCtx(ctx *consensusctx.Context) {
-	tx.BaseTx.InitCtx(ctx)
+func (tx *TransferChainOwnershipTx) InitRuntime(rt *runtime.Runtime) {
+	tx.BaseTx.InitRuntime(rt)
 	// Initialize context for Owner if it's *secp256k1fx.OutputOwners
 	if owner, ok := tx.Owner.(*secp256k1fx.OutputOwners); ok {
-		owner.InitCtx(ctx)
+		owner.InitRuntime(rt)
 	}
 }
 
-func (tx *TransferChainOwnershipTx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *TransferChainOwnershipTx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
@@ -56,7 +56,7 @@ func (tx *TransferChainOwnershipTx) SyntacticVerify(ctx *consensusctx.Context) e
 		return ErrTransferPermissionlessChain
 	}
 
-	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {
+	if err := tx.BaseTx.SyntacticVerify(rt); err != nil {
 		return err
 	}
 	if err := verify.All(tx.ChainAuth, tx.Owner); err != nil {

@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/protocol/p/block"
@@ -36,7 +36,7 @@ type backend struct {
 	blkIDToStateLock sync.RWMutex // Protects concurrent access to blkIDToState
 	state            state.State
 
-	ctx *consensusctx.Context
+	rt *runtime.Runtime
 }
 
 // SharedMemory provides cross-chain atomic operations

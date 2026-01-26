@@ -6,7 +6,7 @@ package txs
 import (
 	"context"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"errors"
 	"fmt"
@@ -35,19 +35,19 @@ type ExportTx struct {
 	ExportedOutputs []*lux.TransferableOutput `serialize:"true" json:"exportedOutputs"`
 }
 
-// InitCtx sets the FxID fields in the inputs and outputs of this
+// InitRuntime sets the FxID fields in the inputs and outputs of this
 // [UnsignedExportTx]. Also sets the [ctx] to the given [vm.ctx] so that
 // the addresses can be json marshalled into human readable format
-func (tx *ExportTx) InitCtx(ctx *consensusctx.Context) {
-	tx.BaseTx.InitCtx(ctx)
+func (tx *ExportTx) InitRuntime(rt *runtime.Runtime) {
+	tx.BaseTx.InitRuntime(rt)
 	for _, out := range tx.ExportedOutputs {
 		out.FxID = secp256k1fx.ID
-		out.InitCtx(ctx)
+		out.InitRuntime(rt)
 	}
 }
 
 // SyntacticVerify this transaction is well-formed
-func (tx *ExportTx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *ExportTx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
@@ -57,7 +57,7 @@ func (tx *ExportTx) SyntacticVerify(ctx *consensusctx.Context) error {
 		return errNoExportOutputs
 	}
 
-	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {
+	if err := tx.BaseTx.SyntacticVerify(rt); err != nil {
 		return err
 	}
 

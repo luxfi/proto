@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/codec"
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
@@ -127,14 +127,14 @@ func (tx *Tx) InputIDs() set.Set[ids.ID] {
 	return tx.Unsigned.InputIDs()
 }
 
-func (tx *Tx) SyntacticVerify(ctx *consensusctx.Context) error {
+func (tx *Tx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilSignedTx
 	case tx.TxID == ids.Empty:
 		return errSignedTxNotInitialized
 	default:
-		return tx.Unsigned.SyntacticVerify(ctx)
+		return tx.Unsigned.SyntacticVerify(rt)
 	}
 }
 

@@ -6,7 +6,7 @@ package executor
 import (
 	"context"
 
-	validators "github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/validators"
 	"github.com/luxfi/protocol/p/warp"
 	"github.com/luxfi/protocol/p/txs"
 )

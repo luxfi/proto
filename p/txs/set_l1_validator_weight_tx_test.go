@@ -292,8 +292,8 @@ func TestSetL1ValidatorWeightTxSerialization(t *testing.T) {
 	}
 	require.Equal(expectedBytes, txBytes)
 
-	ctx := consensustest.Context(t, constants.PlatformChainID)
-	unsignedTx.InitCtx(ctx)
+	rt := consensustest.Runtime(t, constants.PlatformChainID)
+	unsignedTx.InitRuntime(rt)
 
 	txJSON, err := json.MarshalIndent(unsignedTx, "", "\t")
 	require.NoError(err)
@@ -301,7 +301,7 @@ func TestSetL1ValidatorWeightTxSerialization(t *testing.T) {
 }
 
 func TestSetL1ValidatorWeightTxSyntacticVerify(t *testing.T) {
-	ctx := consensustest.Context(t, ids.GenerateTestID())
+	rt := consensustest.Runtime(t, ids.GenerateTestID())
 	tests := []struct {
 		name        string
 		tx          *SetL1ValidatorWeightTx
@@ -335,8 +335,8 @@ func TestSetL1ValidatorWeightTxSyntacticVerify(t *testing.T) {
 			tx: &SetL1ValidatorWeightTx{
 				BaseTx: BaseTx{
 					BaseTx: lux.BaseTx{
-						NetworkID:    ctx.NetworkID,
-						BlockchainID: ctx.ChainID,
+						NetworkID:    rt.NetworkID,
+						BlockchainID: rt.ChainID,
 					},
 				},
 			},
@@ -348,7 +348,7 @@ func TestSetL1ValidatorWeightTxSyntacticVerify(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
 
-			err := test.tx.SyntacticVerify(ctx)
+			err := test.tx.SyntacticVerify(rt)
 			require.ErrorIs(err, test.expectedErr)
 			if test.expectedErr != nil {
 				return

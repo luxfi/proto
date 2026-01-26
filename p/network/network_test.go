@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	consensustest "github.com/luxfi/consensus/test/helpers"
-	validators "github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/validators"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
@@ -89,7 +89,7 @@ func (m *mockValidatorState) GetCurrentHeight(ctx context.Context) (uint64, erro
 	return m.height, nil
 }
 
-func (m *mockValidatorState) GetNetID(ctx context.Context, chainID ids.ID) (ids.ID, error) {
+func (m *mockValidatorState) GetChainID(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 	return ids.Empty, nil
 }
 
@@ -324,10 +324,10 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 			require := require.New(t)
 			ctrl := gomock.NewController(t)
 
-			consensusCtx := consensustest.Context(t, ids.Empty)
+			rt := consensustest.Runtime(t, ids.Empty)
 			// Extract values directly from consensus context
-			nodeID := consensusCtx.NodeID
-			netID := consensusCtx.ChainID
+			nodeID := rt.NodeID
+			netID := rt.ChainID
 			// Use a simple test logger for now
 			logger := log.NoLog{}
 			// Create a mock validator state that returns sensible defaults

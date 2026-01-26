@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/txs"
 )
@@ -29,8 +29,8 @@ func (b *ApricotAtomicBlock) initialize(bytes []byte) error {
 	return nil
 }
 
-func (b *ApricotAtomicBlock) InitCtx(ctx *consensusctx.Context) {
-	b.Tx.Unsigned.InitCtx(ctx)
+func (b *ApricotAtomicBlock) InitRuntime(rt *runtime.Runtime) {
+	b.Tx.Unsigned.InitRuntime(rt)
 }
 
 func (b *ApricotAtomicBlock) Txs() []*txs.Tx {

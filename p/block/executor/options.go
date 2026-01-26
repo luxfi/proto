@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/consensus/validator/uptime"
+	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/constants"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/block"

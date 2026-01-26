@@ -12,7 +12,7 @@ package block
 import (
 	reflect "reflect"
 
-	context "github.com/luxfi/consensus/context"
+	context "github.com/luxfi/runtime"
 	ids "github.com/luxfi/ids"
 	txs "github.com/luxfi/protocol/p/txs"
 	gomock "go.uber.org/mock/gomock"
@@ -84,16 +84,16 @@ func (mr *MockBlockMockRecorder) ID() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ID", reflect.TypeOf((*MockBlock)(nil).ID))
 }
 
-// InitCtx mocks base method.
-func (m *MockBlock) InitCtx(ctx *context.Context) {
+// InitRuntime mocks base method.
+func (m *MockBlock) InitRuntime(ctx *context.Context) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "InitCtx", ctx)
+	m.ctrl.Call(m, "InitRuntime", ctx)
 }
 
-// InitCtx indicates an expected call of InitCtx.
-func (mr *MockBlockMockRecorder) InitCtx(ctx any) *gomock.Call {
+// InitRuntime indicates an expected call of InitRuntime.
+func (mr *MockBlockMockRecorder) InitRuntime(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitCtx", reflect.TypeOf((*MockBlock)(nil).InitCtx), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitRuntime", reflect.TypeOf((*MockBlock)(nil).InitRuntime), ctx)
 }
 
 // Parent mocks base method.

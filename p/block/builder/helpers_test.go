@@ -11,10 +11,10 @@ import (
 	"github.com/luxfi/metric"
 	"github.com/stretchr/testify/require"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/consensus/core/coremock"
 	consensustest "github.com/luxfi/consensus/test/helpers"
-	"github.com/luxfi/consensus/validator/uptime"
+	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/database/prefixdb"
@@ -44,7 +44,7 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/vm/chains"
+	"github.com/luxfi/node/chains"
 	chainatomic "github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/utxo/secp256k1fx"
 
@@ -54,7 +54,7 @@ import (
 	"github.com/luxfi/protocol/p/warp"
 	txmempool "github.com/luxfi/protocol/txs/mempool"
 
-	validators "github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/validators"
 )
 
 const (
@@ -64,7 +64,7 @@ const (
 
 var testNet1 *txs.Tx
 
-// mockValidatorState implements consensusctx.ValidatorState for testing
+// mockValidatorState implements runtime.ValidatorState for testing
 type mockValidatorState struct{}
 
 func (m *mockValidatorState) GetChainID(netID ids.ID) (ids.ID, error) {
@@ -132,22 +132,22 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 
 	// Create test context with Lock
 	// Use PlatformChainID to match genesis transactions
-	consensusCtx := consensustest.Context(t, constants.PlatformChainID)
+	rt := consensustest.Runtime(t, constants.PlatformChainID)
 	res.ctx = testcontext.New(context.Background())
-	res.ctx.NetworkID = consensusCtx.NetworkID
-	res.ctx.ChainID = consensusCtx.ChainID
-	res.ctx.NodeID = consensusCtx.NodeID
-	res.ctx.ChainID = consensusCtx.ChainID
-	res.ctx.XAssetID = consensusCtx.XAssetID
-	res.ctx.XAssetID = consensusCtx.XAssetID
-	res.ctx.XChainID = consensusCtx.XChainID
-	res.ctx.CChainID = consensusCtx.CChainID
+	res.ctx.NetworkID = rt.NetworkID
+	res.ctx.ChainID = rt.ChainID
+	res.ctx.NodeID = rt.NodeID
+	res.ctx.ChainID = rt.ChainID
+	res.ctx.XAssetID = rt.XAssetID
+	res.ctx.XAssetID = rt.XAssetID
+	res.ctx.XChainID = rt.XChainID
+	res.ctx.CChainID = rt.CChainID
 	res.msm = &mutableSharedMemory{
 		SharedMemory: m.NewSharedMemory(res.ctx.ChainID),
 	}
 	res.ctx.SharedMemory = res.msm
 
-	// Create a mock ValidatorState that implements consensusctx.ValidatorState
+	// Create a mock ValidatorState that implements runtime.ValidatorState
 	res.ctx.ValidatorState = &mockValidatorState{}
 
 	res.ctx.Lock.Lock()
@@ -156,8 +156,8 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 	res.fx = defaultFx(t, res.clk, res.ctx.Log, res.isBootstrapped.Get())
 
 	rewardsCalc := reward.NewCalculator(res.config.RewardConfig)
-	// Convert testcontext.Context to consensusctx.Context for state
-	stateConsensusCtx := &consensusctx.Context{
+	// Convert testcontext.Context to runtime.Runtime for state
+	stateConsensusCtx := &runtime.Runtime{
 		NetworkID: res.ctx.NetworkID,
 		ChainID:   res.ctx.ChainID,
 		NodeID:    res.ctx.NodeID,
@@ -176,8 +176,8 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 	res.utxosVerifier = utxo.NewVerifier(res.clk, res.fx)
 
 	genesisID := res.state.GetLastAccepted()
-	// Convert testcontext.Context to consensusctx.Context
-	backendConsensusCtx := &consensusctx.Context{
+	// Convert testcontext.Context to runtime.Runtime
+	backendConsensusCtx := &runtime.Runtime{
 		NetworkID:      res.ctx.NetworkID,
 		ChainID:        res.ctx.ChainID,
 		NodeID:         res.ctx.NodeID,
@@ -281,8 +281,8 @@ func newWallet(t testing.TB, e *environment, c walletConfig) wallet.Wallet {
 	if len(c.keys) == 0 {
 		c.keys = genesistest.DefaultFundedKeys
 	}
-	// Convert testcontext.Context to consensusctx.Context for wallet
-	walletCtx := &consensusctx.Context{
+	// Convert testcontext.Context to runtime.Runtime for wallet
+	walletCtx := &runtime.Runtime{
 		NetworkID:    e.ctx.NetworkID,
 		ChainID:      e.ctx.ChainID,
 		NodeID:       e.ctx.NodeID,
@@ -295,8 +295,8 @@ func newWallet(t testing.TB, e *environment, c walletConfig) wallet.Wallet {
 		CreateAssetTxFee:              constants.MilliLux,
 		CreateNetworkTxFee:            constants.Lux,
 		CreateChainTxFee:              constants.Lux,
-		AddPrimaryNetworkValidatorFee: 0,
-		AddPrimaryNetworkDelegatorFee: 0,
+		AddNetworkValidatorFee: 0,
+		AddNetworkDelegatorFee: 0,
 	}
 	return txstest.NewWallet(
 		t,

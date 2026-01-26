@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
@@ -26,12 +26,12 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	luxAssetID := ids.GenerateTestID()
 	nodeID := ids.GenerateTestNodeID()
 	testChainID := ids.GenerateTestID() // Use a test chain ID instead of empty
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: constants.UnitTestID,
 
 		ChainID: ids.GenerateTestID(),
 	}
-	ctx = &consensusctx.Context{
+	rt = &runtime.Runtime{
 
 		ChainID:  testChainID,
 		XAssetID: luxAssetID,
@@ -46,11 +46,11 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	)
 
 	// Case : signed tx is nil
-	err = stx.SyntacticVerify(ctx)
+	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, ErrNilSignedTx)
 
 	// Case : unsigned tx is nil
-	err = addValidatorTx.SyntacticVerify(ctx)
+	err = addValidatorTx.SyntacticVerify(rt)
 	require.ErrorIs(err, ErrNilTx)
 
 	validatorWeight := uint64(2022)
@@ -91,13 +91,13 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	}}
 	addValidatorTx = &AddValidatorTx{
 		BaseTx: BaseTx{BaseTx: lux.BaseTx{
-			NetworkID:    ctx.NetworkID,
-			BlockchainID: ctx.ChainID,
+			NetworkID:    rt.NetworkID,
+			BlockchainID: rt.ChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 		}},
 		Validator: Validator{
-			NodeID: ctx.NodeID,
+			NodeID: rt.NodeID,
 			Start:  uint64(clk.Time().Unix()),
 			End:    uint64(clk.Time().Add(time.Hour).Unix()),
 			Wght:   validatorWeight,
@@ -114,14 +114,14 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	// Case: valid tx
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
-	require.NoError(stx.SyntacticVerify(ctx))
+	require.NoError(stx.SyntacticVerify(rt))
 
 	// Case: Wrong network ID
 	addValidatorTx.SyntacticallyVerified = false
 	addValidatorTx.NetworkID++
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
-	err = stx.SyntacticVerify(ctx)
+	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, lux.ErrWrongNetworkID)
 	addValidatorTx.NetworkID--
 
@@ -133,7 +133,7 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 		Addrs = nil
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
-	err = stx.SyntacticVerify(ctx)
+	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, secp256k1fx.ErrOutputUnspendable)
 	addValidatorTx.StakeOuts = stakes
 
@@ -142,7 +142,7 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	addValidatorTx.RewardsOwner.(*secp256k1fx.OutputOwners).Addrs = nil
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
-	err = stx.SyntacticVerify(ctx)
+	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, secp256k1fx.ErrOutputUnspendable)
 	addValidatorTx.RewardsOwner.(*secp256k1fx.OutputOwners).Addrs = []ids.ShortID{rewardAddress}
 
@@ -151,7 +151,7 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	addValidatorTx.DelegationShares++ // 1 more than max amount
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
-	err = stx.SyntacticVerify(ctx)
+	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, errTooManyShares)
 	addValidatorTx.DelegationShares--
 }
@@ -162,12 +162,12 @@ func TestAddValidatorTxSyntacticVerifyNotLUX(t *testing.T) {
 	luxAssetID := ids.GenerateTestID()
 	nodeID := ids.GenerateTestNodeID()
 	testChainID := ids.GenerateTestID() // Use a test chain ID instead of empty
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: constants.UnitTestID,
 
 		ChainID: ids.GenerateTestID(),
 	}
-	ctx = &consensusctx.Context{
+	rt = &runtime.Runtime{
 
 		ChainID:  testChainID,
 		XAssetID: luxAssetID,
@@ -220,13 +220,13 @@ func TestAddValidatorTxSyntacticVerifyNotLUX(t *testing.T) {
 	}}
 	addValidatorTx = &AddValidatorTx{
 		BaseTx: BaseTx{BaseTx: lux.BaseTx{
-			NetworkID:    ctx.NetworkID,
-			BlockchainID: ctx.ChainID,
+			NetworkID:    rt.NetworkID,
+			BlockchainID: rt.ChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 		}},
 		Validator: Validator{
-			NodeID: ctx.NodeID,
+			NodeID: rt.NodeID,
 			Start:  uint64(clk.Time().Unix()),
 			End:    uint64(clk.Time().Add(time.Hour).Unix()),
 			Wght:   validatorWeight,
@@ -243,7 +243,7 @@ func TestAddValidatorTxSyntacticVerifyNotLUX(t *testing.T) {
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
 
-	err = stx.SyntacticVerify(ctx)
+	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, errStakeMustBeLUX)
 }
 

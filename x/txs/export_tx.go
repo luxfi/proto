@@ -8,7 +8,7 @@ import (
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 )
 
 var (
@@ -27,16 +27,16 @@ type ExportTx struct {
 	ExportedOuts []*lux.TransferableOutput `serialize:"true" json:"exportedOutputs"`
 }
 
-func (t *ExportTx) InitCtx(ctx *consensusctx.Context) {
+func (t *ExportTx) InitRuntime(rt *runtime.Runtime) {
 	for _, out := range t.ExportedOuts {
-		out.InitCtx(ctx)
+		out.InitRuntime(rt)
 	}
-	t.BaseTx.InitCtx(ctx)
+	t.BaseTx.InitRuntime(rt)
 }
 
 // InitializeContext initializes the context for this transaction
-func (t *ExportTx) InitializeContext(ctx *consensusctx.Context) error {
-	t.InitCtx(ctx)
+func (t *ExportTx) InitializeRuntime(rt *runtime.Runtime) error {
+	t.InitRuntime(rt)
 	return nil
 }
 
@@ -45,7 +45,7 @@ func (t *ExportTx) Visit(v Visitor) error {
 }
 
 // InitializeWithContext initializes the transaction with consensus context
-func (tx *ExportTx) InitializeWithContext(ctx *consensusctx.Context) error {
+func (tx *ExportTx) InitializeWithContext(rt *runtime.Runtime) error {
 	// Initialize any context-dependent fields here
 	return nil
 }

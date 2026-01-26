@@ -15,7 +15,7 @@ import (
 	sync "sync"
 	time "time"
 
-	validators "github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/validators"
 	iterator "github.com/luxfi/container/iterator"
 	database "github.com/luxfi/database"
 	ids "github.com/luxfi/ids"
@@ -559,19 +559,19 @@ func (mr *MockStateMockRecorder) GetLastAccepted() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastAccepted", reflect.TypeOf((*MockState)(nil).GetLastAccepted))
 }
 
-// GetNetIDs mocks base method.
-func (m *MockState) GetNetIDs() ([]ids.ID, error) {
+// GetChainIDs mocks base method.
+func (m *MockState) GetChainIDs() ([]ids.ID, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNetIDs")
+	ret := m.ctrl.Call(m, "GetChainIDs")
 	ret0, _ := ret[0].([]ids.ID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetNetIDs indicates an expected call of GetNetIDs.
-func (mr *MockStateMockRecorder) GetNetIDs() *gomock.Call {
+// GetChainIDs indicates an expected call of GetChainIDs.
+func (mr *MockStateMockRecorder) GetChainIDs() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetIDs", reflect.TypeOf((*MockState)(nil).GetNetIDs))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainIDs", reflect.TypeOf((*MockState)(nil).GetChainIDs))
 }
 
 // GetNetOwner mocks base method.

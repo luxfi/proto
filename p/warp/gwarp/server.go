@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/warp"
+	"github.com/luxfi/warp"
 
 	pb "github.com/luxfi/node/proto/pb/warp"
 )

@@ -14,15 +14,15 @@ import (
 
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
-	consensuscontext "github.com/luxfi/consensus/context"
-	validators "github.com/luxfi/consensus/validator"
-	consensusuptime "github.com/luxfi/consensus/validator/uptime"
+	consensuscontext "github.com/luxfi/runtime"
+	validators "github.com/luxfi/validators"
+	consensusuptime "github.com/luxfi/validators/uptime"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/vm/chains"
+	"github.com/luxfi/node/chains"
 	chainatomic "github.com/luxfi/vm/chains/atomic"
 
 	"github.com/luxfi/atomic"
@@ -119,7 +119,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 	fx := defaultFx(clk, ctx.Log, isBootstrapped.Get())
 
 	// Convert testcontext.Context to consensus.Context for statetest
-	consensusCtx := &consensuscontext.Context{
+	rt := &consensuscontext.Runtime{
 		NetworkID:      ctx.NetworkID,
 		ChainID:        ctx.ChainID,
 		NodeID:         ctx.NodeID,
@@ -137,7 +137,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 	}
 
 	// Initialize utxo.XAssetID from the consensus context
-	utxo.XAssetID = consensusCtx.XAssetID
+	utxo.XAssetID = rt.XAssetID
 
 	rewards := reward.NewCalculator(config.RewardConfig)
 	baseState := statetest.New(t, statetest.Config{
@@ -145,7 +145,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 		Genesis:    genesistest.NewBytes(t, genesistest.Config{}),
 		Validators: config.Validators,
 		Upgrades:   config.UpgradeConfig,
-		Context:    consensusCtx,
+		Context:    rt,
 		Rewards:    rewards,
 	})
 	lastAcceptedID = baseState.GetLastAccepted()
@@ -155,7 +155,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 
 	backend := Backend{
 		Config:       config,
-		Ctx:          consensusCtx,
+		Ctx:          rt,
 		Clk:          &mockable.Clock{},
 		Bootstrapped: &isBootstrapped,
 		Fx:           fx,
@@ -218,7 +218,7 @@ func newWallet(t testing.TB, e *environment, c walletConfig) wallet.Wallet {
 		c.keys = genesistest.DefaultFundedKeys
 	}
 	// Convert testcontext.Context to consensus.Context
-	consensusCtx := &consensuscontext.Context{
+	rt := &consensuscontext.Runtime{
 		NetworkID: e.ctx.NetworkID,
 
 		ChainID:        e.ctx.ChainID,
@@ -244,7 +244,7 @@ func newWallet(t testing.TB, e *environment, c walletConfig) wallet.Wallet {
 	}
 	return txstest.NewWallet(
 		t,
-		consensusCtx,
+		rt,
 		walletConfig,
 		e.state,
 		secp256k1fx.NewKeychain(c.keys...),

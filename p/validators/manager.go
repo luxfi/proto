@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/cache"
 	"github.com/luxfi/cache/lru"
-	validators "github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/validators"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/container/window"
 	"github.com/luxfi/crypto/bls"
@@ -374,7 +374,7 @@ func (m *manager) getCurrentValidatorSet(
 	return result, nil
 }
 
-func (m *manager) GetNetID(_ context.Context, chainID ids.ID) (ids.ID, error) {
+func (m *manager) GetChainID(_ context.Context, chainID ids.ID) (ids.ID, error) {
 	if chainID == constants.PlatformChainID {
 		return constants.PrimaryNetworkID, nil
 	}

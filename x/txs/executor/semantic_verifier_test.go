@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	consContext "github.com/luxfi/consensus/context"
+	consContext "github.com/luxfi/runtime"
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
@@ -764,7 +764,7 @@ func TestSemanticVerifierExportTx(t *testing.T) {
 	}
 }
 
-// testValidatorState is a simple stub for consensusctx.ValidatorState used in tests
+// testValidatorState is a simple stub for runtime.ValidatorState used in tests
 type testValidatorState struct {
 	chainID ids.ID // The chain/chain ID this validator state returns
 }
@@ -794,11 +794,11 @@ func TestSemanticVerifierExportTxDifferentNet(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	cChainID := ids.GenerateTestID()
 
-	ctx := consensustest.Context(t, consensustest.XChainID)
+	rt := consensustest.Runtime(t, consensustest.XChainID)
 
 	// Set up a validator state that returns a different chainID to trigger the error
-	ctx.ValidatorState = &testValidatorState{
-		chainID: ids.GenerateTestID(), // Different from ctx.NetID
+	rt.ValidatorState = &testValidatorState{
+		chainID: ids.GenerateTestID(), // Different from rt.NetID
 	}
 
 	typeToFxIndex := make(map[reflect.Type]int)
@@ -850,7 +850,7 @@ func TestSemanticVerifierExportTxDifferentNet(t *testing.T) {
 
 	backendObj := &Backend{
 		Ctx:      context.Background(),
-		LuxCtx:   ctx,
+		LuxCtx:   rt,
 		CChainID: cChainID,
 		Config:   &feeConfig,
 		Fxs: []*fxs.ParsedFx{
@@ -917,7 +917,7 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 	// Create consensus context for chain operations
 	cChainID := ids.GenerateTestID()
 	chainID := ids.GenerateTestID()
-	_ = consensustest.Context(t, chainID)
+	_ = consensustest.Runtime(t, chainID)
 	ctx := context.Background() // Use standard context for Backend
 	m := atomic.NewMemory(prefixdb.New([]byte{0}, memdb.New()))
 

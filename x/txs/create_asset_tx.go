@@ -4,7 +4,7 @@
 package txs
 
 import (
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 
 	"github.com/luxfi/utxo/secp256k1fx"
 )
@@ -23,16 +23,16 @@ type CreateAssetTx struct {
 	States       []*InitialState `serialize:"true" json:"initialStates"`
 }
 
-func (t *CreateAssetTx) InitCtx(ctx *consensusctx.Context) {
+func (t *CreateAssetTx) InitRuntime(rt *runtime.Runtime) {
 	for _, state := range t.States {
-		state.InitCtx(ctx)
+		state.InitRuntime(rt)
 	}
-	t.BaseTx.InitCtx(ctx)
+	t.BaseTx.InitRuntime(rt)
 }
 
 // InitializeContext initializes the context for this transaction
-func (t *CreateAssetTx) InitializeContext(ctx *consensusctx.Context) error {
-	t.InitCtx(ctx)
+func (t *CreateAssetTx) InitializeRuntime(rt *runtime.Runtime) error {
+	t.InitRuntime(rt)
 	return nil
 }
 
@@ -47,7 +47,7 @@ func (t *CreateAssetTx) Visit(v Visitor) error {
 }
 
 // InitializeWithContext initializes the transaction with consensus context
-func (tx *CreateAssetTx) InitializeWithContext(ctx *consensusctx.Context) error {
+func (tx *CreateAssetTx) InitializeWithContext(rt *runtime.Runtime) error {
 	// Initialize any context-dependent fields here
 	return nil
 }

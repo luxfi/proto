@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/ids"
@@ -136,13 +136,13 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 	lux.SortTransferableOutputs(simpleAddPrimaryTx.Outs, Codec)
 	lux.SortTransferableOutputs(simpleAddPrimaryTx.StakeOuts, Codec)
 	sortByCompare(simpleAddPrimaryTx.Ins)
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: constants.MainnetID,
 
 		ChainID:  constants.PlatformChainID,
 		XAssetID: luxAssetID,
 	}
-	require.NoError(simpleAddPrimaryTx.SyntacticVerify(ctx))
+	require.NoError(simpleAddPrimaryTx.SyntacticVerify(rt))
 
 	expectedUnsignedSimpleAddPrimaryTxBytes := []byte{
 		// Codec version
@@ -440,13 +440,13 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		},
 		DelegationShares: reward.PercentDenominator,
 	}
-	ctx = &consensusctx.Context{
+	rt = &runtime.Runtime{
 		NetworkID: constants.MainnetID,
 
 		ChainID:  constants.PlatformChainID,
 		XAssetID: luxAssetID,
 	}
-	require.NoError(complexAddPrimaryTx.SyntacticVerify(ctx))
+	require.NoError(complexAddPrimaryTx.SyntacticVerify(rt))
 
 	_ = []byte{ // expectedUnsignedComplexAddPrimaryTxBytes - not used since we skip exact byte comparison
 		// Codec version
@@ -831,13 +831,13 @@ func TestAddPermissionlessNetValidator(t *testing.T) {
 	lux.SortTransferableOutputs(simpleAddNetTx.Outs, Codec)
 	lux.SortTransferableOutputs(simpleAddNetTx.StakeOuts, Codec)
 	sortByCompare(simpleAddNetTx.Ins)
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: constants.MainnetID,
 
 		ChainID:  constants.PlatformChainID,
 		XAssetID: luxAssetID,
 	}
-	require.NoError(simpleAddNetTx.SyntacticVerify(ctx))
+	require.NoError(simpleAddNetTx.SyntacticVerify(rt))
 
 	expectedUnsignedSimpleAddNetTxBytes := []byte{
 		// Codec version
@@ -1133,7 +1133,7 @@ func TestAddPermissionlessNetValidator(t *testing.T) {
 		},
 		DelegationShares: reward.PercentDenominator,
 	}
-	ctx2 := &consensusctx.Context{
+	ctx2 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID for "P-lux1..." address encoding
 
 		ChainID:  constants.PlatformChainID,
@@ -1392,7 +1392,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 		chainID   = ids.GenerateTestID()
 	)
 
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: networkID,
 
 		ChainID: chainID,
@@ -1839,7 +1839,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 			ctrl := gomock.NewController(t)
 
 			tx := tt.txFunc(ctrl)
-			err := tx.SyntacticVerify(ctx)
+			err := tx.SyntacticVerify(rt)
 			require.ErrorIs(t, err, tt.err)
 		})
 	}

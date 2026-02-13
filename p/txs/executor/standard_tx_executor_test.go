@@ -17,7 +17,6 @@ import (
 	"github.com/luxfi/atomic"
 	"github.com/luxfi/codec"
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/runtime"
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto"
@@ -45,11 +44,12 @@ import (
 	"github.com/luxfi/protocol/p/warp"
 	"github.com/luxfi/protocol/p/warp/message"
 	"github.com/luxfi/protocol/p/warp/payload"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/sdk/wallet/primary/common"
 	"github.com/luxfi/upgrade/upgradetest"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 
 	safemath "github.com/luxfi/math"
 	txfee "github.com/luxfi/protocol/p/txs/fee"
@@ -2457,7 +2457,7 @@ func TestStandardExecutorConvertChainToL1Tx(t *testing.T) {
 		{
 			name: "tx fails syntactic verification",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.backend.Ctx = consensustest.Runtime(t, ids.GenerateTestID())
+				e.backend.Rt = consensustest.Runtime(t, ids.GenerateTestID())
 				return nil
 			},
 			expectedErr: lux.ErrWrongChainID,
@@ -2893,7 +2893,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		{
 			name: "tx fails syntactic verification",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.backend.Ctx = consensustest.Runtime(t, ids.GenerateTestID())
+				e.backend.Rt = consensustest.Runtime(t, ids.GenerateTestID())
 				return nil
 			},
 			expectedErr: lux.ErrWrongChainID,
@@ -3442,7 +3442,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		{
 			name: "tx fails syntactic verification",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.backend.Ctx = consensustest.Runtime(t, ids.GenerateTestID())
+				e.backend.Rt = consensustest.Runtime(t, ids.GenerateTestID())
 				return nil
 			},
 			expectedErr: lux.ErrWrongChainID,
@@ -3897,7 +3897,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 		{
 			name: "tx fails syntactic verification",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.backend.Ctx = consensustest.Runtime(t, ids.GenerateTestID())
+				e.backend.Rt = consensustest.Runtime(t, ids.GenerateTestID())
 				return nil
 			},
 			expectedErr: lux.ErrWrongChainID,
@@ -4201,7 +4201,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 		{
 			name: "tx fails syntactic verification",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.backend.Ctx = consensustest.Runtime(t, ids.GenerateTestID())
+				e.backend.Rt = consensustest.Runtime(t, ids.GenerateTestID())
 				return nil
 			},
 			expectedErr: lux.ErrWrongChainID,

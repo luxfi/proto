@@ -12,7 +12,6 @@ import (
 
 	"github.com/luxfi/cache"
 	"github.com/luxfi/cache/lru"
-	validators "github.com/luxfi/validators"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/container/window"
 	"github.com/luxfi/crypto/bls"
@@ -24,6 +23,7 @@ import (
 	"github.com/luxfi/protocol/p/status"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/timer/mockable"
+	validators "github.com/luxfi/validators"
 )
 
 const (
@@ -374,7 +374,13 @@ func (m *manager) getCurrentValidatorSet(
 	return result, nil
 }
 
-func (m *manager) GetChainID(_ context.Context, chainID ids.ID) (ids.ID, error) {
+func (m *manager) GetChainID(netID ids.ID) (ids.ID, error) {
+	// TODO: Implement proper network ID to chain ID lookup
+	// For now, return the same ID (most chains have same network and chain ID)
+	return netID, nil
+}
+
+func (m *manager) GetNetworkID(chainID ids.ID) (ids.ID, error) {
 	if chainID == constants.PlatformChainID {
 		return constants.PrimaryNetworkID, nil
 	}

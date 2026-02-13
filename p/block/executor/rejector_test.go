@@ -13,15 +13,15 @@ import (
 	"github.com/luxfi/metric"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/block"
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/testcontext"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/txs/mempool"
-	"github.com/luxfi/vm/components/verify"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 func TestRejectBlock(t *testing.T) {

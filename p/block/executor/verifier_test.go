@@ -12,7 +12,6 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/luxfi/atomic"
-	consensuscontext "github.com/luxfi/runtime"
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/container/iterator"
@@ -38,14 +37,15 @@ import (
 	"github.com/luxfi/protocol/p/txs/txstest"
 	"github.com/luxfi/protocol/p/utxo"
 	"github.com/luxfi/protocol/txs/mempool"
+	consensuscontext "github.com/luxfi/runtime"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade"
 	"github.com/luxfi/upgrade/upgradetest"
 	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 	chainatomic "github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/gas"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/utxo/secp256k1fx"
 
 	txfee "github.com/luxfi/protocol/p/txs/fee"
 	validatorfee "github.com/luxfi/protocol/p/validators/fee"
@@ -98,7 +98,7 @@ func newTestVerifier(t testing.TB, c testVerifierConfig) *verifier {
 			lastAccepted: state.GetLastAccepted(),
 			blkIDToState: make(map[ids.ID]*blockState),
 			state:        state,
-			rt:          c.Context,
+			rt:           c.Context,
 		},
 		txExecutorBackend: &executor.Backend{
 			Config: &config.Internal{
@@ -366,8 +366,8 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 			},
 			verifier.state,
 			secp256k1fx.NewKeychain(genesistest.DefaultFundedKeys[0]),
-			nil,                    // chainIDs
-			nil,                    // validationIDs
+			nil,                   // chainIDs
+			nil,                   // validationIDs
 			[]ids.ID{rt.XChainID}, // Read the UTXO to import
 		)
 		initialTimestamp = verifier.state.GetTimestamp()

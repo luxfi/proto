@@ -6,16 +6,16 @@ package config
 import (
 	"time"
 
-	validators "github.com/luxfi/validators"
-	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/protocol/p/reward"
-	"github.com/luxfi/protocol/p/validators/fee"
-	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/upgrade"
 	"github.com/luxfi/node/chains"
+	"github.com/luxfi/protocol/p/reward"
+	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/validators/fee"
+	"github.com/luxfi/upgrade"
+	validators "github.com/luxfi/validators"
+	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/vm/components/gas"
 )
 

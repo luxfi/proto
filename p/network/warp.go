@@ -13,11 +13,11 @@ import (
 
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/proto/pb/platformvm"
+	"github.com/luxfi/p2p"
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/warp/message"
 	"github.com/luxfi/protocol/p/warp/payload"
-	"github.com/luxfi/p2p"
-	"github.com/luxfi/node/proto/pb/platformvm"
 	"github.com/luxfi/warp"
 )
 

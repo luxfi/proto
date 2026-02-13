@@ -12,15 +12,15 @@ import (
 	"github.com/luxfi/metric"
 
 	"github.com/luxfi/cache"
-	validators "github.com/luxfi/validators"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/config"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/warp"
 	"github.com/luxfi/p2p"
 	"github.com/luxfi/p2p/gossip"
+	"github.com/luxfi/protocol/p/config"
+	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/warp"
 	"github.com/luxfi/protocol/txs/mempool"
+	validators "github.com/luxfi/validators"
 	extwarp "github.com/luxfi/warp"
 )
 

@@ -22,8 +22,8 @@ import (
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 	"github.com/stretchr/testify/require"
 )
 

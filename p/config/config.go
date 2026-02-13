@@ -33,8 +33,8 @@ var Default = Config{
 	CreateAssetTxFee:              constants.MilliLux,
 	CreateNetworkTxFee:            constants.Lux,
 	CreateChainTxFee:              constants.Lux,
-	AddNetworkValidatorFee: 0,
-	AddNetworkDelegatorFee: 0,
+	AddNetworkValidatorFee:        0,
+	AddNetworkDelegatorFee:        0,
 }
 
 // Config contains all of the user-configurable parameters of the PlatformVM.
@@ -59,10 +59,10 @@ type Config struct {
 	Chains                        chains.Manager  `json:"-"`
 
 	// Transaction fees
-	TxFee                         uint64 `json:"tx-fee"`
-	CreateAssetTxFee              uint64 `json:"create-asset-tx-fee"`
-	CreateNetworkTxFee            uint64 `json:"create-network-tx-fee"`
-	CreateChainTxFee              uint64 `json:"create-chain-tx-fee"`
+	TxFee                  uint64 `json:"tx-fee"`
+	CreateAssetTxFee       uint64 `json:"create-asset-tx-fee"`
+	CreateNetworkTxFee     uint64 `json:"create-network-tx-fee"`
+	CreateChainTxFee       uint64 `json:"create-chain-tx-fee"`
 	AddNetworkValidatorFee uint64 `json:"add-primary-network-validator-fee"`
 	AddNetworkDelegatorFee uint64 `json:"add-primary-network-delegator-fee"`
 }

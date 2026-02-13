@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/vm/types"
 )
 

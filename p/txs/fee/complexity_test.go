@@ -16,12 +16,12 @@ import (
 	"github.com/luxfi/protocol/p/fx"
 	"github.com/luxfi/protocol/p/signer"
 	"github.com/luxfi/protocol/p/stakeable"
-	"github.com/luxfi/protocol/p/warp/message"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/warp/message"
 	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/gas"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestTxComplexity_Individual(t *testing.T) {

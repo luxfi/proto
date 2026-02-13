@@ -17,12 +17,12 @@ import (
 	"github.com/luxfi/protocol/p/block"
 	"github.com/luxfi/protocol/p/metrics"
 	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/validators"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/validators"
 	"github.com/luxfi/timer/mockable"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestAcceptorVisitProposalBlock(t *testing.T) {
@@ -119,7 +119,7 @@ func TestAcceptorVisitAtomicBlock(t *testing.T) {
 			lastAccepted: parentID,
 			blkIDToState: make(map[ids.ID]*blockState),
 			state:        s,
-			rt:          rt,
+			rt:           rt,
 		},
 		metrics:    metrics.Noop,
 		validators: validators.TestManager,
@@ -201,7 +201,7 @@ func TestAcceptorVisitStandardBlock(t *testing.T) {
 			lastAccepted: parentID,
 			blkIDToState: make(map[ids.ID]*blockState),
 			state:        s,
-			rt:          rt,
+			rt:           rt,
 		},
 		metrics:    metrics.Noop,
 		validators: validators.TestManager,
@@ -292,7 +292,7 @@ func TestAcceptorVisitCommitBlock(t *testing.T) {
 			lastAccepted: parentID,
 			blkIDToState: make(map[ids.ID]*blockState),
 			state:        s,
-			rt:          rt,
+			rt:           rt,
 		},
 		metrics:    metrics.Noop,
 		validators: validators.TestManager,
@@ -403,7 +403,7 @@ func TestAcceptorVisitAbortBlock(t *testing.T) {
 			lastAccepted: parentID,
 			blkIDToState: make(map[ids.ID]*blockState),
 			state:        s,
-			rt:          rt,
+			rt:           rt,
 		},
 		metrics:    metrics.Noop,
 		validators: validators.TestManager,

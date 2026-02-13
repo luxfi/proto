@@ -13,8 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	validators "github.com/luxfi/validators"
-	"github.com/luxfi/validators/validatorsmock"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
@@ -22,6 +20,8 @@ import (
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/metric"
 	"github.com/luxfi/upgrade"
+	validators "github.com/luxfi/validators"
+	"github.com/luxfi/validators/validatorsmock"
 )
 
 var (

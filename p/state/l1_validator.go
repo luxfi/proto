@@ -11,7 +11,6 @@ import (
 	"github.com/google/btree"
 
 	"github.com/luxfi/cache"
-	validators "github.com/luxfi/validators"
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/container/maybe"
 	"github.com/luxfi/crypto/bls"
@@ -20,6 +19,7 @@ import (
 	"github.com/luxfi/math"
 	"github.com/luxfi/ordering"
 	"github.com/luxfi/protocol/p/block"
+	validators "github.com/luxfi/validators"
 )
 
 var (

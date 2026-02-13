@@ -10,13 +10,13 @@ import (
 	"sync"
 
 	"github.com/luxfi/cache/lru"
+	"github.com/luxfi/concurrent/lock"
 	"github.com/luxfi/consensus/engine"
 	"github.com/luxfi/constants"
+	"github.com/luxfi/container/linked"
 	"github.com/luxfi/container/setmap"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/container/linked"
-	"github.com/luxfi/concurrent/lock"
 )
 
 const (

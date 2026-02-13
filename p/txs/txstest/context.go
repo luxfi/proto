@@ -6,10 +6,10 @@ package txstest
 import (
 	"time"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/txs/fee"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/vm/components/gas"
 )

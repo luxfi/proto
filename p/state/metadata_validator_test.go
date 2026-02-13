@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/codec"
+	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/codec/wrappers"
 )
 
 func TestValidatorUptimes(t *testing.T) {

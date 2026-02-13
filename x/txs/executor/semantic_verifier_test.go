@@ -11,7 +11,6 @@ import (
 	"github.com/luxfi/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	consContext "github.com/luxfi/runtime"
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
@@ -23,11 +22,12 @@ import (
 	"github.com/luxfi/protocol/x/state"
 	"github.com/luxfi/protocol/x/state/statemock"
 	"github.com/luxfi/protocol/x/txs"
+	consContext "github.com/luxfi/runtime"
 	"github.com/luxfi/timer/mockable"
 	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestSemanticVerifierBaseTx(t *testing.T) {

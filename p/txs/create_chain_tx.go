@@ -8,9 +8,9 @@ import (
 	"errors"
 	"unicode"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/vm/components/verify"
 )
 

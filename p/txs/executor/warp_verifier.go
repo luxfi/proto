@@ -6,9 +6,9 @@ package executor
 import (
 	"context"
 
-	validators "github.com/luxfi/validators"
-	"github.com/luxfi/protocol/p/warp"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/warp"
+	validators "github.com/luxfi/validators"
 )
 
 const (

@@ -8,9 +8,9 @@ import (
 	"context"
 	"sync"
 
-	consensuscontext "github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
+	consensuscontext "github.com/luxfi/runtime"
 	"github.com/luxfi/vm/chains/atomic"
 )
 

@@ -8,11 +8,11 @@ import (
 	"reflect"
 
 	"github.com/luxfi/codec"
-	consContext "github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/x/config"
 	"github.com/luxfi/protocol/x/fxs"
+	consContext "github.com/luxfi/runtime"
 	"github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/verify"
 )

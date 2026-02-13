@@ -4,13 +4,13 @@
 package txstest
 
 import (
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
 	wkeychain "github.com/luxfi/keychain"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/state"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/chain/p/signer"
 	"github.com/luxfi/utxo/secp256k1fx"

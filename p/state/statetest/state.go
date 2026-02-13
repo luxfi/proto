@@ -10,8 +10,6 @@ import (
 	"github.com/luxfi/metric"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/runtime"
-	validators "github.com/luxfi/validators"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
@@ -22,8 +20,10 @@ import (
 	"github.com/luxfi/protocol/p/metrics"
 	"github.com/luxfi/protocol/p/reward"
 	"github.com/luxfi/protocol/p/state"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/upgrade"
 	"github.com/luxfi/upgrade/upgradetest"
+	validators "github.com/luxfi/validators"
 )
 
 var DefaultNodeID = ids.GenerateTestNodeID()

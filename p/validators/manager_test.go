@@ -10,7 +10,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	validators "github.com/luxfi/validators"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
@@ -23,6 +22,7 @@ import (
 	"github.com/luxfi/protocol/p/state/statetest"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
+	validators "github.com/luxfi/validators"
 
 	. "github.com/luxfi/protocol/p/validators"
 )

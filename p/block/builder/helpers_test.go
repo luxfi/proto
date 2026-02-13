@@ -11,10 +11,8 @@ import (
 	"github.com/luxfi/metric"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/consensus/core/coremock"
 	consensustest "github.com/luxfi/consensus/test/helpers"
-	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/database/prefixdb"
@@ -22,11 +20,14 @@ import (
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/p2p"
+	"github.com/luxfi/runtime"
+	"github.com/luxfi/validators/uptime"
 
 	"github.com/luxfi/atomic"
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/constants"
+	"github.com/luxfi/node/chains"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/fx"
 	"github.com/luxfi/protocol/p/genesis/genesistest"
@@ -44,9 +45,8 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/node/chains"
-	chainatomic "github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/utxo/secp256k1fx"
+	chainatomic "github.com/luxfi/vm/chains/atomic"
 
 	blockexecutor "github.com/luxfi/protocol/p/block/executor"
 	"github.com/luxfi/protocol/p/testcontext"
@@ -291,10 +291,10 @@ func newWallet(t testing.TB, e *environment, c walletConfig) wallet.Wallet {
 	}
 	// Create a minimal Config for the wallet
 	walletCfg := &config.Config{
-		TxFee:                         constants.MilliLux,
-		CreateAssetTxFee:              constants.MilliLux,
-		CreateNetworkTxFee:            constants.Lux,
-		CreateChainTxFee:              constants.Lux,
+		TxFee:                  constants.MilliLux,
+		CreateAssetTxFee:       constants.MilliLux,
+		CreateNetworkTxFee:     constants.Lux,
+		CreateChainTxFee:       constants.Lux,
 		AddNetworkValidatorFee: 0,
 		AddNetworkDelegatorFee: 0,
 	}

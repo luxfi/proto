@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	consensustest "github.com/luxfi/consensus/test/helpers"
-	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
@@ -24,6 +23,7 @@ import (
 	"github.com/luxfi/protocol/p/status"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/p/txs/executor"
+	"github.com/luxfi/validators/uptime"
 )
 
 func TestBlockOptions(t *testing.T) {

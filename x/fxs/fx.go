@@ -6,10 +6,10 @@ package fxs
 import (
 	"github.com/luxfi/ids"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/nftfx"
 	"github.com/luxfi/utxo/propertyfx"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 var (

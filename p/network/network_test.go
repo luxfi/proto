@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	consensustest "github.com/luxfi/consensus/test/helpers"
-	validators "github.com/luxfi/validators"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
@@ -23,6 +22,7 @@ import (
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/txs/mempool"
 	lux "github.com/luxfi/utxo"
+	validators "github.com/luxfi/validators"
 	"github.com/luxfi/warp"
 
 	pmempool "github.com/luxfi/protocol/txs/mempool"

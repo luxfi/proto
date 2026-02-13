@@ -9,10 +9,10 @@ import (
 
 	"github.com/luxfi/metric"
 
+	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/ids"
 	utilmetric "github.com/luxfi/metric"
 	"github.com/luxfi/protocol/p/block"
-	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/vm/components/gas"
 )
 

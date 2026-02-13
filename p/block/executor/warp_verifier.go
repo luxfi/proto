@@ -6,9 +6,9 @@ package executor
 import (
 	"context"
 
-	validators "github.com/luxfi/validators"
 	"github.com/luxfi/protocol/p/block"
 	txexecutor "github.com/luxfi/protocol/p/txs/executor"
+	validators "github.com/luxfi/validators"
 )
 
 // VerifyWarpMessages verifies all warp messages in the block. If any of the

@@ -11,8 +11,8 @@ import (
 
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
 )

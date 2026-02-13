@@ -12,10 +12,10 @@ package txsmock
 import (
 	reflect "reflect"
 
-	"github.com/luxfi/runtime"
 	ids "github.com/luxfi/ids"
 	set "github.com/luxfi/math/set"
 	txs "github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
 	gomock "go.uber.org/mock/gomock"
 )

@@ -13,8 +13,8 @@ import (
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/vm/components/gas"
 
-	validatorfee "github.com/luxfi/protocol/p/validators/fee"
 	txfee "github.com/luxfi/protocol/p/txs/fee"
+	validatorfee "github.com/luxfi/protocol/p/validators/fee"
 )
 
 func NextBlockTime(

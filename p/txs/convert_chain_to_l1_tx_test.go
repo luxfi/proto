@@ -561,7 +561,7 @@ func TestConvertChainToL1TxSyntacticVerify(t *testing.T) {
 	require.NoError(t, err)
 
 	var (
-		rt         = consensustest.Runtime(t, ids.GenerateTestID())
+		rt          = consensustest.Runtime(t, ids.GenerateTestID())
 		validBaseTx = BaseTx{
 			BaseTx: lux.BaseTx{
 				NetworkID:    rt.NetworkID,

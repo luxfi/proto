@@ -19,8 +19,8 @@ import (
 	txexecutor "github.com/luxfi/protocol/p/txs/executor"
 	"github.com/luxfi/vm/chains/atomic"
 
-	validatorfee "github.com/luxfi/protocol/p/validators/fee"
 	txfee "github.com/luxfi/protocol/p/txs/fee"
+	validatorfee "github.com/luxfi/protocol/p/validators/fee"
 	"github.com/luxfi/vm/components/gas"
 )
 

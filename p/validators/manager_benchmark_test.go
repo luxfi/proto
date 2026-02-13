@@ -11,12 +11,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	validators "github.com/luxfi/validators"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/database/badgerdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/timer/mockable"
+	validators "github.com/luxfi/validators"
 
 	"github.com/luxfi/protocol/p/block"
 

@@ -12,9 +12,9 @@ import (
 	"github.com/luxfi/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/runtime"
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/container/iterator"
@@ -32,9 +32,9 @@ import (
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
 	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/chain"
 	"github.com/luxfi/vm/components/gas"
-	"github.com/luxfi/utxo/secp256k1fx"
 
 	walletcommon "github.com/luxfi/sdk/wallet/primary/common"
 )

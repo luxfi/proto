@@ -12,11 +12,11 @@ import (
 	"github.com/luxfi/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/fx/fxmock"
 	"github.com/luxfi/protocol/p/stakeable"
+	"github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/luxmock"
 	"github.com/luxfi/utxo/secp256k1fx"

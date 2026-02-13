@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/luxfi/codec"
+	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/codec/wrappers"
 )
 
 // preDelegateeRewardSize is the size of codec marshalling

@@ -15,7 +15,6 @@ import (
 	sync "sync"
 	time "time"
 
-	validators "github.com/luxfi/validators"
 	iterator "github.com/luxfi/container/iterator"
 	database "github.com/luxfi/database"
 	ids "github.com/luxfi/ids"
@@ -25,6 +24,7 @@ import (
 	status "github.com/luxfi/protocol/p/status"
 	txs "github.com/luxfi/protocol/p/txs"
 	lux "github.com/luxfi/utxo"
+	validators "github.com/luxfi/validators"
 	gas "github.com/luxfi/vm/components/gas"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -557,21 +557,6 @@ func (m *MockState) GetLastAccepted() ids.ID {
 func (mr *MockStateMockRecorder) GetLastAccepted() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastAccepted", reflect.TypeOf((*MockState)(nil).GetLastAccepted))
-}
-
-// GetChainIDs mocks base method.
-func (m *MockState) GetChainIDs() ([]ids.ID, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetChainIDs")
-	ret0, _ := ret[0].([]ids.ID)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetChainIDs indicates an expected call of GetChainIDs.
-func (mr *MockStateMockRecorder) GetChainIDs() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChainIDs", reflect.TypeOf((*MockState)(nil).GetChainIDs))
 }
 
 // GetNetOwner mocks base method.

@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/runtime"
 )
 
 var _ Block = (*ApricotAtomicBlock)(nil)

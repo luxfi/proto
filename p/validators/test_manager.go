@@ -7,8 +7,8 @@ import (
 	"context"
 
 	consensusset "github.com/luxfi/consensus/utils/set"
-	validators "github.com/luxfi/validators"
 	"github.com/luxfi/ids"
+	validators "github.com/luxfi/validators"
 )
 
 var TestManager Manager = testManager{}
@@ -23,7 +23,11 @@ func (testManager) GetCurrentHeight(context.Context) (uint64, error) {
 	return 0, nil
 }
 
-func (testManager) GetChainID(context.Context, ids.ID) (ids.ID, error) {
+func (testManager) GetChainID(ids.ID) (ids.ID, error) {
+	return ids.Empty, nil
+}
+
+func (testManager) GetNetworkID(ids.ID) (ids.ID, error) {
 	return ids.Empty, nil
 }
 

@@ -9,14 +9,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/fx"
 	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/warp/message"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/warp/message"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/chain/p/signer"
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"

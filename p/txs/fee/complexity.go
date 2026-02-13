@@ -9,6 +9,7 @@ import (
 	"errors"
 
 	"github.com/luxfi/codec"
+	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
@@ -16,13 +17,12 @@ import (
 	"github.com/luxfi/protocol/p/fx"
 	"github.com/luxfi/protocol/p/signer"
 	"github.com/luxfi/protocol/p/stakeable"
-	"github.com/luxfi/protocol/p/warp"
 	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/codec/wrappers"
+	"github.com/luxfi/protocol/p/warp"
 	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/gas"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 // Signature verification costs were conservatively based on benchmarks run on

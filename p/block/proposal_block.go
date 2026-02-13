@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/runtime"
 )
 
 var (

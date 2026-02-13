@@ -20,9 +20,7 @@ import (
 	"github.com/luxfi/metric"
 
 	"github.com/luxfi/codec"
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/consensus/core/choices"
-	validators "github.com/luxfi/validators"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/crypto"
@@ -34,7 +32,9 @@ import (
 	log "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/ordering"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/upgrade/upgradetest"
+	validators "github.com/luxfi/validators"
 
 	"github.com/luxfi/codec/wrappers"
 

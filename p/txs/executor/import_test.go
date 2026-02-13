@@ -18,8 +18,8 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/upgrade/upgradetest"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/chains/atomic"
 )
 
 var fundedSharedMemoryCalls byte

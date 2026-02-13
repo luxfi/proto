@@ -15,10 +15,10 @@ import (
 	platformblock "github.com/luxfi/protocol/p/block"
 	"github.com/luxfi/protocol/p/metrics"
 	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/validators"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/p/txs/executor"
 	"github.com/luxfi/protocol/p/txs/fee"
+	"github.com/luxfi/protocol/p/validators"
 	"github.com/luxfi/protocol/txs/mempool"
 )
 
@@ -63,7 +63,7 @@ func NewManager(
 		Mempool:      mempool,
 		lastAccepted: lastAccepted,
 		state:        s,
-		ctx:          txExecutorBackend.Ctx,
+		rt:           txExecutorBackend.Rt,
 		blkIDToState: map[ids.ID]*blockState{},
 	}
 
@@ -144,7 +144,7 @@ func (m *manager) VerifyTx(tx *txs.Tx) error {
 	}
 	err = executor.VerifyWarpMessages(
 		context.TODO(),
-		m.ctx.NetworkID,
+		m.rt.NetworkID,
 		m.validatorManager,
 		recommendedPChainHeight,
 		tx.Unsigned,

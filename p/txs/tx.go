@@ -8,15 +8,15 @@ import (
 	"fmt"
 
 	"github.com/luxfi/codec"
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/p2p/gossip"
+	"github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 var (

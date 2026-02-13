@@ -5,20 +5,20 @@ package executor
 
 import (
 	"github.com/luxfi/atomic"
-	"github.com/luxfi/runtime"
-	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/config"
 	"github.com/luxfi/protocol/p/fx"
 	"github.com/luxfi/protocol/p/reward"
 	"github.com/luxfi/protocol/p/utxo"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/timer/mockable"
+	"github.com/luxfi/validators/uptime"
 )
 
 type Backend struct {
 	Config       *config.Internal
-	Ctx          *runtime.Runtime
+	Rt           *runtime.Runtime
 	Clk          *mockable.Clock
 	Fx           fx.Fx
 	FlowChecker  utxo.Verifier

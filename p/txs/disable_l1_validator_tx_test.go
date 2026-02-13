@@ -16,8 +16,8 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/stakeable"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/vm/types"
 )
 
@@ -318,7 +318,7 @@ func TestDisableL1ValidatorTxSerialization(t *testing.T) {
 
 func TestDisableL1ValidatorTxSyntacticVerify(t *testing.T) {
 	var (
-		rt         = consensustest.Runtime(t, ids.GenerateTestID())
+		rt          = consensustest.Runtime(t, ids.GenerateTestID())
 		validBaseTx = BaseTx{
 			BaseTx: lux.BaseTx{
 				NetworkID:    rt.NetworkID,

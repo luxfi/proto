@@ -9,7 +9,6 @@ import (
 	"slices"
 	"time"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
@@ -18,6 +17,7 @@ import (
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/p/utxo"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/timer/mockable"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -212,7 +212,7 @@ func New(
 		Spender:           utxoSpender,
 		state:             state,
 		cfg:               cfg,
-		rt:               rt,
+		rt:                rt,
 		NetworkID:         rt.NetworkID,
 		ChainID:           rt.ChainID,
 		XAssetID:          rt.XAssetID,
@@ -227,7 +227,7 @@ type builder struct {
 	state state.State
 
 	cfg       *config.Config
-	rt       *runtime.Runtime
+	rt        *runtime.Runtime
 	NetworkID uint32
 	ChainID   ids.ID
 	XAssetID  ids.ID

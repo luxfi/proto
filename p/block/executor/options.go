@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/constants"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/block"
@@ -15,6 +14,7 @@ import (
 	"github.com/luxfi/protocol/p/state"
 	"github.com/luxfi/protocol/p/txs"
 	txexecutor "github.com/luxfi/protocol/p/txs/executor"
+	"github.com/luxfi/validators/uptime"
 )
 
 var (

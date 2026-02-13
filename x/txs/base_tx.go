@@ -8,8 +8,8 @@ import (
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/runtime"
 )
 
 var (

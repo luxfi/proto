@@ -12,9 +12,9 @@ package block
 import (
 	reflect "reflect"
 
-	context "github.com/luxfi/runtime"
 	ids "github.com/luxfi/ids"
 	txs "github.com/luxfi/protocol/p/txs"
+	context "github.com/luxfi/runtime"
 	gomock "go.uber.org/mock/gomock"
 )
 

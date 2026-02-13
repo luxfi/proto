@@ -23,8 +23,8 @@ import (
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
-	"github.com/luxfi/vm/chain"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/chain"
 
 	blockexecutor "github.com/luxfi/protocol/p/block/executor"
 	txexecutor "github.com/luxfi/protocol/p/txs/executor"

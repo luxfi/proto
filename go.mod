@@ -18,7 +18,7 @@ require (
 	github.com/luxfi/crypto v1.17.45
 	github.com/luxfi/database v1.17.44
 	github.com/luxfi/formatting v1.0.1
-	github.com/luxfi/genesis v1.6.2
+	github.com/luxfi/genesis v1.7.1
 	github.com/luxfi/ids v1.2.9
 	github.com/luxfi/keychain v1.0.2
 	github.com/luxfi/log v1.4.1

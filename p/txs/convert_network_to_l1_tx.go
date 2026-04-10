@@ -21,10 +21,10 @@ import (
 const MaxChainAddressLength = 4096
 
 var (
-	_ UnsignedTx = (*ConvertChainToL1Tx)(nil)
+	_ UnsignedTx = (*ConvertNetworkToL1Tx)(nil)
 	_ interface {
-		Compare(*ConvertChainToL1Validator) int
-	} = (*ConvertChainToL1Validator)(nil)
+		Compare(*ConvertNetworkToL1Validator) int
+	} = (*ConvertNetworkToL1Validator)(nil)
 
 	ErrConvertPermissionlessChain          = errors.New("cannot convert a permissionless chain")
 	ErrAddressTooLong                      = errors.New("address is too long")
@@ -33,7 +33,7 @@ var (
 	ErrZeroWeight                          = errors.New("validator weight must be non-zero")
 )
 
-type ConvertChainToL1Tx struct {
+type ConvertNetworkToL1Tx struct {
 	// Metadata, inputs and outputs
 	BaseTx `serialize:"true"`
 	// ID of the Chain to transform
@@ -43,12 +43,12 @@ type ConvertChainToL1Tx struct {
 	// Address of the Chain manager
 	Address types.JSONByteSlice `serialize:"true" json:"address"`
 	// Initial pay-as-you-go validators for the Chain
-	Validators []*ConvertChainToL1Validator `serialize:"true" json:"validators"`
+	Validators []*ConvertNetworkToL1Validator `serialize:"true" json:"validators"`
 	// Authorizes this conversion
 	ChainAuth verify.Verifiable `serialize:"true" json:"chainAuthorization"`
 }
 
-func (tx *ConvertChainToL1Tx) SyntacticVerify(rt *runtime.Runtime) error {
+func (tx *ConvertNetworkToL1Tx) SyntacticVerify(rt *runtime.Runtime) error {
 	switch {
 	case tx == nil:
 		return ErrNilTx
@@ -81,11 +81,11 @@ func (tx *ConvertChainToL1Tx) SyntacticVerify(rt *runtime.Runtime) error {
 	return nil
 }
 
-func (tx *ConvertChainToL1Tx) Visit(visitor Visitor) error {
-	return visitor.ConvertChainToL1Tx(tx)
+func (tx *ConvertNetworkToL1Tx) Visit(visitor Visitor) error {
+	return visitor.ConvertNetworkToL1Tx(tx)
 }
 
-type ConvertChainToL1Validator struct {
+type ConvertNetworkToL1Validator struct {
 	// NodeID of this validator
 	NodeID types.JSONByteSlice `serialize:"true" json:"nodeID"`
 	// Weight of this validator used when sampling
@@ -104,11 +104,11 @@ type ConvertChainToL1Validator struct {
 	DeactivationOwner message.PChainOwner `serialize:"true" json:"deactivationOwner"`
 }
 
-func (v *ConvertChainToL1Validator) Compare(o *ConvertChainToL1Validator) int {
+func (v *ConvertNetworkToL1Validator) Compare(o *ConvertNetworkToL1Validator) int {
 	return bytes.Compare(v.NodeID, o.NodeID)
 }
 
-func (v *ConvertChainToL1Validator) Verify() error {
+func (v *ConvertNetworkToL1Validator) Verify() error {
 	if v.Weight == 0 {
 		return ErrZeroWeight
 	}

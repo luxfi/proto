@@ -2364,7 +2364,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 	}
 }
 
-func TestStandardExecutorConvertChainToL1Tx(t *testing.T) {
+func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 	var (
 		fx = &secp256k1fx.Fx{}
 		vm = &secp256k1fx.TestVM{
@@ -2560,7 +2560,7 @@ func TestStandardExecutorConvertChainToL1Tx(t *testing.T) {
 			pop, err := signer.NewProofOfPossession(sk)
 			require.NoError(err)
 
-			// Create the ConvertChainToL1Tx
+			// Create the ConvertNetworkToL1Tx
 			const (
 				weight  = 1
 				balance = 1
@@ -2586,7 +2586,7 @@ func TestStandardExecutorConvertChainToL1Tx(t *testing.T) {
 				)
 				chainID   = ids.GenerateTestID()
 				address   = crypto.RandomBytes(32)
-				validator = &txs.ConvertChainToL1Validator{
+				validator = &txs.ConvertNetworkToL1Validator{
 					NodeID:                nodeID.Bytes(),
 					Weight:                weight,
 					Balance:               balance,
@@ -2595,11 +2595,11 @@ func TestStandardExecutorConvertChainToL1Tx(t *testing.T) {
 					DeactivationOwner:     message.PChainOwner{},
 				}
 			)
-			convertNetToL1Tx, err := wallet.IssueConvertChainToL1Tx(
+			convertNetToL1Tx, err := wallet.IssueConvertNetworkToL1Tx(
 				chainID,
 				chainID,
 				address,
-				[]*txs.ConvertChainToL1Validator{
+				[]*txs.ConvertNetworkToL1Validator{
 					validator,
 				},
 				test.builderOptions...,
@@ -2787,7 +2787,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		chainID       = createNetTx.ID()
 		address       = crypto.RandomBytes(32)
 		initialNodeID = ids.GenerateTestNodeID()
-		validator     = &txs.ConvertChainToL1Validator{
+		validator     = &txs.ConvertNetworkToL1Validator{
 			NodeID:                initialNodeID.Bytes(),
 			Weight:                initialWeight,
 			Balance:               initialBalance,
@@ -2796,11 +2796,11 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 			DeactivationOwner:     message.PChainOwner{},
 		}
 	)
-	convertNetToL1Tx, err := wallet.IssueConvertChainToL1Tx(
+	convertNetToL1Tx, err := wallet.IssueConvertNetworkToL1Tx(
 		chainID,
 		chainID,
 		address,
-		[]*txs.ConvertChainToL1Validator{
+		[]*txs.ConvertNetworkToL1Validator{
 			validator,
 		},
 	)
@@ -3321,7 +3321,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 	var (
 		chainID   = createNetTx.ID()
 		address   = crypto.RandomBytes(32)
-		validator = &txs.ConvertChainToL1Validator{
+		validator = &txs.ConvertNetworkToL1Validator{
 			NodeID:  ids.GenerateTestNodeID().Bytes(),
 			Weight:  initialWeight,
 			Balance: balance,
@@ -3340,11 +3340,11 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		validationID = chainID.Append(0)
 	)
 
-	convertNetToL1Tx, err := wallet.IssueConvertChainToL1Tx(
+	convertNetToL1Tx, err := wallet.IssueConvertNetworkToL1Tx(
 		chainID,
 		chainID,
 		address,
-		[]*txs.ConvertChainToL1Validator{
+		[]*txs.ConvertNetworkToL1Validator{
 			validator,
 		},
 	)
@@ -3831,7 +3831,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 	var (
 		chainID   = createNetTx.ID()
 		address   = crypto.RandomBytes(32)
-		validator = &txs.ConvertChainToL1Validator{
+		validator = &txs.ConvertNetworkToL1Validator{
 			NodeID:  ids.GenerateTestNodeID().Bytes(),
 			Weight:  weight,
 			Balance: initialBalance,
@@ -3850,11 +3850,11 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 		validationID = chainID.Append(0)
 	)
 
-	convertNetToL1Tx, err := wallet.IssueConvertChainToL1Tx(
+	convertNetToL1Tx, err := wallet.IssueConvertNetworkToL1Tx(
 		chainID,
 		chainID,
 		address,
-		[]*txs.ConvertChainToL1Validator{
+		[]*txs.ConvertNetworkToL1Validator{
 			validator,
 		},
 	)
@@ -4132,7 +4132,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 	var (
 		chainID   = createNetTx.ID()
 		address   = crypto.RandomBytes(32)
-		validator = &txs.ConvertChainToL1Validator{
+		validator = &txs.ConvertNetworkToL1Validator{
 			NodeID:  ids.GenerateTestNodeID().Bytes(),
 			Weight:  weight,
 			Balance: initialBalance,
@@ -4155,11 +4155,11 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 		validationID = chainID.Append(0)
 	)
 
-	convertNetToL1Tx, err := wallet.IssueConvertChainToL1Tx(
+	convertNetToL1Tx, err := wallet.IssueConvertNetworkToL1Tx(
 		chainID,
 		chainID,
 		address,
-		[]*txs.ConvertChainToL1Validator{
+		[]*txs.ConvertNetworkToL1Validator{
 			validator,
 		},
 	)

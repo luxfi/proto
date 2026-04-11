@@ -92,7 +92,7 @@ require (
 	github.com/luxfi/tls v1.0.3 // indirect
 	github.com/luxfi/utils v1.1.4 // indirect
 	github.com/luxfi/version v1.0.1 // indirect
-	github.com/luxfi/zapdb/v4 v4.9.3 // indirect
+	github.com/luxfi/zapdb v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect

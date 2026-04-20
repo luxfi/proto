@@ -19,7 +19,7 @@ type ContextInitializable interface {
 // UnsignedTx is an unsigned transaction
 type UnsignedTx interface {
 	// TODO: Remove this initialization pattern from both the platformvm and the
-	// avm.
+	// xvm.
 	ContextInitializable
 	secp256k1fx.UnsignedTx
 	SetBytes(unsignedBytes []byte)

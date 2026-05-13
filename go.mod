@@ -15,14 +15,14 @@ require (
 	github.com/luxfi/consensus v1.22.70
 	github.com/luxfi/constants v1.4.7
 	github.com/luxfi/container v0.0.4
-	github.com/luxfi/crypto v1.17.45
+	github.com/luxfi/crypto v1.18.7
 	github.com/luxfi/database v1.17.44
 	github.com/luxfi/formatting v1.0.1
 	github.com/luxfi/genesis v1.7.1
 	github.com/luxfi/ids v1.2.9
 	github.com/luxfi/keychain v1.0.2
 	github.com/luxfi/log v1.4.1
-	github.com/luxfi/math v1.2.4
+	github.com/luxfi/math v1.4.0
 	github.com/luxfi/metric v1.5.1
 	github.com/luxfi/mock v0.1.1
 	github.com/luxfi/node v1.23.36
@@ -33,7 +33,7 @@ require (
 	github.com/luxfi/timer v1.0.2
 	github.com/luxfi/upgrade v1.0.0
 	github.com/luxfi/utxo v0.2.4
-	github.com/luxfi/validators v1.0.0
+	github.com/luxfi/validators v1.2.0
 	github.com/luxfi/vm v1.0.40
 	github.com/luxfi/warp v1.18.5
 	github.com/stretchr/testify v1.11.1
@@ -89,10 +89,12 @@ require (
 	github.com/luxfi/rpc v1.0.2 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
 	github.com/luxfi/staking v1.1.0 // indirect
+	github.com/luxfi/threshold v1.6.8 // indirect
 	github.com/luxfi/tls v1.0.3 // indirect
 	github.com/luxfi/utils v1.1.4 // indirect
 	github.com/luxfi/version v1.0.1 // indirect
 	github.com/luxfi/zapdb v1.0.0 // indirect
+	github.com/luxfi/zapdb/v4 v4.9.3 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect

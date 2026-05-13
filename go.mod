@@ -15,7 +15,7 @@ require (
 	github.com/luxfi/consensus v1.22.70
 	github.com/luxfi/constants v1.4.7
 	github.com/luxfi/container v0.0.4
-	github.com/luxfi/crypto v1.18.7
+	github.com/luxfi/crypto v1.19.0
 	github.com/luxfi/database v1.17.44
 	github.com/luxfi/formatting v1.0.1
 	github.com/luxfi/genesis v1.7.1

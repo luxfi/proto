@@ -1,6 +1,16 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+//go:build grpc
+// +build grpc
+
+// Warp validator-registration verification rides on protobuf-encoded
+// justification messages produced by other consensus peers. The
+// generated pb types in node/proto/pb/platformvm carry a `//go:build
+// grpc` tag (luxfi network is ZAP-native by default; protobuf is
+// opt-in for cross-stack compat). Gate this file the same way so the
+// rest of `network` builds without -tags grpc.
+
 package network
 
 import (

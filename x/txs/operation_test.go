@@ -4,7 +4,6 @@
 package txs
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"

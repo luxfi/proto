@@ -26,6 +26,7 @@ import (
 	"github.com/luxfi/timer/mockable"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/validators"
 	"github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/verify"
 )
@@ -764,7 +765,8 @@ func TestSemanticVerifierExportTx(t *testing.T) {
 	}
 }
 
-// testValidatorState is a simple stub for runtime.ValidatorState used in tests
+// testValidatorState is a simple stub for runtime.ValidatorState used in tests.
+// Mirrors github.com/luxfi/validators.State surface.
 type testValidatorState struct {
 	chainID ids.ID // The chain/chain ID this validator state returns
 }
@@ -778,8 +780,12 @@ func (t *testValidatorState) GetNetworkID(_ ids.ID) (ids.ID, error) {
 	return t.chainID, nil
 }
 
-func (t *testValidatorState) GetValidatorSet(height uint64, netID ids.ID) (map[ids.NodeID]uint64, error) {
-	return make(map[ids.NodeID]uint64), nil
+func (t *testValidatorState) GetValidatorSet(_ context.Context, _ uint64, _ ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+	return make(map[ids.NodeID]*validators.GetValidatorOutput), nil
+}
+
+func (t *testValidatorState) GetCurrentValidators(_ context.Context, _ uint64, _ ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+	return make(map[ids.NodeID]*validators.GetValidatorOutput), nil
 }
 
 func (t *testValidatorState) GetCurrentHeight(ctx context.Context) (uint64, error) {
@@ -788,6 +794,14 @@ func (t *testValidatorState) GetCurrentHeight(ctx context.Context) (uint64, erro
 
 func (t *testValidatorState) GetMinimumHeight(ctx context.Context) (uint64, error) {
 	return 0, nil
+}
+
+func (t *testValidatorState) GetWarpValidatorSets(_ context.Context, _ []uint64, _ []ids.ID) (map[ids.ID]map[uint64]*validators.WarpSet, error) {
+	return make(map[ids.ID]map[uint64]*validators.WarpSet), nil
+}
+
+func (t *testValidatorState) GetWarpValidatorSet(_ context.Context, _ uint64, _ ids.ID) (*validators.WarpSet, error) {
+	return &validators.WarpSet{}, nil
 }
 
 func TestSemanticVerifierExportTxDifferentNet(t *testing.T) {

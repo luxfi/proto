@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/codec"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/txs"
 )
 
 var _ Block = (*StandardBlock)(nil)

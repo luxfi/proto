@@ -10,8 +10,8 @@ import (
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/codec/wrappers"
-	"github.com/luxfi/protocol/p/signer"
-	"github.com/luxfi/protocol/p/stakeable"
+	"github.com/luxfi/proto/p/signer"
+	"github.com/luxfi/proto/p/stakeable"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
 

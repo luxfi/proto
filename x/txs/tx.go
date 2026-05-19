@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/p2p/gossip"
-	"github.com/luxfi/protocol/x/fxs"
+	"github.com/luxfi/proto/x/fxs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/nftfx"
 	"github.com/luxfi/utxo/propertyfx"

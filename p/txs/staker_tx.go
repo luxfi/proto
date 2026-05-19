@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/fx"
+	"github.com/luxfi/proto/p/fx"
 	lux "github.com/luxfi/utxo"
 )
 

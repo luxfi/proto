@@ -17,8 +17,8 @@ import (
 	"github.com/luxfi/metric"
 	"github.com/luxfi/p2p"
 	"github.com/luxfi/p2p/gossip"
-	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/protocol/txs/mempool"
+	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/proto/txs/mempool"
 	"github.com/luxfi/warp"
 )
 

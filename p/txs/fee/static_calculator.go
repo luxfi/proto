@@ -5,7 +5,7 @@ package fee
 
 import (
 	"github.com/luxfi/constants"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 )
 
 var (

@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/genesis/genesistest"
-	"github.com/luxfi/protocol/p/state"
+	"github.com/luxfi/proto/p/genesis/genesistest"
+	"github.com/luxfi/proto/p/state"
 	"github.com/luxfi/upgrade/upgradetest"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"

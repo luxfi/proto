@@ -9,11 +9,11 @@ import (
 
 	"github.com/luxfi/constants"
 	log "github.com/luxfi/log"
-	"github.com/luxfi/protocol/p/block"
-	"github.com/luxfi/protocol/p/reward"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/txs"
-	txexecutor "github.com/luxfi/protocol/p/txs/executor"
+	"github.com/luxfi/proto/p/block"
+	"github.com/luxfi/proto/p/reward"
+	"github.com/luxfi/proto/p/state"
+	"github.com/luxfi/proto/p/txs"
+	txexecutor "github.com/luxfi/proto/p/txs/executor"
 	"github.com/luxfi/validators/uptime"
 )
 

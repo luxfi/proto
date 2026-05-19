@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/warp"
+	"github.com/luxfi/proto/p/warp"
 )
 
 // SignerTests is a list of all signer tests

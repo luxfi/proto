@@ -13,10 +13,10 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/protocol/x/block"
-	"github.com/luxfi/protocol/x/state/statemock"
-	"github.com/luxfi/protocol/x/txs"
-	"github.com/luxfi/protocol/x/txs/txsmock"
+	"github.com/luxfi/proto/x/block"
+	"github.com/luxfi/proto/x/state/statemock"
+	"github.com/luxfi/proto/x/txs"
+	"github.com/luxfi/proto/x/txs/txsmock"
 )
 
 var (

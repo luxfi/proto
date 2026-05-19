@@ -9,9 +9,9 @@ import (
 
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/fx"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/fx"
+	"github.com/luxfi/proto/p/state"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/vm/components/verify"
 )
 

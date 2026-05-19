@@ -10,8 +10,8 @@ import (
 	utilmetric "github.com/luxfi/metric"
 
 	"github.com/luxfi/codec/wrappers"
-	"github.com/luxfi/protocol/x/block"
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/block"
+	"github.com/luxfi/proto/x/txs"
 )
 
 var _ Metrics = (*metricsImpl)(nil)

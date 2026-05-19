@@ -15,9 +15,9 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/protocol/p/genesis/genesistest"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/genesis/genesistest"
+	"github.com/luxfi/proto/p/state"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/upgrade/upgradetest"
 	"github.com/luxfi/utxo/secp256k1fx"
 )

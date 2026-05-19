@@ -15,7 +15,7 @@ import (
 
 	codec "github.com/luxfi/codec"
 	ids "github.com/luxfi/ids"
-	txs "github.com/luxfi/protocol/x/txs"
+	txs "github.com/luxfi/proto/x/txs"
 	gomock "go.uber.org/mock/gomock"
 )
 

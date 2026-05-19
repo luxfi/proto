@@ -20,9 +20,9 @@ import (
 	"github.com/luxfi/ids"
 
 	"github.com/luxfi/crypto/hash"
-	"github.com/luxfi/protocol/p/signer"
-	"github.com/luxfi/protocol/p/stakeable"
-	"github.com/luxfi/protocol/p/warp/message"
+	"github.com/luxfi/proto/p/signer"
+	"github.com/luxfi/proto/p/stakeable"
+	"github.com/luxfi/proto/p/warp/message"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/types"

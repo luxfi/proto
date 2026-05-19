@@ -6,7 +6,7 @@ package metrics
 import (
 	"github.com/luxfi/metric"
 
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/txs"
 )
 
 const txLabel = "tx"

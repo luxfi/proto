@@ -15,7 +15,7 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/stakeable"
+	"github.com/luxfi/proto/p/stakeable"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/verify/verifymock"

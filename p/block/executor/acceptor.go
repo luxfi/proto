@@ -9,10 +9,10 @@ import (
 
 	log "github.com/luxfi/log"
 
-	"github.com/luxfi/protocol/p/block"
-	"github.com/luxfi/protocol/p/metrics"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/validators"
+	"github.com/luxfi/proto/p/block"
+	"github.com/luxfi/proto/p/metrics"
+	"github.com/luxfi/proto/p/state"
+	"github.com/luxfi/proto/p/validators"
 	"github.com/luxfi/vm/chains/atomic"
 )
 

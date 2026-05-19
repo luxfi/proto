@@ -16,9 +16,9 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/protocol/x/block"
-	"github.com/luxfi/protocol/x/state"
-	"github.com/luxfi/protocol/x/txs/executor"
+	"github.com/luxfi/proto/x/block"
+	"github.com/luxfi/proto/x/state"
+	"github.com/luxfi/proto/x/txs/executor"
 	"github.com/luxfi/vm/chains/atomic"
 )
 

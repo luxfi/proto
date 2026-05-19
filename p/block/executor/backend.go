@@ -10,10 +10,10 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/protocol/p/block"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/protocol/txs/mempool"
+	"github.com/luxfi/proto/p/block"
+	"github.com/luxfi/proto/p/state"
+	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/proto/txs/mempool"
 	"github.com/luxfi/runtime"
 )
 

@@ -13,9 +13,9 @@ import (
 
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/signer"
-	"github.com/luxfi/protocol/p/signer/signermock"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/signer"
+	"github.com/luxfi/proto/p/signer/signermock"
+	"github.com/luxfi/proto/p/txs"
 )
 
 var errCustom = errors.New("custom")

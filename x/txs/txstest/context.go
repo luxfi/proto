@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/x/config"
+	"github.com/luxfi/proto/x/config"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 )
 

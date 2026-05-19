@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/runtime"
 
-	"github.com/luxfi/protocol/p/fx"
+	"github.com/luxfi/proto/p/fx"
 )
 
 var _ UnsignedTx = (*CreateNetworkTx)(nil)

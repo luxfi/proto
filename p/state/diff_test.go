@@ -19,9 +19,9 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/ordering"
-	"github.com/luxfi/protocol/p/fx/fxmock"
-	"github.com/luxfi/protocol/p/status"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/fx/fxmock"
+	"github.com/luxfi/proto/p/status"
+	"github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/gas"
 )

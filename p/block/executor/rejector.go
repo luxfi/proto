@@ -6,7 +6,7 @@ package executor
 import (
 	core "github.com/luxfi/consensus/core"
 	log "github.com/luxfi/log"
-	"github.com/luxfi/protocol/p/block"
+	"github.com/luxfi/proto/p/block"
 )
 
 var _ block.Visitor = (*rejector)(nil)

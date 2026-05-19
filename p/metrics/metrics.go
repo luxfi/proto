@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/ids"
 	utilmetric "github.com/luxfi/metric"
-	"github.com/luxfi/protocol/p/block"
+	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/vm/components/gas"
 )
 

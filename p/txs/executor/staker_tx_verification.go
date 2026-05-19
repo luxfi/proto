@@ -12,9 +12,9 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/protocol/p/txs/fee"
+	"github.com/luxfi/proto/p/state"
+	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/proto/p/txs/fee"
 	lux "github.com/luxfi/utxo"
 
 	safemath "github.com/luxfi/math"

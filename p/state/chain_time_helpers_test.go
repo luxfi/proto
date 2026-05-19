@@ -13,15 +13,15 @@ import (
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/genesis/builder"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/config"
-	"github.com/luxfi/protocol/p/genesis/genesistest"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/config"
+	"github.com/luxfi/proto/p/genesis/genesistest"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
 	"github.com/luxfi/vm/components/gas"
 
-	txfee "github.com/luxfi/protocol/p/txs/fee"
-	validatorfee "github.com/luxfi/protocol/p/validators/fee"
+	txfee "github.com/luxfi/proto/p/txs/fee"
+	validatorfee "github.com/luxfi/proto/p/validators/fee"
 )
 
 func TestNextBlockTime(t *testing.T) {

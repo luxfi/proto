@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/reward"
+	"github.com/luxfi/proto/p/reward"
 	"github.com/luxfi/vm/components/verify"
 )
 

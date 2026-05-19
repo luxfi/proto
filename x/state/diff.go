@@ -10,8 +10,8 @@ import (
 
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/x/block"
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/block"
+	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 )
 

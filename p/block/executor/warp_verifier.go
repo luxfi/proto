@@ -6,8 +6,8 @@ package executor
 import (
 	"context"
 
-	"github.com/luxfi/protocol/p/block"
-	txexecutor "github.com/luxfi/protocol/p/txs/executor"
+	"github.com/luxfi/proto/p/block"
+	txexecutor "github.com/luxfi/proto/p/txs/executor"
 	validators "github.com/luxfi/validators"
 )
 

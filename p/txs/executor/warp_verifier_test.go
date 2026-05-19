@@ -15,8 +15,8 @@ import (
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/protocol/p/warp"
+	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/proto/p/warp"
 	validators "github.com/luxfi/validators"
 	validatorstest "github.com/luxfi/validators/validatorstest"
 )

@@ -12,8 +12,8 @@ import (
 
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/block"
-	"github.com/luxfi/protocol/p/state"
+	"github.com/luxfi/proto/p/block"
+	"github.com/luxfi/proto/p/state"
 )
 
 func TestGetState(t *testing.T) {

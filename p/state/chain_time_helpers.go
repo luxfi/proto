@@ -9,12 +9,12 @@ import (
 
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/math"
-	"github.com/luxfi/protocol/p/config"
+	"github.com/luxfi/proto/p/config"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/vm/components/gas"
 
-	txfee "github.com/luxfi/protocol/p/txs/fee"
-	validatorfee "github.com/luxfi/protocol/p/validators/fee"
+	txfee "github.com/luxfi/proto/p/txs/fee"
+	validatorfee "github.com/luxfi/proto/p/validators/fee"
 )
 
 func NextBlockTime(

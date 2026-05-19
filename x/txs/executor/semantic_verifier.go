@@ -9,8 +9,8 @@ import (
 	"reflect"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/x/state"
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/state"
+	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
 )

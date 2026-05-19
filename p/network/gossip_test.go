@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 
-	"github.com/luxfi/protocol/txs/mempool"
+	"github.com/luxfi/proto/txs/mempool"
 
-	pmempool "github.com/luxfi/protocol/txs/mempool"
+	pmempool "github.com/luxfi/proto/txs/mempool"
 )
 
 var errFoo = errors.New("foo")

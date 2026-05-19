@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
 	"github.com/luxfi/ordering"
-	"github.com/luxfi/protocol/p/block"
+	"github.com/luxfi/proto/p/block"
 	validators "github.com/luxfi/validators"
 )
 

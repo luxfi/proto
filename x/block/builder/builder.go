@@ -12,14 +12,14 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/protocol/txs/mempool"
-	"github.com/luxfi/protocol/x/block"
-	"github.com/luxfi/protocol/x/state"
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/txs/mempool"
+	"github.com/luxfi/proto/x/block"
+	"github.com/luxfi/proto/x/state"
+	"github.com/luxfi/proto/x/txs"
 	"github.com/luxfi/timer/mockable"
 
-	blockexecutor "github.com/luxfi/protocol/x/block/executor"
-	txexecutor "github.com/luxfi/protocol/x/txs/executor"
+	blockexecutor "github.com/luxfi/proto/x/block/executor"
+	txexecutor "github.com/luxfi/proto/x/txs/executor"
 )
 
 // targetBlockSize is the max block size we aim to produce

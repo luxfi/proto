@@ -15,9 +15,9 @@ import (
 
 	iterator "github.com/luxfi/container/iterator"
 	ids "github.com/luxfi/ids"
-	fx "github.com/luxfi/protocol/p/fx"
-	status "github.com/luxfi/protocol/p/status"
-	txs "github.com/luxfi/protocol/p/txs"
+	fx "github.com/luxfi/proto/p/fx"
+	status "github.com/luxfi/proto/p/status"
+	txs "github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
 	gas "github.com/luxfi/vm/components/gas"
 	gomock "go.uber.org/mock/gomock"

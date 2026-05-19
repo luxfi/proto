@@ -15,9 +15,9 @@ import (
 	chain "github.com/luxfi/consensus/protocol/chain"
 	ids "github.com/luxfi/ids"
 	set "github.com/luxfi/math/set"
-	block "github.com/luxfi/protocol/x/block"
-	state "github.com/luxfi/protocol/x/state"
-	txs "github.com/luxfi/protocol/x/txs"
+	block "github.com/luxfi/proto/x/block"
+	state "github.com/luxfi/proto/x/state"
+	txs "github.com/luxfi/proto/x/txs"
 	gomock "go.uber.org/mock/gomock"
 )
 

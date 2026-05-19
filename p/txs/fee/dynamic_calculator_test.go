@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 )
 
 func TestDynamicCalculator(t *testing.T) {

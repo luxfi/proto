@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 )
 
 func TestStakerDiffIterator(t *testing.T) {

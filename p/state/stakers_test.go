@@ -12,8 +12,8 @@ import (
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/genesis/genesistest"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/genesis/genesistest"
+	"github.com/luxfi/proto/p/txs"
 )
 
 func TestBaseStakersPruning(t *testing.T) {

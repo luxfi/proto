@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/codec"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/txs"
 )
 
 // Block defines the common stateless interface for all blocks

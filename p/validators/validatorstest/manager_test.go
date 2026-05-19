@@ -6,7 +6,7 @@ package validatorstest
 import (
 	"testing"
 
-	vmvalidators "github.com/luxfi/protocol/p/validators"
+	vmvalidators "github.com/luxfi/proto/p/validators"
 )
 
 // TestManagerImplementsInterface verifies that the test manager

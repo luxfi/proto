@@ -12,14 +12,14 @@ import (
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
-	platformblock "github.com/luxfi/protocol/p/block"
-	"github.com/luxfi/protocol/p/metrics"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/protocol/p/txs/executor"
-	"github.com/luxfi/protocol/p/txs/fee"
-	"github.com/luxfi/protocol/p/validators"
-	"github.com/luxfi/protocol/txs/mempool"
+	platformblock "github.com/luxfi/proto/p/block"
+	"github.com/luxfi/proto/p/metrics"
+	"github.com/luxfi/proto/p/state"
+	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/proto/p/txs/executor"
+	"github.com/luxfi/proto/p/txs/fee"
+	"github.com/luxfi/proto/p/validators"
+	"github.com/luxfi/proto/txs/mempool"
 )
 
 var (

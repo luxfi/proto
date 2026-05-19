@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	safemath "github.com/luxfi/math"
-	"github.com/luxfi/protocol/p/fx"
+	"github.com/luxfi/proto/p/fx"
 	"github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"

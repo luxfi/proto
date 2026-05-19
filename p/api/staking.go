@@ -6,7 +6,7 @@ package api
 import (
 	"github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/signer"
+	"github.com/luxfi/proto/p/signer"
 	"github.com/luxfi/vm/types"
 )
 

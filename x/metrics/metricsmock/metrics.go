@@ -14,8 +14,8 @@ import (
 	reflect "reflect"
 
 	rpc "github.com/gorilla/rpc/v2"
-	block "github.com/luxfi/protocol/x/block"
-	txs "github.com/luxfi/protocol/x/txs"
+	block "github.com/luxfi/proto/x/block"
+	txs "github.com/luxfi/proto/x/txs"
 	gomock "go.uber.org/mock/gomock"
 )
 

@@ -15,7 +15,7 @@ import (
 
 	secp256k1 "github.com/luxfi/crypto/secp256k1"
 	ids "github.com/luxfi/ids"
-	txs "github.com/luxfi/protocol/p/txs"
+	txs "github.com/luxfi/proto/p/txs"
 	secp256k1fx "github.com/luxfi/utxo/secp256k1fx"
 )
 

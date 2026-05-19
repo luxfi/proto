@@ -18,14 +18,14 @@ import (
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/protocol/p/config"
-	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/protocol/txs/mempool"
+	"github.com/luxfi/proto/p/config"
+	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/proto/txs/mempool"
 	lux "github.com/luxfi/utxo"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/warp"
 
-	pmempool "github.com/luxfi/protocol/txs/mempool"
+	pmempool "github.com/luxfi/proto/txs/mempool"
 )
 
 // testSender implements warp.Sender for testing with optional call tracking

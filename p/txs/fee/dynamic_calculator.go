@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/vm/components/gas"
 )
 

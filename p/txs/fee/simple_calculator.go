@@ -3,7 +3,7 @@
 
 package fee
 
-import "github.com/luxfi/protocol/p/txs"
+import "github.com/luxfi/proto/p/txs"
 
 var _ Calculator = (*SimpleCalculator)(nil)
 

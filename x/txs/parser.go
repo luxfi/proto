@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
 	log "github.com/luxfi/log"
-	"github.com/luxfi/protocol/x/fxs"
+	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/timer/mockable"
 )
 

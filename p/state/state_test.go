@@ -38,21 +38,21 @@ import (
 
 	"github.com/luxfi/codec/wrappers"
 
-	"github.com/luxfi/protocol/p/block"
+	"github.com/luxfi/proto/p/block"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/gas"
 
-	"github.com/luxfi/protocol/p/config"
-	"github.com/luxfi/protocol/p/fx/fxmock"
-	"github.com/luxfi/protocol/p/genesis/genesistest"
-	"github.com/luxfi/protocol/p/metrics"
-	"github.com/luxfi/protocol/p/reward"
+	"github.com/luxfi/proto/p/config"
+	"github.com/luxfi/proto/p/fx/fxmock"
+	"github.com/luxfi/proto/p/genesis/genesistest"
+	"github.com/luxfi/proto/p/metrics"
+	"github.com/luxfi/proto/p/reward"
 
-	"github.com/luxfi/protocol/p/signer"
+	"github.com/luxfi/proto/p/signer"
 
-	"github.com/luxfi/protocol/p/status"
+	"github.com/luxfi/proto/p/status"
 
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 
 	"github.com/luxfi/utxo/secp256k1fx"
 

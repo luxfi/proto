@@ -6,7 +6,7 @@ package metrics
 import (
 	"github.com/luxfi/metric"
 
-	"github.com/luxfi/protocol/p/block"
+	"github.com/luxfi/proto/p/block"
 )
 
 const blkLabel = "blk"

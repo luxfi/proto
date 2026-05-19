@@ -13,8 +13,8 @@ import (
 
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/stakeable"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/stakeable"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/timer/mockable"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"

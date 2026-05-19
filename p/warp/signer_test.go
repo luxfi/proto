@@ -12,8 +12,8 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/warp"
-	"github.com/luxfi/protocol/p/warp/signertest"
+	"github.com/luxfi/proto/p/warp"
+	"github.com/luxfi/proto/p/warp/signertest"
 )
 
 func TestSigner(t *testing.T) {

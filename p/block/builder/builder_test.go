@@ -16,18 +16,18 @@ import (
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/block"
-	"github.com/luxfi/protocol/p/reward"
-	"github.com/luxfi/protocol/p/signer"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/block"
+	"github.com/luxfi/proto/p/reward"
+	"github.com/luxfi/proto/p/signer"
+	"github.com/luxfi/proto/p/state"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/chain"
 
-	blockexecutor "github.com/luxfi/protocol/p/block/executor"
-	txexecutor "github.com/luxfi/protocol/p/txs/executor"
+	blockexecutor "github.com/luxfi/proto/p/block/executor"
+	txexecutor "github.com/luxfi/proto/p/txs/executor"
 )
 
 func TestBuildBlockBasic(t *testing.T) {

@@ -12,13 +12,13 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/reward"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/reward"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/upgrade"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 
-	platformvmgenesis "github.com/luxfi/protocol/p/genesis"
+	platformvmgenesis "github.com/luxfi/proto/p/genesis"
 )
 
 const (

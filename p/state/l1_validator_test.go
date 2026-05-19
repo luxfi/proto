@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/block"
+	"github.com/luxfi/proto/p/block"
 )
 
 func TestL1Validator_Compare(t *testing.T) {

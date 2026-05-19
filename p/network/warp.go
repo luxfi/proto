@@ -8,7 +8,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/luxfi/protocol/p/state"
+	"github.com/luxfi/proto/p/state"
 	"github.com/luxfi/warp"
 )
 

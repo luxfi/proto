@@ -11,10 +11,10 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
-	"github.com/luxfi/protocol/p/reward"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/protocol/p/validators/fee"
+	"github.com/luxfi/proto/p/reward"
+	"github.com/luxfi/proto/p/state"
+	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/proto/p/validators/fee"
 	"github.com/luxfi/vm/components/gas"
 )
 

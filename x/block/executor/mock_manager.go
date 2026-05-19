@@ -16,9 +16,9 @@ import (
 	ids "github.com/luxfi/ids"
 	set "github.com/luxfi/math/set"
 	gomock "github.com/luxfi/mock/gomock"
-	block "github.com/luxfi/protocol/x/block"
-	state "github.com/luxfi/protocol/x/state"
-	txs "github.com/luxfi/protocol/x/txs"
+	block "github.com/luxfi/proto/x/block"
+	state "github.com/luxfi/proto/x/state"
+	txs "github.com/luxfi/proto/x/txs"
 )
 
 // MockManager is a mock of Manager interface.

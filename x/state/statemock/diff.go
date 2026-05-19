@@ -14,9 +14,9 @@ import (
 	time "time"
 
 	ids "github.com/luxfi/ids"
-	block "github.com/luxfi/protocol/x/block"
-	state "github.com/luxfi/protocol/x/state"
-	txs "github.com/luxfi/protocol/x/txs"
+	block "github.com/luxfi/proto/x/block"
+	state "github.com/luxfi/proto/x/state"
+	txs "github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 	gomock "go.uber.org/mock/gomock"
 )

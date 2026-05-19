@@ -14,9 +14,9 @@ import (
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/fx"
-	"github.com/luxfi/protocol/p/status"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/fx"
+	"github.com/luxfi/proto/p/status"
+	"github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/gas"
 )

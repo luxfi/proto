@@ -6,7 +6,7 @@ package state
 import (
 	"github.com/luxfi/container/heap"
 	"github.com/luxfi/container/iterator"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 )
 
 var (

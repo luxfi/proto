@@ -18,14 +18,14 @@ import (
 	"github.com/luxfi/timer/mockable"
 	validators "github.com/luxfi/validators"
 
-	"github.com/luxfi/protocol/p/block"
+	"github.com/luxfi/proto/p/block"
 
-	"github.com/luxfi/protocol/p/config"
-	"github.com/luxfi/protocol/p/genesis/genesistest"
-	"github.com/luxfi/protocol/p/metrics"
-	"github.com/luxfi/protocol/p/state"
-	"github.com/luxfi/protocol/p/state/statetest"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/config"
+	"github.com/luxfi/proto/p/genesis/genesistest"
+	"github.com/luxfi/proto/p/metrics"
+	"github.com/luxfi/proto/p/state"
+	"github.com/luxfi/proto/p/state/statetest"
+	"github.com/luxfi/proto/p/txs"
 )
 
 // BenchmarkGetValidatorSet generates 10k diffs and calculates the time to

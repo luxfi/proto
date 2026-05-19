@@ -6,7 +6,7 @@ package fee
 import (
 	"errors"
 
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 )
 
 var ErrUnsupportedTx = errors.New("unsupported transaction type")

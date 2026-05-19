@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/address"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/ids"
-	platformblock "github.com/luxfi/protocol/p/block"
+	platformblock "github.com/luxfi/proto/p/block"
 )
 
 var (

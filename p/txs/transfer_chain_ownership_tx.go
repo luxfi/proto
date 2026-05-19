@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/fx"
+	"github.com/luxfi/proto/p/fx"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/verify"
 )

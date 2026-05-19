@@ -17,9 +17,9 @@ import (
 	consensusman "github.com/luxfi/consensus/engine/chain/block"
 	ids "github.com/luxfi/ids"
 	set "github.com/luxfi/math/set"
-	block "github.com/luxfi/protocol/p/block"
-	state "github.com/luxfi/protocol/p/state"
-	txs "github.com/luxfi/protocol/p/txs"
+	block "github.com/luxfi/proto/p/block"
+	state "github.com/luxfi/proto/p/state"
+	txs "github.com/luxfi/proto/p/txs"
 )
 
 // MockManager is a mock of Manager interface.

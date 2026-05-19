@@ -11,8 +11,8 @@ import (
 
 	"github.com/luxfi/codec"
 	"github.com/luxfi/constants"
-	"github.com/luxfi/protocol/p/block"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/block"
+	"github.com/luxfi/proto/p/txs"
 )
 
 func TestVerifyWarpMessages(t *testing.T) {

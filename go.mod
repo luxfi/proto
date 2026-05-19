@@ -1,4 +1,4 @@
-module github.com/luxfi/protocol
+module github.com/luxfi/proto
 
 go 1.26.3
 

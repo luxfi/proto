@@ -12,7 +12,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/stakeable"
+	"github.com/luxfi/proto/p/stakeable"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 )

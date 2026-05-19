@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/codec"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/ordering"
-	"github.com/luxfi/protocol/x/fxs"
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/fxs"
+	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 )

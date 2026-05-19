@@ -14,9 +14,9 @@ import (
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/metric"
-	"github.com/luxfi/protocol/x/block"
-	"github.com/luxfi/protocol/x/fxs"
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/block"
+	"github.com/luxfi/proto/x/fxs"
+	"github.com/luxfi/proto/x/txs"
 	"github.com/luxfi/upgrade"
 	lux "github.com/luxfi/utxo"
 

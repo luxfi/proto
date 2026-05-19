@@ -13,7 +13,7 @@ import (
 	reflect "reflect"
 
 	ids "github.com/luxfi/ids"
-	txs "github.com/luxfi/protocol/p/txs"
+	txs "github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
 	verify "github.com/luxfi/vm/components/verify"
 	gomock "go.uber.org/mock/gomock"

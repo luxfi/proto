@@ -241,7 +241,7 @@ github.com/luxfi/vm v1.0.40/go.mod h1:Y5WUKhT76PR6HnbUykHBWI2f5sjssrm5BL6/o7b6If
 github.com/luxfi/warp v1.18.5 h1:yXFCT+lnvzJHs8nVvfUCQ9wNvhtgbDGaXJkJeiwgKf4=
 github.com/luxfi/warp v1.18.5/go.mod h1:SFyC529HDvbP/TWRAdYQSyJUliMa5JKFRtBrTLEElp4=
 github.com/luxfi/zapdb v1.0.0 h1:u8TF4g/bWew5mQwiR/Mcu+QIFYTT6BP5Ty8oBaDgalA=
-github.com/luxfi/zapdb v1.0.0/go.mod h1:tT2WF2iSabQHrAYe9l7LHscaIBfN2YtCbdgOrCyCI2A=
+github.com/luxfi/zapdb v1.0.0/go.mod h1:Qukh3hDRD0MnxA6z+a28JTnXhN85AiLLgp6TYr4QAMc=
 github.com/luxfi/zapdb/v4 v4.9.3 h1:KV1DrbZqtZsZvrWyPw5D8WHR0DxzqW2jHjqx6obxgoM=
 github.com/luxfi/zapdb/v4 v4.9.3/go.mod h1:BrpLaDeYy+smON4ASDPCFKWrQ58CXhy3WNEPGna7vuU=
 github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=

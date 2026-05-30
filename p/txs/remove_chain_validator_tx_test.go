@@ -103,7 +103,7 @@ func TestRemoveChainValidatorTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID,
 
 		ChainID:  testChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(simpleRemoveValidatorTx.SyntacticVerify(rt))
 
@@ -273,7 +273,7 @@ func TestRemoveChainValidatorTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID,
 
 		ChainID:  testChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(complexRemoveValidatorTx.SyntacticVerify(ctx2))
 
@@ -436,7 +436,7 @@ func TestRemoveChainValidatorTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID, // Must match tx.ChainworkID for "P-lux1..." address encoding
 
 		ChainID:  testChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 	}
 	unsignedComplexRemoveValidatorTx.InitRuntime(ctx3)
 

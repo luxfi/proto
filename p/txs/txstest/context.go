@@ -25,7 +25,7 @@ func newContext(
 	builderContext := &builder.Context{
 		NetworkID: networkID,
 		ChainID:   rt.ChainID,
-		XAssetID:  luxAssetID,
+		UTXOAssetID:  luxAssetID,
 	}
 
 	// For test purposes, populate the fee configuration

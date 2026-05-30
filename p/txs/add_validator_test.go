@@ -34,7 +34,7 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	rt = &runtime.Runtime{
 
 		ChainID:  testChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 		NodeID:   nodeID,
 	}
 	signers := [][]*secp256k1.PrivateKey{preFundedKeys}
@@ -170,7 +170,7 @@ func TestAddValidatorTxSyntacticVerifyNotLUX(t *testing.T) {
 	rt = &runtime.Runtime{
 
 		ChainID:  testChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 		NodeID:   nodeID,
 	}
 	signers := [][]*secp256k1.PrivateKey{preFundedKeys}

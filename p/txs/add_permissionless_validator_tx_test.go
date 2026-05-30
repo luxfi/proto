@@ -140,7 +140,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		NetworkID: constants.MainnetID,
 
 		ChainID:  constants.PlatformChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(simpleAddPrimaryTx.SyntacticVerify(rt))
 
@@ -444,7 +444,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		NetworkID: constants.MainnetID,
 
 		ChainID:  constants.PlatformChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(complexAddPrimaryTx.SyntacticVerify(rt))
 
@@ -835,7 +835,7 @@ func TestAddPermissionlessNetValidator(t *testing.T) {
 		NetworkID: constants.MainnetID,
 
 		ChainID:  constants.PlatformChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(simpleAddNetTx.SyntacticVerify(rt))
 
@@ -1137,7 +1137,7 @@ func TestAddPermissionlessNetValidator(t *testing.T) {
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID for "P-lux1..." address encoding
 
 		ChainID:  constants.PlatformChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(complexAddNetTx.SyntacticVerify(ctx2))
 

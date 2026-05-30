@@ -102,13 +102,13 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 
 	baseDB := versiondb.New(memdb.New())
 	// Use the same fixed X-chain asset ID as genesis for consistency
-	xAssetID := genesistest.XAssetID
+	utxoAssetID := genesistest.UTXOAssetID
 
 	ctx := testcontext.New(context.Background())
 	ctx.ChainID = constants.PlatformChainID
 	ctx.XChainID = ids.GenerateTestID() // Set a test X-Chain ID
 	ctx.CChainID = ids.GenerateTestID() // Set a test C-Chain ID
-	ctx.XAssetID = xAssetID
+	ctx.UTXOAssetID = utxoAssetID
 	ctx.NetworkID = constants.UnitTestID
 	m := chainatomic.NewMemory(baseDB)
 	msm := &mutableSharedMemory{
@@ -126,7 +126,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 		PublicKey:      []byte{}, // Use empty bytes for test
 		XChainID:       ctx.XChainID,
 		CChainID:       ctx.CChainID,
-		XAssetID:       ctx.XAssetID,
+		UTXOAssetID:       ctx.UTXOAssetID,
 		ValidatorState: ctx.ValidatorState,
 		SharedMemory:   ctx.SharedMemory,
 		ChainDataDir:   ctx.ChainDataDir,
@@ -136,8 +136,8 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 		WarpSigner:     ctx.WarpSigner,
 	}
 
-	// Initialize utxo.XAssetID from the consensus context
-	utxo.XAssetID = rt.XAssetID
+	// Initialize utxo.UTXOAssetID from the consensus context
+	utxo.UTXOAssetID = rt.UTXOAssetID
 
 	rewards := reward.NewCalculator(config.RewardConfig)
 	baseState := statetest.New(t, statetest.Config{
@@ -226,7 +226,7 @@ func newWallet(t testing.TB, e *environment, c walletConfig) wallet.Wallet {
 		PublicKey:      []byte{}, // Use empty bytes for test
 		XChainID:       e.ctx.XChainID,
 		CChainID:       e.ctx.CChainID,
-		XAssetID:       e.ctx.XAssetID,
+		UTXOAssetID:       e.ctx.UTXOAssetID,
 		ValidatorState: e.ctx.ValidatorState,
 		SharedMemory:   e.ctx.SharedMemory,
 		ChainDataDir:   e.ctx.ChainDataDir,

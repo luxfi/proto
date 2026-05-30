@@ -123,31 +123,31 @@ func (m *Message) String() string                     { return fmt.Sprintf("%+v"
 // Ping message
 type Ping struct {
 	Uptime        uint32
-	SubnetUptimes []*SubnetUptime
+	ChainUptimes []*ChainUptime
 }
 
 func (m *Ping) GetUptime() uint32                 { return m.Uptime }
-func (m *Ping) GetSubnetUptimes() []*SubnetUptime { return m.SubnetUptimes }
+func (m *Ping) GetChainUptimes() []*ChainUptime { return m.ChainUptimes }
 func (m *Ping) Reset()                            { *m = Ping{} }
 func (m *Ping) String() string                    { return fmt.Sprintf("Ping{Uptime:%d}", m.Uptime) }
 
-// SubnetUptime for ping/pong
-type SubnetUptime struct {
+// ChainUptime for ping/pong
+type ChainUptime struct {
 	ChainId []byte
 	Uptime   uint32
 }
 
-func (m *SubnetUptime) GetChainId() []byte { return m.ChainId }
-func (m *SubnetUptime) GetUptime() uint32   { return m.Uptime }
+func (m *ChainUptime) GetChainId() []byte { return m.ChainId }
+func (m *ChainUptime) GetUptime() uint32   { return m.Uptime }
 
 // Pong message
 type Pong struct {
 	Uptime        uint32
-	SubnetUptimes []*SubnetUptime
+	ChainUptimes []*ChainUptime
 }
 
 func (m *Pong) GetUptime() uint32                 { return m.Uptime }
-func (m *Pong) GetSubnetUptimes() []*SubnetUptime { return m.SubnetUptimes }
+func (m *Pong) GetChainUptimes() []*ChainUptime { return m.ChainUptimes }
 func (m *Pong) Reset()                            { *m = Pong{} }
 func (m *Pong) String() string                    { return fmt.Sprintf("Pong{Uptime:%d}", m.Uptime) }
 

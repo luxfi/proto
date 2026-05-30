@@ -138,8 +138,8 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 	res.ctx.ChainID = rt.ChainID
 	res.ctx.NodeID = rt.NodeID
 	res.ctx.ChainID = rt.ChainID
-	res.ctx.XAssetID = rt.XAssetID
-	res.ctx.XAssetID = rt.XAssetID
+	res.ctx.UTXOAssetID = rt.UTXOAssetID
+	res.ctx.UTXOAssetID = rt.UTXOAssetID
 	res.ctx.XChainID = rt.XChainID
 	res.ctx.CChainID = rt.CChainID
 	res.msm = &mutableSharedMemory{
@@ -161,7 +161,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 		NetworkID: res.ctx.NetworkID,
 		ChainID:   res.ctx.ChainID,
 		NodeID:    res.ctx.NodeID,
-		XAssetID:  res.ctx.XAssetID,
+		UTXOAssetID:  res.ctx.UTXOAssetID,
 		Log:       res.ctx.Log,
 	}
 	res.state = statetest.New(t, statetest.Config{
@@ -181,7 +181,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 		NetworkID:      res.ctx.NetworkID,
 		ChainID:        res.ctx.ChainID,
 		NodeID:         res.ctx.NodeID,
-		XAssetID:       res.ctx.XAssetID,
+		UTXOAssetID:       res.ctx.UTXOAssetID,
 		Log:            res.ctx.Log,
 		ValidatorState: res.ctx.ValidatorState,
 		SharedMemory:   res.ctx.SharedMemory,
@@ -286,7 +286,7 @@ func newWallet(t testing.TB, e *environment, c walletConfig) wallet.Wallet {
 		NetworkID:    e.ctx.NetworkID,
 		ChainID:      e.ctx.ChainID,
 		NodeID:       e.ctx.NodeID,
-		XAssetID:     e.ctx.XAssetID,
+		UTXOAssetID:     e.ctx.UTXOAssetID,
 		SharedMemory: e.ctx.SharedMemory,
 	}
 	// Create a minimal Config for the wallet

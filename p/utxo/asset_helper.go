@@ -5,6 +5,6 @@ package utxo
 
 import "github.com/luxfi/ids"
 
-// XAssetID is the LUX asset ID
+// UTXOAssetID is the LUX asset ID
 // TODO: This should be properly initialized from the context
-var XAssetID ids.ID
+var UTXOAssetID ids.ID

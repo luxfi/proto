@@ -78,7 +78,7 @@ func TestApricotProposalBlockTimeVerification(t *testing.T) {
 		StakeOuts: []*lux.TransferableOutput{
 			{
 				Asset: lux.Asset{
-					ID: env.ctx.XAssetID,
+					ID: env.ctx.UTXOAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
@@ -200,7 +200,7 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 		StakeOuts: []*lux.TransferableOutput{
 			{
 				Asset: lux.Asset{
-					ID: env.ctx.XAssetID,
+					ID: env.ctx.UTXOAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
@@ -1386,7 +1386,7 @@ func TestAddValidatorProposalBlock(t *testing.T) {
 			Chain: constants.PrimaryNetworkID,
 		},
 		pop,
-		env.ctx.XAssetID,
+		env.ctx.UTXOAssetID,
 		rewardsOwner,
 		rewardsOwner,
 		10000,
@@ -1468,7 +1468,7 @@ func TestAddValidatorProposalBlock(t *testing.T) {
 			Chain: constants.PrimaryNetworkID,
 		},
 		pop,
-		env.ctx.XAssetID,
+		env.ctx.UTXOAssetID,
 		rewardsOwner,
 		rewardsOwner,
 		10000,

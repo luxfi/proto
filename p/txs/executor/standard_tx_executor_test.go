@@ -1308,7 +1308,7 @@ func TestDurangoMemoField(t *testing.T) {
 					sourceKey,
 					sourceChain,
 					map[ids.ID]uint64{
-						env.ctx.XAssetID: sourceAmount,
+						env.ctx.UTXOAssetID: sourceAmount,
 					},
 					rand.NewSource(0),
 				)
@@ -1339,7 +1339,7 @@ func TestDurangoMemoField(t *testing.T) {
 				tx, err := wallet.IssueExportTx(
 					env.ctx.XChainID,
 					[]*lux.TransferableOutput{{
-						Asset: lux.Asset{ID: env.ctx.XAssetID},
+						Asset: lux.Asset{ID: env.ctx.UTXOAssetID},
 						Out: &secp256k1fx.TransferOutput{
 							Amt:          constants.Lux,
 							OutputOwners: *owners,
@@ -1472,7 +1472,7 @@ func TestDurangoMemoField(t *testing.T) {
 						Chain: constants.PrimaryNetworkID,
 					},
 					pop,
-					env.ctx.XAssetID,
+					env.ctx.UTXOAssetID,
 					owners,
 					owners,
 					reward.PercentDenominator,
@@ -1514,7 +1514,7 @@ func TestDurangoMemoField(t *testing.T) {
 						},
 						Chain: constants.PrimaryNetworkID,
 					},
-					env.ctx.XAssetID,
+					env.ctx.UTXOAssetID,
 					owners,
 					common.WithMemo(memoField),
 				)
@@ -1556,7 +1556,7 @@ func TestDurangoMemoField(t *testing.T) {
 				tx, err := wallet.IssueBaseTx(
 					[]*lux.TransferableOutput{
 						{
-							Asset: lux.Asset{ID: env.ctx.XAssetID},
+							Asset: lux.Asset{ID: env.ctx.UTXOAssetID},
 							Out: &secp256k1fx.TransferOutput{
 								Amt: 1,
 								OutputOwners: secp256k1fx.OutputOwners{
@@ -3624,7 +3624,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 			updateExecutor: increaseL1Weight(1),
 			expectedRemainingFundsUTXO: &lux.UTXO{
 				Asset: lux.Asset{
-					ID: ctx.XAssetID,
+					ID: ctx.UTXOAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: balance,
@@ -4343,7 +4343,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 				&lux.UTXO{
 					UTXOID: utxoID,
 					Asset: lux.Asset{
-						ID: ctx.XAssetID,
+						ID: ctx.UTXOAssetID,
 					},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: test.expectedBalance,

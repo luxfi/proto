@@ -48,7 +48,7 @@ func TestNewExportTx(t *testing.T) {
 			tx, err := wallet.IssueExportTx(
 				tt.destinationChainID,
 				[]*lux.TransferableOutput{{
-					Asset: lux.Asset{ID: env.ctx.XAssetID},
+					Asset: lux.Asset{ID: env.ctx.UTXOAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: genesistest.DefaultInitialBalance - defaultTxFee,
 						OutputOwners: secp256k1fx.OutputOwners{

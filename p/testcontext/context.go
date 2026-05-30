@@ -25,7 +25,7 @@ type Context struct {
 	XChainID       ids.ID
 	CChainID       ids.ID
 	DChainID       ids.ID
-	XAssetID       ids.ID // Primary asset ID (X-chain native)
+	UTXOAssetID       ids.ID // Primary asset ID (X-chain native)
 	ValidatorState interface{}
 	WarpSigner     interface{}
 	Log            log.Logger
@@ -51,6 +51,6 @@ func (c *Context) WithIDs(ids consensuscontext.IDs) *Context {
 	c.NetworkID = ids.NetworkID
 	c.ChainID = ids.ChainID
 	c.NodeID = ids.NodeID
-	c.XAssetID = ids.XAssetID
+	c.UTXOAssetID = ids.UTXOAssetID
 	return c
 }

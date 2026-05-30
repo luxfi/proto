@@ -12,7 +12,7 @@ require (
 	github.com/luxfi/cache v1.2.1
 	github.com/luxfi/codec v1.1.4
 	github.com/luxfi/concurrent v0.0.3
-	github.com/luxfi/consensus v1.22.70
+	github.com/luxfi/consensus v1.25.0
 	github.com/luxfi/constants v1.4.7
 	github.com/luxfi/container v0.0.4
 	github.com/luxfi/crypto v1.19.0
@@ -28,7 +28,7 @@ require (
 	github.com/luxfi/node v1.23.36
 	github.com/luxfi/ordering v0.0.1
 	github.com/luxfi/p2p v1.19.2
-	github.com/luxfi/runtime v1.0.1
+	github.com/luxfi/runtime v1.1.0
 	github.com/luxfi/sdk v1.16.48
 	github.com/luxfi/timer v1.0.2
 	github.com/luxfi/upgrade v1.0.0

@@ -90,7 +90,7 @@ type testContext struct {
 	NodeID          ids.NodeID
 	XChainID        ids.ID
 	CChainID        ids.ID
-	XAssetID        ids.ID
+	UTXOAssetID        ids.ID
 	Log             log.Logger
 	Lock            *sync.RWMutex
 	SharedMemory    chainatomic.SharedMemory
@@ -136,7 +136,7 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 		NodeID:       rt.NodeID,
 		XChainID:     rt.XChainID,
 		CChainID:     rt.CChainID,
-		XAssetID:     rt.XAssetID,
+		UTXOAssetID:     rt.UTXOAssetID,
 		Log:          rt.Log.(log.Logger),
 		Lock:         &rt.Lock,
 		SharedMemory: m.NewSharedMemory(rt.ChainID),

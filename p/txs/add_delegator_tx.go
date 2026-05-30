@@ -107,7 +107,7 @@ func (tx *AddDelegatorTx) SyntacticVerify(rt *runtime.Runtime) error {
 		totalStakeWeight = newWeight
 
 		assetID := out.AssetID()
-		luxAssetID := rt.XAssetID
+		luxAssetID := rt.UTXOAssetID
 		if assetID != luxAssetID {
 			return fmt.Errorf("%w but is %q", errStakeMustBeLUX, assetID)
 		}

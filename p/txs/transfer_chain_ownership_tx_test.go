@@ -97,7 +97,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:  testChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(simpleTransferChainOwnershipTx.SyntacticVerify(rt))
 
@@ -281,7 +281,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID,
 
 		ChainID:  testChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(complexTransferChainOwnershipTx.SyntacticVerify(ctx2))
 
@@ -452,7 +452,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID for "P-lux1..." address encoding
 
 		ChainID:  testChainID,
-		XAssetID: luxAssetID,
+		UTXOAssetID: luxAssetID,
 	}
 	unsignedComplexTransferChainOwnershipTx.InitRuntime(ctx3)
 

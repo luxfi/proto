@@ -222,7 +222,7 @@ func (e *standardTxExecutor) CreateChainTx(tx *txs.CreateChainTx) error {
 		tx.Outs,
 		baseTxCreds,
 		map[ids.ID]uint64{
-			e.backend.Rt.XAssetID: fee,
+			e.backend.Rt.UTXOAssetID: fee,
 		},
 	); err != nil {
 		return err
@@ -271,7 +271,7 @@ func (e *standardTxExecutor) CreateNetworkTx(tx *txs.CreateNetworkTx) error {
 		tx.Outs,
 		e.tx.Creds,
 		map[ids.ID]uint64{
-			e.backend.Rt.XAssetID: fee,
+			e.backend.Rt.UTXOAssetID: fee,
 		},
 	); err != nil {
 		return err
@@ -362,7 +362,7 @@ func (e *standardTxExecutor) ImportTx(tx *txs.ImportTx) error {
 			tx.Outs,
 			e.tx.Creds,
 			map[ids.ID]uint64{
-				e.backend.Rt.XAssetID: fee,
+				e.backend.Rt.UTXOAssetID: fee,
 			},
 		); err != nil {
 			return err
@@ -423,7 +423,7 @@ func (e *standardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 		outs,
 		e.tx.Creds,
 		map[ids.ID]uint64{
-			e.backend.Rt.XAssetID: fee,
+			e.backend.Rt.UTXOAssetID: fee,
 		},
 	); err != nil {
 		return fmt.Errorf("failed verifySpend: %w", err)
@@ -543,11 +543,11 @@ func (e *standardTxExecutor) TransformChainTx(tx *txs.TransformChainTx) error {
 		tx.Ins,
 		tx.Outs,
 		baseTxCreds,
-		// Invariant: [tx.AssetID != e.XAssetID]. This prevents the first
+		// Invariant: [tx.AssetID != e.UTXOAssetID]. This prevents the first
 		//            entry in this map literal from being overwritten by the
 		//            second entry.
 		map[ids.ID]uint64{
-			e.backend.Rt.XAssetID: fee,
+			e.backend.Rt.UTXOAssetID: fee,
 			tx.AssetID:             totalRewardAmount,
 		},
 	); err != nil {
@@ -674,7 +674,7 @@ func (e *standardTxExecutor) BaseTx(tx *txs.BaseTx) error {
 		tx.Outs,
 		e.tx.Creds,
 		map[ids.ID]uint64{
-			e.backend.Rt.XAssetID: fee,
+			e.backend.Rt.UTXOAssetID: fee,
 		},
 	); err != nil {
 		return err
@@ -787,7 +787,7 @@ func (e *standardTxExecutor) ConvertNetworkToL1Tx(tx *txs.ConvertNetworkToL1Tx) 
 		tx.Outs,
 		baseTxCreds,
 		map[ids.ID]uint64{
-			e.backend.Rt.XAssetID: fee,
+			e.backend.Rt.UTXOAssetID: fee,
 		},
 	); err != nil {
 		return err
@@ -850,7 +850,7 @@ func (e *standardTxExecutor) RegisterL1ValidatorTx(tx *txs.RegisterL1ValidatorTx
 		tx.Outs,
 		e.tx.Creds,
 		map[ids.ID]uint64{
-			e.backend.Rt.XAssetID: fee,
+			e.backend.Rt.UTXOAssetID: fee,
 		},
 	); err != nil {
 		return err
@@ -998,7 +998,7 @@ func (e *standardTxExecutor) SetL1ValidatorWeightTx(tx *txs.SetL1ValidatorWeight
 		tx.Outs,
 		e.tx.Creds,
 		map[ids.ID]uint64{
-			e.backend.Rt.XAssetID: fee,
+			e.backend.Rt.UTXOAssetID: fee,
 		},
 	); err != nil {
 		return err
@@ -1072,7 +1072,7 @@ func (e *standardTxExecutor) SetL1ValidatorWeightTx(tx *txs.SetL1ValidatorWeight
 					OutputIndex: uint32(len(tx.Outs)),
 				},
 				Asset: lux.Asset{
-					ID: e.backend.Rt.XAssetID,
+					ID: e.backend.Rt.UTXOAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: remainingBalance,
@@ -1139,7 +1139,7 @@ func (e *standardTxExecutor) IncreaseL1ValidatorBalanceTx(tx *txs.IncreaseL1Vali
 		tx.Outs,
 		e.tx.Creds,
 		map[ids.ID]uint64{
-			e.backend.Rt.XAssetID: fee,
+			e.backend.Rt.UTXOAssetID: fee,
 		},
 	); err != nil {
 		return err
@@ -1229,7 +1229,7 @@ func (e *standardTxExecutor) DisableL1ValidatorTx(tx *txs.DisableL1ValidatorTx) 
 		tx.Outs,
 		baseTxCreds,
 		map[ids.ID]uint64{
-			e.backend.Rt.XAssetID: fee,
+			e.backend.Rt.UTXOAssetID: fee,
 		},
 	); err != nil {
 		return err
@@ -1267,7 +1267,7 @@ func (e *standardTxExecutor) DisableL1ValidatorTx(tx *txs.DisableL1ValidatorTx) 
 			OutputIndex: uint32(len(tx.Outs)),
 		},
 		Asset: lux.Asset{
-			ID: e.backend.Rt.XAssetID,
+			ID: e.backend.Rt.UTXOAssetID,
 		},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: remainingBalance,

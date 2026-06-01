@@ -139,7 +139,7 @@ func TestRejectBlock(t *testing.T) {
 						NodeID:    testCtx.NodeID,
 						XChainID:  testCtx.XChainID,
 						CChainID:  testCtx.CChainID,
-						XAssetID:  testCtx.XAssetID,
+						UTXOAssetID:  testCtx.UTXOAssetID,
 						Log:       testCtx.Log,
 					},
 					blkIDToState: blkIDToState,

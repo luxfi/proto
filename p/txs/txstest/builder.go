@@ -38,7 +38,7 @@ func NewWalletFactoryWithAssets(
 	if rt == nil {
 		rt = &runtime.Runtime{}
 	}
-	rt.XAssetID = luxAssetID
+	rt.UTXOAssetID = luxAssetID
 	return &WalletFactory{
 		rt:    rt,
 		cfg:   cfg,
@@ -76,7 +76,7 @@ func (w *WalletFactory) NewWallet(keys ...*secp256k1.PrivateKey) (builder.Builde
 		backend = newBackend(addrSet, w.state)
 		// Extract networkID and LUXAssetID from context
 		networkID  = w.rt.NetworkID
-		luxAssetID = w.rt.XAssetID
+		luxAssetID = w.rt.UTXOAssetID
 	)
 
 	context := newContext(w.rt, networkID, luxAssetID, w.cfg, nil, w.state.GetTimestamp())

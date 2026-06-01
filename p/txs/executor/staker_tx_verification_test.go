@@ -573,7 +573,7 @@ func TestGetValidatorRules(t *testing.T) {
 			backend: &Backend{
 				Config: config,
 				Ctx: &runtime.Runtime{
-					XAssetID: luxAssetID,
+					UTXOAssetID: luxAssetID,
 				},
 			},
 			chainStateF: func(*gomock.Controller) state.Chain {
@@ -690,7 +690,7 @@ func TestGetDelegatorRules(t *testing.T) {
 			backend: &Backend{
 				Config: config,
 				Ctx: &runtime.Runtime{
-					XAssetID: luxAssetID,
+					UTXOAssetID: luxAssetID,
 				},
 			},
 			chainStateF: func(*gomock.Controller) state.Chain {

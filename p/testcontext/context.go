@@ -25,7 +25,7 @@ type Context struct {
 	XChainID       ids.ID
 	CChainID       ids.ID
 	DChainID       ids.ID
-	UTXOAssetID       ids.ID // Primary asset ID (X-chain native)
+	UTXOAssetID    ids.ID // Primary asset ID (X-chain native)
 	ValidatorState interface{}
 	WarpSigner     interface{}
 	Log            log.Logger

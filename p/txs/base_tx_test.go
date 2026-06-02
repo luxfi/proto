@@ -74,7 +74,7 @@ func TestBaseTxSerialization(t *testing.T) {
 	rt := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
-		ChainID:  testChainID,
+		ChainID:     testChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(simpleBaseTx.SyntacticVerify(rt))
@@ -222,7 +222,7 @@ func TestBaseTxSerialization(t *testing.T) {
 	ctx2 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
-		ChainID:  testChainID,
+		ChainID:     testChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(complexBaseTx.SyntacticVerify(ctx2))
@@ -372,7 +372,7 @@ func TestBaseTxSerialization(t *testing.T) {
 	ctx3 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
-		ChainID:  testChainID,
+		ChainID:     testChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	unsignedComplexBaseTx.InitRuntime(ctx3)

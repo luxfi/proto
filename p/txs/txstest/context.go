@@ -23,9 +23,9 @@ func newContext(
 	timestamp time.Time,
 ) *builder.Context {
 	builderContext := &builder.Context{
-		NetworkID: networkID,
-		ChainID:   rt.ChainID,
-		UTXOAssetID:  luxAssetID,
+		NetworkID:   networkID,
+		ChainID:     rt.ChainID,
+		UTXOAssetID: luxAssetID,
 	}
 
 	// For test purposes, populate the fee configuration

@@ -88,68 +88,198 @@ func (*Message_Request) isMessage_Message()                 {}
 func (*Message_Response) isMessage_Message()                {}
 func (*Message_Gossip) isMessage_Message()                  {}
 func (*Message_Error) isMessage_Message()                   {}
-func (*Message_BFT) isMessage_Message()                 {}
+func (*Message_BFT) isMessage_Message()                     {}
 
-func (m *Message) GetMessage() isMessage_Message      { return m.Message }
-func (m *Message) GetCompressedZstd() []byte          { if x, ok := m.Message.(*Message_CompressedZstd); ok { return x.CompressedZstd }; return nil }
-func (m *Message) GetPing() *Ping                     { if x, ok := m.Message.(*Message_Ping); ok { return x.Ping }; return nil }
-func (m *Message) GetPong() *Pong                     { if x, ok := m.Message.(*Message_Pong); ok { return x.Pong }; return nil }
-func (m *Message) GetHandshake() *Handshake           { if x, ok := m.Message.(*Message_Handshake); ok { return x.Handshake }; return nil }
-func (m *Message) GetGetPeerList() *GetPeerList       { if x, ok := m.Message.(*Message_GetPeerList); ok { return x.GetPeerList }; return nil }
-func (m *Message) GetPeerList() *PeerList             { if x, ok := m.Message.(*Message_PeerList_); ok { return x.PeerList_ }; return nil }
-func (m *Message) GetGetStateSummaryFrontier() *GetStateSummaryFrontier { if x, ok := m.Message.(*Message_GetStateSummaryFrontier); ok { return x.GetStateSummaryFrontier }; return nil }
-func (m *Message) GetStateSummaryFrontier() *StateSummaryFrontier { if x, ok := m.Message.(*Message_StateSummaryFrontier_); ok { return x.StateSummaryFrontier_ }; return nil }
-func (m *Message) GetGetAcceptedStateSummary() *GetAcceptedStateSummary { if x, ok := m.Message.(*Message_GetAcceptedStateSummary); ok { return x.GetAcceptedStateSummary }; return nil }
-func (m *Message) GetAcceptedStateSummary() *AcceptedStateSummary { if x, ok := m.Message.(*Message_AcceptedStateSummary_); ok { return x.AcceptedStateSummary_ }; return nil }
-func (m *Message) GetGetAcceptedFrontier() *GetAcceptedFrontier { if x, ok := m.Message.(*Message_GetAcceptedFrontier); ok { return x.GetAcceptedFrontier }; return nil }
-func (m *Message) GetAcceptedFrontier() *AcceptedFrontier { if x, ok := m.Message.(*Message_AcceptedFrontier_); ok { return x.AcceptedFrontier_ }; return nil }
-func (m *Message) GetGetAccepted() *GetAccepted       { if x, ok := m.Message.(*Message_GetAccepted); ok { return x.GetAccepted }; return nil }
-func (m *Message) GetAccepted() *Accepted             { if x, ok := m.Message.(*Message_Accepted_); ok { return x.Accepted_ }; return nil }
-func (m *Message) GetGetAncestors() *GetAncestors     { if x, ok := m.Message.(*Message_GetAncestors); ok { return x.GetAncestors }; return nil }
-func (m *Message) GetAncestors() *Ancestors           { if x, ok := m.Message.(*Message_Ancestors_); ok { return x.Ancestors_ }; return nil }
-func (m *Message) GetGet() *Get                       { if x, ok := m.Message.(*Message_Get); ok { return x.Get }; return nil }
-func (m *Message) GetPut() *Put                       { if x, ok := m.Message.(*Message_Put); ok { return x.Put }; return nil }
-func (m *Message) GetPushQuery() *PushQuery           { if x, ok := m.Message.(*Message_PushQuery); ok { return x.PushQuery }; return nil }
-func (m *Message) GetPullQuery() *PullQuery           { if x, ok := m.Message.(*Message_PullQuery); ok { return x.PullQuery }; return nil }
-func (m *Message) GetChits() *Chits                   { if x, ok := m.Message.(*Message_Chits); ok { return x.Chits }; return nil }
-func (m *Message) GetRequest() *Request               { if x, ok := m.Message.(*Message_Request); ok { return x.Request }; return nil }
-func (m *Message) GetResponse() *Response             { if x, ok := m.Message.(*Message_Response); ok { return x.Response }; return nil }
-func (m *Message) GetGossip() *Gossip                 { if x, ok := m.Message.(*Message_Gossip); ok { return x.Gossip }; return nil }
-func (m *Message) GetError() *Error                   { if x, ok := m.Message.(*Message_Error); ok { return x.Error }; return nil }
-func (m *Message) GetBFT() *BFT               { if x, ok := m.Message.(*Message_BFT); ok { return x.BFT }; return nil }
-func (m *Message) Reset()                             { *m = Message{} }
-func (m *Message) String() string                     { return fmt.Sprintf("%+v", m.Message) }
+func (m *Message) GetMessage() isMessage_Message { return m.Message }
+func (m *Message) GetCompressedZstd() []byte {
+	if x, ok := m.Message.(*Message_CompressedZstd); ok {
+		return x.CompressedZstd
+	}
+	return nil
+}
+func (m *Message) GetPing() *Ping {
+	if x, ok := m.Message.(*Message_Ping); ok {
+		return x.Ping
+	}
+	return nil
+}
+func (m *Message) GetPong() *Pong {
+	if x, ok := m.Message.(*Message_Pong); ok {
+		return x.Pong
+	}
+	return nil
+}
+func (m *Message) GetHandshake() *Handshake {
+	if x, ok := m.Message.(*Message_Handshake); ok {
+		return x.Handshake
+	}
+	return nil
+}
+func (m *Message) GetGetPeerList() *GetPeerList {
+	if x, ok := m.Message.(*Message_GetPeerList); ok {
+		return x.GetPeerList
+	}
+	return nil
+}
+func (m *Message) GetPeerList() *PeerList {
+	if x, ok := m.Message.(*Message_PeerList_); ok {
+		return x.PeerList_
+	}
+	return nil
+}
+func (m *Message) GetGetStateSummaryFrontier() *GetStateSummaryFrontier {
+	if x, ok := m.Message.(*Message_GetStateSummaryFrontier); ok {
+		return x.GetStateSummaryFrontier
+	}
+	return nil
+}
+func (m *Message) GetStateSummaryFrontier() *StateSummaryFrontier {
+	if x, ok := m.Message.(*Message_StateSummaryFrontier_); ok {
+		return x.StateSummaryFrontier_
+	}
+	return nil
+}
+func (m *Message) GetGetAcceptedStateSummary() *GetAcceptedStateSummary {
+	if x, ok := m.Message.(*Message_GetAcceptedStateSummary); ok {
+		return x.GetAcceptedStateSummary
+	}
+	return nil
+}
+func (m *Message) GetAcceptedStateSummary() *AcceptedStateSummary {
+	if x, ok := m.Message.(*Message_AcceptedStateSummary_); ok {
+		return x.AcceptedStateSummary_
+	}
+	return nil
+}
+func (m *Message) GetGetAcceptedFrontier() *GetAcceptedFrontier {
+	if x, ok := m.Message.(*Message_GetAcceptedFrontier); ok {
+		return x.GetAcceptedFrontier
+	}
+	return nil
+}
+func (m *Message) GetAcceptedFrontier() *AcceptedFrontier {
+	if x, ok := m.Message.(*Message_AcceptedFrontier_); ok {
+		return x.AcceptedFrontier_
+	}
+	return nil
+}
+func (m *Message) GetGetAccepted() *GetAccepted {
+	if x, ok := m.Message.(*Message_GetAccepted); ok {
+		return x.GetAccepted
+	}
+	return nil
+}
+func (m *Message) GetAccepted() *Accepted {
+	if x, ok := m.Message.(*Message_Accepted_); ok {
+		return x.Accepted_
+	}
+	return nil
+}
+func (m *Message) GetGetAncestors() *GetAncestors {
+	if x, ok := m.Message.(*Message_GetAncestors); ok {
+		return x.GetAncestors
+	}
+	return nil
+}
+func (m *Message) GetAncestors() *Ancestors {
+	if x, ok := m.Message.(*Message_Ancestors_); ok {
+		return x.Ancestors_
+	}
+	return nil
+}
+func (m *Message) GetGet() *Get {
+	if x, ok := m.Message.(*Message_Get); ok {
+		return x.Get
+	}
+	return nil
+}
+func (m *Message) GetPut() *Put {
+	if x, ok := m.Message.(*Message_Put); ok {
+		return x.Put
+	}
+	return nil
+}
+func (m *Message) GetPushQuery() *PushQuery {
+	if x, ok := m.Message.(*Message_PushQuery); ok {
+		return x.PushQuery
+	}
+	return nil
+}
+func (m *Message) GetPullQuery() *PullQuery {
+	if x, ok := m.Message.(*Message_PullQuery); ok {
+		return x.PullQuery
+	}
+	return nil
+}
+func (m *Message) GetChits() *Chits {
+	if x, ok := m.Message.(*Message_Chits); ok {
+		return x.Chits
+	}
+	return nil
+}
+func (m *Message) GetRequest() *Request {
+	if x, ok := m.Message.(*Message_Request); ok {
+		return x.Request
+	}
+	return nil
+}
+func (m *Message) GetResponse() *Response {
+	if x, ok := m.Message.(*Message_Response); ok {
+		return x.Response
+	}
+	return nil
+}
+func (m *Message) GetGossip() *Gossip {
+	if x, ok := m.Message.(*Message_Gossip); ok {
+		return x.Gossip
+	}
+	return nil
+}
+func (m *Message) GetError() *Error {
+	if x, ok := m.Message.(*Message_Error); ok {
+		return x.Error
+	}
+	return nil
+}
+func (m *Message) GetBFT() *BFT {
+	if x, ok := m.Message.(*Message_BFT); ok {
+		return x.BFT
+	}
+	return nil
+}
+func (m *Message) Reset()         { *m = Message{} }
+func (m *Message) String() string { return fmt.Sprintf("%+v", m.Message) }
 
 // Ping message
 type Ping struct {
-	Uptime        uint32
+	Uptime       uint32
 	ChainUptimes []*ChainUptime
 }
 
-func (m *Ping) GetUptime() uint32                 { return m.Uptime }
+func (m *Ping) GetUptime() uint32               { return m.Uptime }
 func (m *Ping) GetChainUptimes() []*ChainUptime { return m.ChainUptimes }
-func (m *Ping) Reset()                            { *m = Ping{} }
-func (m *Ping) String() string                    { return fmt.Sprintf("Ping{Uptime:%d}", m.Uptime) }
+func (m *Ping) Reset()                          { *m = Ping{} }
+func (m *Ping) String() string                  { return fmt.Sprintf("Ping{Uptime:%d}", m.Uptime) }
 
 // ChainUptime for ping/pong
 type ChainUptime struct {
 	ChainId []byte
-	Uptime   uint32
+	Uptime  uint32
 }
 
 func (m *ChainUptime) GetChainId() []byte { return m.ChainId }
-func (m *ChainUptime) GetUptime() uint32   { return m.Uptime }
+func (m *ChainUptime) GetUptime() uint32  { return m.Uptime }
 
 // Pong message
 type Pong struct {
-	Uptime        uint32
+	Uptime       uint32
 	ChainUptimes []*ChainUptime
 }
 
-func (m *Pong) GetUptime() uint32                 { return m.Uptime }
+func (m *Pong) GetUptime() uint32               { return m.Uptime }
 func (m *Pong) GetChainUptimes() []*ChainUptime { return m.ChainUptimes }
-func (m *Pong) Reset()                            { *m = Pong{} }
-func (m *Pong) String() string                    { return fmt.Sprintf("Pong{Uptime:%d}", m.Uptime) }
+func (m *Pong) Reset()                          { *m = Pong{} }
+func (m *Pong) String() string                  { return fmt.Sprintf("Pong{Uptime:%d}", m.Uptime) }
 
 // Handshake message
 type Handshake struct {
@@ -189,8 +319,8 @@ func (m *Handshake) GetKnownPeers() *BloomFilter { return m.KnownPeers }
 func (m *Handshake) GetIpBlsSig() []byte         { return m.IpBlsSig }
 func (m *Handshake) GetAllChains() bool          { return m.AllChains }
 func (m *Handshake) GetIpMldsaSig() []byte       { return m.IpMldsaSig }
-func (m *Handshake) Reset()                     { *m = Handshake{} }
-func (m *Handshake) String() string             { return fmt.Sprintf("Handshake{NetworkId:%d}", m.NetworkId) }
+func (m *Handshake) Reset()                      { *m = Handshake{} }
+func (m *Handshake) String() string              { return fmt.Sprintf("Handshake{NetworkId:%d}", m.NetworkId) }
 
 // Client info
 type Client struct {
@@ -262,7 +392,9 @@ func (m *GetStateSummaryFrontier) GetChainId() []byte   { return m.ChainId }
 func (m *GetStateSummaryFrontier) GetRequestId() uint32 { return m.RequestId }
 func (m *GetStateSummaryFrontier) GetDeadline() uint64  { return m.Deadline }
 func (m *GetStateSummaryFrontier) Reset()               { *m = GetStateSummaryFrontier{} }
-func (m *GetStateSummaryFrontier) String() string       { return fmt.Sprintf("GetStateSummaryFrontier{RequestId:%d}", m.RequestId) }
+func (m *GetStateSummaryFrontier) String() string {
+	return fmt.Sprintf("GetStateSummaryFrontier{RequestId:%d}", m.RequestId)
+}
 
 // StateSummaryFrontier message
 type StateSummaryFrontier struct {
@@ -275,7 +407,9 @@ func (m *StateSummaryFrontier) GetChainId() []byte   { return m.ChainId }
 func (m *StateSummaryFrontier) GetRequestId() uint32 { return m.RequestId }
 func (m *StateSummaryFrontier) GetSummary() []byte   { return m.Summary }
 func (m *StateSummaryFrontier) Reset()               { *m = StateSummaryFrontier{} }
-func (m *StateSummaryFrontier) String() string       { return fmt.Sprintf("StateSummaryFrontier{RequestId:%d}", m.RequestId) }
+func (m *StateSummaryFrontier) String() string {
+	return fmt.Sprintf("StateSummaryFrontier{RequestId:%d}", m.RequestId)
+}
 
 // GetAcceptedStateSummary message
 type GetAcceptedStateSummary struct {
@@ -290,7 +424,9 @@ func (m *GetAcceptedStateSummary) GetRequestId() uint32 { return m.RequestId }
 func (m *GetAcceptedStateSummary) GetDeadline() uint64  { return m.Deadline }
 func (m *GetAcceptedStateSummary) GetHeights() []uint64 { return m.Heights }
 func (m *GetAcceptedStateSummary) Reset()               { *m = GetAcceptedStateSummary{} }
-func (m *GetAcceptedStateSummary) String() string       { return fmt.Sprintf("GetAcceptedStateSummary{RequestId:%d}", m.RequestId) }
+func (m *GetAcceptedStateSummary) String() string {
+	return fmt.Sprintf("GetAcceptedStateSummary{RequestId:%d}", m.RequestId)
+}
 
 // AcceptedStateSummary message
 type AcceptedStateSummary struct {
@@ -303,7 +439,9 @@ func (m *AcceptedStateSummary) GetChainId() []byte      { return m.ChainId }
 func (m *AcceptedStateSummary) GetRequestId() uint32    { return m.RequestId }
 func (m *AcceptedStateSummary) GetSummaryIds() [][]byte { return m.SummaryIds }
 func (m *AcceptedStateSummary) Reset()                  { *m = AcceptedStateSummary{} }
-func (m *AcceptedStateSummary) String() string          { return fmt.Sprintf("AcceptedStateSummary{RequestId:%d}", m.RequestId) }
+func (m *AcceptedStateSummary) String() string {
+	return fmt.Sprintf("AcceptedStateSummary{RequestId:%d}", m.RequestId)
+}
 
 // GetAcceptedFrontier message
 type GetAcceptedFrontier struct {
@@ -318,7 +456,9 @@ func (m *GetAcceptedFrontier) GetRequestId() uint32      { return m.RequestId }
 func (m *GetAcceptedFrontier) GetDeadline() uint64       { return m.Deadline }
 func (m *GetAcceptedFrontier) GetEngineType() EngineType { return m.EngineType }
 func (m *GetAcceptedFrontier) Reset()                    { *m = GetAcceptedFrontier{} }
-func (m *GetAcceptedFrontier) String() string            { return fmt.Sprintf("GetAcceptedFrontier{RequestId:%d}", m.RequestId) }
+func (m *GetAcceptedFrontier) String() string {
+	return fmt.Sprintf("GetAcceptedFrontier{RequestId:%d}", m.RequestId)
+}
 
 // AcceptedFrontier message
 type AcceptedFrontier struct {
@@ -331,7 +471,9 @@ func (m *AcceptedFrontier) GetChainId() []byte     { return m.ChainId }
 func (m *AcceptedFrontier) GetRequestId() uint32   { return m.RequestId }
 func (m *AcceptedFrontier) GetContainerId() []byte { return m.ContainerId }
 func (m *AcceptedFrontier) Reset()                 { *m = AcceptedFrontier{} }
-func (m *AcceptedFrontier) String() string         { return fmt.Sprintf("AcceptedFrontier{RequestId:%d}", m.RequestId) }
+func (m *AcceptedFrontier) String() string {
+	return fmt.Sprintf("AcceptedFrontier{RequestId:%d}", m.RequestId)
+}
 
 // GetAccepted message
 type GetAccepted struct {
@@ -534,7 +676,9 @@ func (m *Error) GetRequestId() uint32    { return m.RequestId }
 func (m *Error) GetErrorCode() int32     { return m.ErrorCode }
 func (m *Error) GetErrorMessage() string { return m.ErrorMessage }
 func (m *Error) Reset()                  { *m = Error{} }
-func (m *Error) String() string          { return fmt.Sprintf("Error{RequestId:%d,Code:%d}", m.RequestId, m.ErrorCode) }
+func (m *Error) String() string {
+	return fmt.Sprintf("Error{RequestId:%d,Code:%d}", m.RequestId, m.ErrorCode)
+}
 
 // BFT message
 type BFT struct {
@@ -556,24 +700,44 @@ type BFT_Finalization struct{ Finalization *QuorumCertificate }
 type BFT_ReplicationRequest struct{ ReplicationRequest *ReplicationRequest }
 type BFT_ReplicationResponse struct{ ReplicationResponse *ReplicationResponse }
 
-func (*BFT_BlockProposal) isBFT_Message()         {}
-func (*BFT_Vote) isBFT_Message()                  {}
-func (*BFT_EmptyVote) isBFT_Message()             {}
-func (*BFT_FinalizeVote) isBFT_Message()          {}
-func (*BFT_Notarization) isBFT_Message()          {}
-func (*BFT_EmptyNotarization) isBFT_Message()     {}
-func (*BFT_Finalization) isBFT_Message()          {}
-func (*BFT_ReplicationRequest) isBFT_Message()    {}
-func (*BFT_ReplicationResponse) isBFT_Message()   {}
+func (*BFT_BlockProposal) isBFT_Message()       {}
+func (*BFT_Vote) isBFT_Message()                {}
+func (*BFT_EmptyVote) isBFT_Message()           {}
+func (*BFT_FinalizeVote) isBFT_Message()        {}
+func (*BFT_Notarization) isBFT_Message()        {}
+func (*BFT_EmptyNotarization) isBFT_Message()   {}
+func (*BFT_Finalization) isBFT_Message()        {}
+func (*BFT_ReplicationRequest) isBFT_Message()  {}
+func (*BFT_ReplicationResponse) isBFT_Message() {}
 
-func (m *BFT) GetChainId() []byte           { return m.ChainId }
+func (m *BFT) GetChainId() []byte        { return m.ChainId }
 func (m *BFT) GetMessage() isBFT_Message { return m.Message }
-func (m *BFT) GetBlockProposal() *BlockProposal { if x, ok := m.Message.(*BFT_BlockProposal); ok { return x.BlockProposal }; return nil }
-func (m *BFT) GetVote() *Vote { if x, ok := m.Message.(*BFT_Vote); ok { return x.Vote }; return nil }
-func (m *BFT) GetReplicationRequest() *ReplicationRequest { if x, ok := m.Message.(*BFT_ReplicationRequest); ok { return x.ReplicationRequest }; return nil }
-func (m *BFT) GetReplicationResponse() *ReplicationResponse { if x, ok := m.Message.(*BFT_ReplicationResponse); ok { return x.ReplicationResponse }; return nil }
-func (m *BFT) Reset()                       { *m = BFT{} }
-func (m *BFT) String() string               { return "BFT{}" }
+func (m *BFT) GetBlockProposal() *BlockProposal {
+	if x, ok := m.Message.(*BFT_BlockProposal); ok {
+		return x.BlockProposal
+	}
+	return nil
+}
+func (m *BFT) GetVote() *Vote {
+	if x, ok := m.Message.(*BFT_Vote); ok {
+		return x.Vote
+	}
+	return nil
+}
+func (m *BFT) GetReplicationRequest() *ReplicationRequest {
+	if x, ok := m.Message.(*BFT_ReplicationRequest); ok {
+		return x.ReplicationRequest
+	}
+	return nil
+}
+func (m *BFT) GetReplicationResponse() *ReplicationResponse {
+	if x, ok := m.Message.(*BFT_ReplicationResponse); ok {
+		return x.ReplicationResponse
+	}
+	return nil
+}
+func (m *BFT) Reset()         { *m = BFT{} }
+func (m *BFT) String() string { return "BFT{}" }
 
 // BlockProposal message
 type BlockProposal struct {

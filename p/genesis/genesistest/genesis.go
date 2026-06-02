@@ -34,7 +34,7 @@ const (
 var (
 	// Use a fixed test asset ID for X-chain native asset
 	UTXOAssetID = ids.ID{'l', 'u', 'x', ' ', 'a', 's', 's', 'e', 't', ' ', 'i', 'd'}
-	XAsset   = lux.Asset{ID: UTXOAssetID}
+	XAsset      = lux.Asset{ID: UTXOAssetID}
 
 	DefaultValidatorStartTime     = upgrade.InitiallyActiveTime
 	DefaultValidatorStartTimeUnix = uint64(DefaultValidatorStartTime.Unix())

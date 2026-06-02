@@ -21,8 +21,10 @@ type L1ValidatorRegistrationJustification_RegisterL1ValidatorMessage struct {
 	RegisterL1ValidatorMessage []byte
 }
 
-func (*L1ValidatorRegistrationJustification_ConvertNetworkToL1TxData) isL1ValidatorRegistrationJustification_Preimage()    {}
-func (*L1ValidatorRegistrationJustification_RegisterL1ValidatorMessage) isL1ValidatorRegistrationJustification_Preimage() {}
+func (*L1ValidatorRegistrationJustification_ConvertNetworkToL1TxData) isL1ValidatorRegistrationJustification_Preimage() {
+}
+func (*L1ValidatorRegistrationJustification_RegisterL1ValidatorMessage) isL1ValidatorRegistrationJustification_Preimage() {
+}
 
 func (m *L1ValidatorRegistrationJustification) GetPreimage() isL1ValidatorRegistrationJustification_Preimage {
 	return m.preimage
@@ -59,7 +61,8 @@ type L1ValidatorWeightJustification_L1ValidatorWeightMessage struct {
 	L1ValidatorWeightMessage []byte
 }
 
-func (*L1ValidatorWeightJustification_L1ValidatorWeightMessage) isL1ValidatorWeightJustification_Preimage() {}
+func (*L1ValidatorWeightJustification_L1ValidatorWeightMessage) isL1ValidatorWeightJustification_Preimage() {
+}
 
 func (m *L1ValidatorWeightJustification) GetPreimage() isL1ValidatorWeightJustification_Preimage {
 	return m.preimage

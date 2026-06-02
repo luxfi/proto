@@ -32,7 +32,7 @@ func testContext(networkID uint32, chainID, luxAssetID ids.ID) *runtime.Runtime 
 	return &runtime.Runtime{
 		NetworkID: networkID,
 
-		ChainID:  chainID,
+		ChainID:     chainID,
 		UTXOAssetID: luxAssetID,
 	}
 }
@@ -135,7 +135,7 @@ func TestAddPermissionlessPrimaryDelegatorSerialization(t *testing.T) {
 	rt := &runtime.Runtime{
 		NetworkID: 1,
 
-		ChainID:  testChainID,
+		ChainID:     testChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(simpleAddPrimaryTx.SyntacticVerify(rt))
@@ -391,7 +391,7 @@ func TestAddPermissionlessPrimaryDelegatorSerialization(t *testing.T) {
 	rt = &runtime.Runtime{
 		NetworkID: 1,
 
-		ChainID:  constants.PlatformChainID,
+		ChainID:     constants.PlatformChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(complexAddPrimaryTx.SyntacticVerify(rt))
@@ -624,7 +624,7 @@ func TestAddPermissionlessPrimaryDelegatorSerialization(t *testing.T) {
 	ctx2 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID for "P-lux1..." address encoding
 
-		ChainID:  testChainID,
+		ChainID:     testChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	unsignedComplexAddPrimaryTx.InitRuntime(ctx2)
@@ -882,7 +882,7 @@ func TestAddPermissionlessNetDelegatorSerialization(t *testing.T) {
 	rt = &runtime.Runtime{
 		NetworkID: 1,
 
-		ChainID:  constants.PlatformChainID,
+		ChainID:     constants.PlatformChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(simpleAddNetTx.SyntacticVerify(rt))
@@ -1159,7 +1159,7 @@ func TestAddPermissionlessNetDelegatorSerialization(t *testing.T) {
 	rt = &runtime.Runtime{
 		NetworkID: 1,
 
-		ChainID:  constants.PlatformChainID,
+		ChainID:     constants.PlatformChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(complexAddNetTx.SyntacticVerify(rt))
@@ -1392,7 +1392,7 @@ func TestAddPermissionlessNetDelegatorSerialization(t *testing.T) {
 	ctx3 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID for "P-lux1..." address encoding
 
-		ChainID:  testChainID,
+		ChainID:     testChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	unsignedComplexAddNetTx.InitRuntime(ctx3)

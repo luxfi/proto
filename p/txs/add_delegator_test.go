@@ -30,9 +30,9 @@ func TestAddDelegatorTxSyntacticVerify(t *testing.T) {
 	rt := &runtime.Runtime{
 		NetworkID: constants.UnitTestID,
 
-		ChainID:  testChainID,
+		ChainID:     testChainID,
 		UTXOAssetID: luxAssetID,
-		NodeID:   nodeID,
+		NodeID:      nodeID,
 	}
 	signers := [][]*secp256k1.PrivateKey{preFundedKeys}
 

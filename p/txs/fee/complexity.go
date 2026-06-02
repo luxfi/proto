@@ -89,8 +89,8 @@ const (
 
 	intrinsicInputDBRead = 1
 
-	intrinsicInputDBWrite                     = 1
-	intrinsicOutputDBWrite                    = 1
+	intrinsicInputDBWrite                       = 1
+	intrinsicOutputDBWrite                      = 1
 	intrinsicConvertNetworkToL1ValidatorDBWrite = 4 // weight diff + pub key diff + chainID/nodeID + validationID
 )
 

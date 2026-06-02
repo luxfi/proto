@@ -548,7 +548,7 @@ func (e *standardTxExecutor) TransformChainTx(tx *txs.TransformChainTx) error {
 		//            second entry.
 		map[ids.ID]uint64{
 			e.backend.Rt.UTXOAssetID: fee,
-			tx.AssetID:             totalRewardAmount,
+			tx.AssetID:               totalRewardAmount,
 		},
 	); err != nil {
 		return err

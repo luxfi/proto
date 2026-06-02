@@ -171,9 +171,9 @@ func (rp *RangeProof) GetKeyValues() []*KeyValue {
 
 // ChangeProof represents a change proof
 type ChangeProof struct {
-	StartProof     []*ProofNode
-	EndProof       []*ProofNode
-	KeyChanges     []*KeyChange
+	StartProof        []*ProofNode
+	EndProof          []*ProofNode
+	KeyChanges        []*KeyChange
 	HadRootsInHistory bool
 }
 

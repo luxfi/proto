@@ -126,7 +126,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 		PublicKey:      []byte{}, // Use empty bytes for test
 		XChainID:       ctx.XChainID,
 		CChainID:       ctx.CChainID,
-		UTXOAssetID:       ctx.UTXOAssetID,
+		UTXOAssetID:    ctx.UTXOAssetID,
 		ValidatorState: ctx.ValidatorState,
 		SharedMemory:   ctx.SharedMemory,
 		ChainDataDir:   ctx.ChainDataDir,
@@ -226,7 +226,7 @@ func newWallet(t testing.TB, e *environment, c walletConfig) wallet.Wallet {
 		PublicKey:      []byte{}, // Use empty bytes for test
 		XChainID:       e.ctx.XChainID,
 		CChainID:       e.ctx.CChainID,
-		UTXOAssetID:       e.ctx.UTXOAssetID,
+		UTXOAssetID:    e.ctx.UTXOAssetID,
 		ValidatorState: e.ctx.ValidatorState,
 		SharedMemory:   e.ctx.SharedMemory,
 		ChainDataDir:   e.ctx.ChainDataDir,

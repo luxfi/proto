@@ -134,13 +134,13 @@ func TestRejectBlock(t *testing.T) {
 			rejector := &rejector{
 				backend: &backend{
 					ctx: &runtime.Runtime{
-						NetworkID: testCtx.NetworkID,
-						ChainID:   testCtx.ChainID,
-						NodeID:    testCtx.NodeID,
-						XChainID:  testCtx.XChainID,
-						CChainID:  testCtx.CChainID,
-						UTXOAssetID:  testCtx.UTXOAssetID,
-						Log:       testCtx.Log,
+						NetworkID:   testCtx.NetworkID,
+						ChainID:     testCtx.ChainID,
+						NodeID:      testCtx.NodeID,
+						XChainID:    testCtx.XChainID,
+						CChainID:    testCtx.CChainID,
+						UTXOAssetID: testCtx.UTXOAssetID,
+						Log:         testCtx.Log,
 					},
 					blkIDToState: blkIDToState,
 					Mempool:      mempool,

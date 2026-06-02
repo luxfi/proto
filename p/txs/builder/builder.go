@@ -215,7 +215,7 @@ func New(
 		rt:                rt,
 		NetworkID:         rt.NetworkID,
 		ChainID:           rt.ChainID,
-		UTXOAssetID:          rt.UTXOAssetID,
+		UTXOAssetID:       rt.UTXOAssetID,
 		clk:               clk,
 		fx:                fx,
 	}
@@ -226,13 +226,13 @@ type builder struct {
 	utxo.Spender
 	state state.State
 
-	cfg       *config.Config
-	rt        *runtime.Runtime
-	NetworkID uint32
-	ChainID   ids.ID
-	UTXOAssetID  ids.ID
-	clk       *mockable.Clock
-	fx        fx.Fx
+	cfg         *config.Config
+	rt          *runtime.Runtime
+	NetworkID   uint32
+	ChainID     ids.ID
+	UTXOAssetID ids.ID
+	clk         *mockable.Clock
+	fx          fx.Fx
 }
 
 func (b *builder) NewImportTx(

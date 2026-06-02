@@ -11,12 +11,12 @@ import (
 
 // Message tags for ZAP encoding
 const (
-	tagCompressedZstd = 1
-	tagPing           = 2
-	tagPong           = 3
-	tagHandshake      = 4
-	tagGetPeerList    = 5
-	tagPeerList       = 6
+	tagCompressedZstd          = 1
+	tagPing                    = 2
+	tagPong                    = 3
+	tagHandshake               = 4
+	tagGetPeerList             = 5
+	tagPeerList                = 6
 	tagGetStateSummaryFrontier = 7
 	tagStateSummaryFrontier    = 8
 	tagGetAcceptedStateSummary = 9
@@ -36,13 +36,12 @@ const (
 	tagResponse                = 23
 	tagGossip                  = 24
 	tagError                   = 25
-	tagBFT                 = 26
+	tagBFT                     = 26
 )
 
 var (
 	ErrInvalidMessage = errors.New("invalid wire message")
 	ErrUnknownTag     = errors.New("unknown message tag")
-
 )
 
 // Buffer for zero-copy encoding

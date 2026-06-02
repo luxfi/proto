@@ -35,10 +35,10 @@ type ValidatorState interface {
 
 // ValidatorData contains the data for a single validator
 type ValidatorData struct {
-	NodeID         ids.NodeID
-	PublicKey      []byte // BLS public key (classical)
+	NodeID       ids.NodeID
+	PublicKey    []byte // BLS public key (classical)
 	CoronaPubKey []byte // Corona public key (post-quantum)
-	Weight         uint64
+	Weight       uint64
 }
 
 type CanonicalValidatorSet struct {
@@ -51,7 +51,7 @@ type CanonicalValidatorSet struct {
 type Validator struct {
 	PublicKey      *bls.PublicKey
 	PublicKeyBytes []byte
-	CoronaPubKey []byte // Post-quantum Corona public key
+	CoronaPubKey   []byte // Post-quantum Corona public key
 	Weight         uint64
 	NodeIDs        []ids.NodeID
 }
@@ -124,7 +124,7 @@ func FlattenValidatorSet(vdrSet map[ids.NodeID]*ValidatorData) (CanonicalValidat
 			newVdr := &Validator{
 				PublicKey:      blsPK,
 				PublicKeyBytes: pkBytes,
-				CoronaPubKey: vdr.CoronaPubKey, // Post-quantum key
+				CoronaPubKey:   vdr.CoronaPubKey, // Post-quantum key
 				Weight:         vdr.Weight,
 				NodeIDs:        []ids.NodeID{vdr.NodeID},
 			}
@@ -207,10 +207,10 @@ func (v *validatorStateAdapter) GetValidatorSet(ctx context.Context, height uint
 	result := make(map[ids.NodeID]*ValidatorData, len(validatorSet))
 	for nodeID, validator := range validatorSet {
 		result[nodeID] = &ValidatorData{
-			NodeID:         validator.NodeID,
-			PublicKey:      validator.PublicKey,
+			NodeID:       validator.NodeID,
+			PublicKey:    validator.PublicKey,
 			CoronaPubKey: validator.CoronaPubKey, // Post-quantum key
-			Weight:         validator.Weight,
+			Weight:       validator.Weight,
 		}
 	}
 	return result, nil

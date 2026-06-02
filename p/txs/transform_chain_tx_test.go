@@ -117,7 +117,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 	rt := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
-		ChainID:  testChainID,
+		ChainID:     testChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(simpleTransformTx.SyntacticVerify(rt))
@@ -345,7 +345,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 	ctx2 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
-		ChainID:  testChainID,
+		ChainID:     testChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	require.NoError(complexTransformTx.SyntacticVerify(ctx2))
@@ -533,7 +533,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 	ctx3 := &runtime.Runtime{
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
-		ChainID:  testChainID,
+		ChainID:     testChainID,
 		UTXOAssetID: luxAssetID,
 	}
 	unsignedComplexTransformTx.InitRuntime(ctx3)
@@ -650,7 +650,7 @@ func TestTransformChainTxSyntacticVerify(t *testing.T) {
 	rt := &runtime.Runtime{
 		NetworkID: networkID, // Must match tx.NetworkID
 
-		ChainID:  chainID,
+		ChainID:     chainID,
 		UTXOAssetID: luxAssetID,
 	}
 

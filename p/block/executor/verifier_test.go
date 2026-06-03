@@ -1389,7 +1389,7 @@ func TestDeactivateLowBalanceL1ValidatorBlockChanges(t *testing.T) {
 	}{
 		{
 			name:              "Before F Upgrade - no L1 validators evicted",
-			currentFork:       upgradetest.Etna,
+			currentFork:       upgradetest.Quasar,
 			durationToAdvance: 0,
 			networkID:         constants.UnitTestID,
 			expectedErr:       ErrStandardBlockWithoutChanges,
@@ -1403,7 +1403,7 @@ func TestDeactivateLowBalanceL1ValidatorBlockChanges(t *testing.T) {
 		},
 		{
 			name:              "Before F Upgrade - L1 validators evicted",
-			currentFork:       upgradetest.Etna,
+			currentFork:       upgradetest.Quasar,
 			durationToAdvance: time.Second,
 			networkID:         constants.UnitTestID,
 		},
@@ -1415,7 +1415,7 @@ func TestDeactivateLowBalanceL1ValidatorBlockChanges(t *testing.T) {
 		},
 		{
 			name:              "Before F Upgrade - L1 validators evicted - on Testnet",
-			currentFork:       upgradetest.Etna,
+			currentFork:       upgradetest.Quasar,
 			durationToAdvance: time.Second,
 			networkID:         constants.TestnetID,
 		},

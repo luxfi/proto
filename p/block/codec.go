@@ -39,7 +39,7 @@ func init() {
 			RegisterApricotTypes(lc),
 			RegisterBanffTypes(lc),
 			RegisterDurangoTypes(lc),
-			RegisterEtnaTypes(lc),
+			RegisterQuasarTypes(lc),
 		)
 	}
 
@@ -92,8 +92,8 @@ func RegisterDurangoTypes(targetCodec linearcodec.Codec) error {
 	return txs.RegisterDurangoTypes(targetCodec)
 }
 
-// RegisterEtnaTypes registers the type information for blocks that were valid
-// during the Etna series of upgrades.
-func RegisterEtnaTypes(targetCodec linearcodec.Codec) error {
-	return txs.RegisterEtnaTypes(targetCodec)
+// RegisterQuasarTypes registers the type information for blocks that were valid
+// during the Quasar Edition series of upgrades.
+func RegisterQuasarTypes(targetCodec linearcodec.Codec) error {
+	return txs.RegisterQuasarTypes(targetCodec)
 }

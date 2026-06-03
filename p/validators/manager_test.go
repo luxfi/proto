@@ -27,13 +27,13 @@ import (
 	. "github.com/luxfi/proto/p/validators"
 )
 
-func TestGetValidatorSet_AfterEtna(t *testing.T) {
+func TestGetValidatorSet_AfterQuasar(t *testing.T) {
 	require := require.New(t)
 
 	vdrs := validators.NewManager()
 	upgrades := upgradetest.GetConfig(upgradetest.Durango)
 	upgradeTime := genesistest.DefaultValidatorStartTime.Add(2 * time.Second)
-	upgrades.EtnaTime = upgradeTime
+	upgrades.QuasarTime = upgradeTime
 	s := statetest.New(t, statetest.Config{
 		Validators: vdrs,
 		Upgrades:   upgrades,
@@ -67,7 +67,7 @@ func TestGetValidatorSet_AfterEtna(t *testing.T) {
 		}
 	)
 
-	// Add a chain staker during the Etna upgrade
+	// Add a chain staker during the Quasar Edition upgrade
 	{
 		blk, err := block.NewBanffStandardBlock(upgradeTime, s.GetLastAccepted(), 1, nil)
 		require.NoError(err)

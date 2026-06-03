@@ -29,7 +29,7 @@ import (
 	"github.com/luxfi/vm/components/gas"
 )
 
-// TODO: Before Etna, ensure that the maximum number of expiries to track is
+// TODO: Before Quasar Edition, ensure that the maximum number of expiries to track is
 // limited to a reasonable number by this window.
 const (
 	second                            = 1
@@ -45,8 +45,8 @@ var (
 	errEmptyNodeID                     = errors.New("validator nodeID cannot be empty")
 	errMaxStakeDurationTooLarge        = errors.New("max stake duration must be less than or equal to the global max stake duration")
 	errMissingStartTimePreDurango      = errors.New("staker transactions must have a StartTime pre-Durango")
-	errEtnaUpgradeNotActive            = errors.New("attempting to use an Etna-upgrade feature prior to activation")
-	errTransformChainTxPostEtna        = errors.New("TransformChainTx is not permitted post-Etna")
+	errQuasarUpgradeNotActive            = errors.New("attempting to use a Quasar Edition upgrade feature prior to activation")
+	errTransformChainTxPostQuasar        = errors.New("TransformChainTx is not permitted post-Quasar")
 	errMaxNumActiveValidators          = errors.New("already at the max number of active validators")
 	errCouldNotLoadChainToL1Conversion = errors.New("could not load chain conversion")
 	errWrongWarpMessageSourceChainID   = errors.New("wrong warp message source chain ID")
@@ -507,8 +507,8 @@ func (e *standardTxExecutor) RemoveChainValidatorTx(tx *txs.RemoveChainValidator
 
 func (e *standardTxExecutor) TransformChainTx(tx *txs.TransformChainTx) error {
 	currentTimestamp := e.state.GetTimestamp()
-	if e.backend.Config.UpgradeConfig.IsEtnaActivated(currentTimestamp) {
-		return errTransformChainTxPostEtna
+	if e.backend.Config.UpgradeConfig.IsQuasarActivated(currentTimestamp) {
+		return errTransformChainTxPostQuasar
 	}
 
 	if err := e.tx.SyntacticVerify(e.backend.Rt); err != nil {
@@ -693,8 +693,8 @@ func (e *standardTxExecutor) ConvertNetworkToL1Tx(tx *txs.ConvertNetworkToL1Tx) 
 		currentTimestamp = e.state.GetTimestamp()
 		upgrades         = e.backend.Config.UpgradeConfig
 	)
-	if !upgrades.IsEtnaActivated(currentTimestamp) {
-		return errEtnaUpgradeNotActive
+	if !upgrades.IsQuasarActivated(currentTimestamp) {
+		return errQuasarUpgradeNotActive
 	}
 
 	if err := e.tx.SyntacticVerify(e.backend.Rt); err != nil {
@@ -821,8 +821,8 @@ func (e *standardTxExecutor) RegisterL1ValidatorTx(tx *txs.RegisterL1ValidatorTx
 		currentTimestamp = e.state.GetTimestamp()
 		upgrades         = e.backend.Config.UpgradeConfig
 	)
-	if !upgrades.IsEtnaActivated(currentTimestamp) {
-		return errEtnaUpgradeNotActive
+	if !upgrades.IsQuasarActivated(currentTimestamp) {
+		return errQuasarUpgradeNotActive
 	}
 
 	if err := e.tx.SyntacticVerify(e.backend.Rt); err != nil {
@@ -973,8 +973,8 @@ func (e *standardTxExecutor) SetL1ValidatorWeightTx(tx *txs.SetL1ValidatorWeight
 		currentTimestamp = e.state.GetTimestamp()
 		upgrades         = e.backend.Config.UpgradeConfig
 	)
-	if !upgrades.IsEtnaActivated(currentTimestamp) {
-		return errEtnaUpgradeNotActive
+	if !upgrades.IsQuasarActivated(currentTimestamp) {
+		return errQuasarUpgradeNotActive
 	}
 
 	if err := e.tx.SyntacticVerify(e.backend.Rt); err != nil {
@@ -1109,8 +1109,8 @@ func (e *standardTxExecutor) IncreaseL1ValidatorBalanceTx(tx *txs.IncreaseL1Vali
 		currentTimestamp = e.state.GetTimestamp()
 		upgrades         = e.backend.Config.UpgradeConfig
 	)
-	if !upgrades.IsEtnaActivated(currentTimestamp) {
-		return errEtnaUpgradeNotActive
+	if !upgrades.IsQuasarActivated(currentTimestamp) {
+		return errQuasarUpgradeNotActive
 	}
 
 	if err := e.tx.SyntacticVerify(e.backend.Rt); err != nil {
@@ -1181,8 +1181,8 @@ func (e *standardTxExecutor) DisableL1ValidatorTx(tx *txs.DisableL1ValidatorTx) 
 		currentTimestamp = e.state.GetTimestamp()
 		upgrades         = e.backend.Config.UpgradeConfig
 	)
-	if !upgrades.IsEtnaActivated(currentTimestamp) {
-		return errEtnaUpgradeNotActive
+	if !upgrades.IsQuasarActivated(currentTimestamp) {
+		return errQuasarUpgradeNotActive
 	}
 
 	if err := e.tx.SyntacticVerify(e.backend.Rt); err != nil {

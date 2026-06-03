@@ -13,13 +13,13 @@ type Config struct {
 	// Fee that must be burned by every asset creating transaction
 	CreateAssetTxFee uint64 `json:"createAssetTxFee"`
 
-	// Time of the Etna network upgrade
-	EtnaTime time.Time `json:"etnaTime"`
+	// Time of the Quasar Edition network upgrade
+	QuasarTime time.Time `json:"quasarTime"`
 
 	// IndexTransactions enables transaction indexing by address
 	IndexTransactions bool `json:"indexTransactions"`
 }
 
-func (c *Config) IsEtnaActivated(timestamp time.Time) bool {
-	return !timestamp.Before(c.EtnaTime)
+func (c *Config) IsQuasarActivated(timestamp time.Time) bool {
+	return !timestamp.Before(c.QuasarTime)
 }

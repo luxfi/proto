@@ -224,7 +224,7 @@ func TestPickFeeCalculator(t *testing.T) {
 			expected: txfee.NewSimpleCalculator(0),
 		},
 		{
-			fork: upgradetest.Etna,
+			fork: upgradetest.Quasar,
 			expected: txfee.NewDynamicCalculator(
 				dynamicFeeConfig.Weights,
 				dynamicFeeConfig.MinPrice,

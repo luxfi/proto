@@ -6,24 +6,24 @@ require (
 	github.com/cloudflare/circl v1.6.3
 	github.com/google/btree v1.1.3
 	github.com/gorilla/rpc v1.2.1
-	github.com/luxfi/accel v1.0.7
+	github.com/luxfi/accel v1.1.8
 	github.com/luxfi/address v1.0.1
 	github.com/luxfi/atomic v1.0.0
 	github.com/luxfi/cache v1.2.1
 	github.com/luxfi/codec v1.1.4
 	github.com/luxfi/concurrent v0.0.3
 	github.com/luxfi/consensus v1.25.0
-	github.com/luxfi/constants v1.4.7
+	github.com/luxfi/constants v1.5.8-0.20260603055356-93c2c2ceb9ca
 	github.com/luxfi/container v0.0.4
-	github.com/luxfi/crypto v1.19.0
-	github.com/luxfi/database v1.17.44
+	github.com/luxfi/crypto v1.19.10
+	github.com/luxfi/database v1.18.3
 	github.com/luxfi/formatting v1.0.1
 	github.com/luxfi/genesis v1.7.1
 	github.com/luxfi/ids v1.2.9
 	github.com/luxfi/keychain v1.0.2
 	github.com/luxfi/log v1.4.1
-	github.com/luxfi/math v1.4.0
-	github.com/luxfi/metric v1.5.1
+	github.com/luxfi/math v1.4.1
+	github.com/luxfi/metric v1.5.7
 	github.com/luxfi/mock v0.1.1
 	github.com/luxfi/node v1.23.36
 	github.com/luxfi/ordering v0.0.1
@@ -31,7 +31,7 @@ require (
 	github.com/luxfi/runtime v1.1.0
 	github.com/luxfi/sdk v1.16.48
 	github.com/luxfi/timer v1.0.2
-	github.com/luxfi/upgrade v1.0.0
+	github.com/luxfi/upgrade v1.0.1-0.20260603055252-f51810805436
 	github.com/luxfi/utxo v0.2.4
 	github.com/luxfi/validators v1.2.0
 	github.com/luxfi/vm v1.0.40
@@ -89,11 +89,11 @@ require (
 	github.com/luxfi/rpc v1.0.2 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
 	github.com/luxfi/staking v1.1.0 // indirect
-	github.com/luxfi/threshold v1.6.8 // indirect
+	github.com/luxfi/threshold v1.9.4 // indirect
 	github.com/luxfi/tls v1.0.3 // indirect
 	github.com/luxfi/utils v1.1.4 // indirect
 	github.com/luxfi/version v1.0.1 // indirect
-	github.com/luxfi/zapdb v1.0.0 // indirect
+	github.com/luxfi/zapdb v1.8.0 // indirect
 	github.com/luxfi/zapdb/v4 v4.9.3 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -113,13 +113,13 @@ require (
 	github.com/supranational/blst v0.3.16 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/otel v1.42.0 // indirect
+	go.opentelemetry.io/otel v1.43.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.42.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.42.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.42.0 // indirect
-	go.opentelemetry.io/otel/metric v1.42.0 // indirect
+	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.42.0 // indirect
-	go.opentelemetry.io/otel/trace v1.42.0 // indirect
+	go.opentelemetry.io/otel/trace v1.43.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.10.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
@@ -136,5 +136,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
 replace github.com/luxfi/runtime => /Users/z/work/lux/runtime
+
 replace github.com/luxfi/consensus => /Users/z/work/lux/consensus

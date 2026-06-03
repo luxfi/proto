@@ -50,7 +50,7 @@ func init() {
 
 		errs.Add(
 			RegisterDurangoTypes(lc),
-			RegisterEtnaTypes(lc),
+			RegisterQuasarTypes(lc),
 		)
 	}
 
@@ -121,9 +121,9 @@ func RegisterDurangoTypes(targetCodec linearcodec.Codec) error {
 	)
 }
 
-// RegisterEtnaTypes registers the type information for transactions that
-// were valid during the Etna series of upgrades.
-func RegisterEtnaTypes(targetCodec linearcodec.Codec) error {
+// RegisterQuasarTypes registers the type information for transactions that
+// were valid during the Quasar Edition series of upgrades.
+func RegisterQuasarTypes(targetCodec linearcodec.Codec) error {
 	return errors.Join(
 		targetCodec.RegisterType(&ConvertNetworkToL1Tx{}),
 		targetCodec.RegisterType(&RegisterL1ValidatorTx{}),

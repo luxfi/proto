@@ -44,13 +44,13 @@ func TestAdvanceTimeTo_UpdatesFeeState(t *testing.T) {
 		expectedState gas.State
 	}{
 		{
-			name:          "Pre-Etna",
+			name:          "Pre-Quasar",
 			fork:          upgradetest.Durango,
 			initialState:  gas.State{},
-			expectedState: gas.State{}, // Pre-Etna, fee state should not change
+			expectedState: gas.State{}, // Pre-Quasar, fee state should not change
 		},
 		{
-			name: "Etna with no usage",
+			name: "Quasar with no usage",
 			initialState: gas.State{
 				Capacity: feeConfig.MaxCapacity,
 				Excess:   0,
@@ -61,8 +61,8 @@ func TestAdvanceTimeTo_UpdatesFeeState(t *testing.T) {
 			},
 		},
 		{
-			name: "Etna with usage",
-			fork: upgradetest.Etna,
+			name: "Quasar with usage",
+			fork: upgradetest.Quasar,
 			initialState: gas.State{
 				Capacity: 1,
 				Excess:   10_000,

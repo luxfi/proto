@@ -140,7 +140,7 @@ func getNextL1ValidatorEvictionTime(
 // PickFeeCalculator does not modify [state].
 func PickFeeCalculator(config *config.Internal, state Chain) txfee.Calculator {
 	timestamp := state.GetTimestamp()
-	if !config.UpgradeConfig.IsEtnaActivated(timestamp) {
+	if !config.UpgradeConfig.IsQuasarActivated(timestamp) {
 		return txfee.NewSimpleCalculator(0)
 	}
 

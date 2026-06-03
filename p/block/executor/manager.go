@@ -172,7 +172,7 @@ func (m *manager) VerifyTx(tx *txs.Tx) error {
 		return fmt.Errorf("failed to advance the chain time: %w", err)
 	}
 
-	if timestamp := stateDiff.GetTimestamp(); m.txExecutorBackend.Config.UpgradeConfig.IsEtnaActivated(timestamp) {
+	if timestamp := stateDiff.GetTimestamp(); m.txExecutorBackend.Config.UpgradeConfig.IsQuasarActivated(timestamp) {
 		complexity, err := fee.TxComplexity(tx.Unsigned)
 		if err != nil {
 			return fmt.Errorf("failed to calculate tx complexity: %w", err)

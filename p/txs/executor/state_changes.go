@@ -221,7 +221,7 @@ func advanceTimeTo(
 		changed = true
 	}
 
-	if !backend.Config.UpgradeConfig.IsEtnaActivated(newChainTime) {
+	if !backend.Config.UpgradeConfig.IsQuasarActivated(newChainTime) {
 		changes.SetTimestamp(newChainTime)
 		return changes, changed, nil
 	}

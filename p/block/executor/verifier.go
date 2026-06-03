@@ -523,7 +523,7 @@ func (v *verifier) processStandardTxs(txs []*txs.Tx, feeCalculator txfee.Calcula
 ) {
 	// Complexity is limited first to avoid processing too large of a block.
 	var gasConsumed gas.Gas
-	if timestamp := diff.GetTimestamp(); v.txExecutorBackend.Config.UpgradeConfig.IsEtnaActivated(timestamp) {
+	if timestamp := diff.GetTimestamp(); v.txExecutorBackend.Config.UpgradeConfig.IsQuasarActivated(timestamp) {
 		var blockComplexity gas.Dimensions
 		for _, tx := range txs {
 			txComplexity, err := txfee.TxComplexity(tx.Unsigned)

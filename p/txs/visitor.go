@@ -26,7 +26,7 @@ type Visitor interface {
 	TransferChainOwnershipTx(*TransferChainOwnershipTx) error
 	BaseTx(*BaseTx) error
 
-	// Etna Transactions:
+	// Quasar Transactions:
 	ConvertNetworkToL1Tx(*ConvertNetworkToL1Tx) error
 	RegisterL1ValidatorTx(*RegisterL1ValidatorTx) error
 	SetL1ValidatorWeightTx(*SetL1ValidatorWeightTx) error

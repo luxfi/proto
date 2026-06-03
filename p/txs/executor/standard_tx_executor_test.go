@@ -886,9 +886,9 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 	}
 }
 
-func TestEtnaStandardTxExecutorAddNetValidator(t *testing.T) {
+func TestQuasarStandardTxExecutorAddNetValidator(t *testing.T) {
 	require := require.New(t)
-	env := newEnvironment(t, upgradetest.Etna)
+	env := newEnvironment(t, upgradetest.Quasar)
 	env.ctx.Lock.Lock()
 	defer env.ctx.Lock.Unlock()
 
@@ -1610,11 +1610,11 @@ func TestDurangoMemoField(t *testing.T) {
 	}
 }
 
-// Verifies that [TransformChainTx] is disabled post-Etna
-func TestEtnaDisabledTransactions(t *testing.T) {
+// Verifies that [TransformChainTx] is disabled post-Quasar
+func TestQuasarDisabledTransactions(t *testing.T) {
 	require := require.New(t)
 
-	env := newEnvironment(t, upgradetest.Etna)
+	env := newEnvironment(t, upgradetest.Quasar)
 	env.ctx.Lock.Lock()
 	defer env.ctx.Lock.Unlock()
 
@@ -1631,7 +1631,7 @@ func TestEtnaDisabledTransactions(t *testing.T) {
 		tx,
 		onAcceptState,
 	)
-	require.ErrorIs(err, errTransformChainTxPostEtna)
+	require.ErrorIs(err, errTransformChainTxPostQuasar)
 }
 
 // Returns a RemoveChainValidatorTx that passes syntactic verification.
@@ -1770,7 +1770,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 				).AnyTimes()
 
 				cfg := &config.Internal{
-					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Etna, env.latestForkTime),
+					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Quasar, env.latestForkTime),
 				}
 				feeCalculator := txfee.NewSimpleCalculator(0)
 				e := &standardTxExecutor{
@@ -2452,7 +2452,7 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 				}
 				return nil
 			},
-			expectedErr: errEtnaUpgradeNotActive,
+			expectedErr: errQuasarUpgradeNotActive,
 		},
 		{
 			name: "tx fails syntactic verification",
@@ -2888,7 +2888,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 				}
 				return nil
 			},
-			expectedErr: errEtnaUpgradeNotActive,
+			expectedErr: errQuasarUpgradeNotActive,
 		},
 		{
 			name: "tx fails syntactic verification",
@@ -3437,7 +3437,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 				}
 				return nil
 			},
-			expectedErr: errEtnaUpgradeNotActive,
+			expectedErr: errQuasarUpgradeNotActive,
 		},
 		{
 			name: "tx fails syntactic verification",
@@ -3892,7 +3892,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 				}
 				return nil
 			},
-			expectedErr: errEtnaUpgradeNotActive,
+			expectedErr: errQuasarUpgradeNotActive,
 		},
 		{
 			name: "tx fails syntactic verification",
@@ -4196,7 +4196,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 				}
 				return nil
 			},
-			expectedErr: errEtnaUpgradeNotActive,
+			expectedErr: errQuasarUpgradeNotActive,
 		},
 		{
 			name: "tx fails syntactic verification",

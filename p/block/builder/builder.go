@@ -351,7 +351,7 @@ func (b *builder) PackAllBlockTxs() ([]*txs.Tx, error) {
 		}
 	}
 
-	if !b.txExecutorBackend.Config.UpgradeConfig.IsEtnaActivated(timestamp) {
+	if !b.txExecutorBackend.Config.UpgradeConfig.IsQuasarActivated(timestamp) {
 		return packDurangoBlockTxs(
 			context.TODO(),
 			preferredID,
@@ -364,7 +364,7 @@ func (b *builder) PackAllBlockTxs() ([]*txs.Tx, error) {
 			math.MaxInt,
 		)
 	}
-	return packEtnaBlockTxs(
+	return packQuasarBlockTxs(
 		context.TODO(),
 		preferredID,
 		preferredState,
@@ -392,8 +392,8 @@ func buildBlock(
 		blockTxs []*txs.Tx
 		err      error
 	)
-	if builder.txExecutorBackend.Config.UpgradeConfig.IsEtnaActivated(timestamp) {
-		blockTxs, err = packEtnaBlockTxs(
+	if builder.txExecutorBackend.Config.UpgradeConfig.IsQuasarActivated(timestamp) {
+		blockTxs, err = packQuasarBlockTxs(
 			ctx,
 			parentID,
 			parentState,
@@ -530,7 +530,7 @@ func packDurangoBlockTxs(
 	return blockTxs, nil
 }
 
-func packEtnaBlockTxs(
+func packQuasarBlockTxs(
 	ctx context.Context,
 	parentID ids.ID,
 	parentState state.Chain,

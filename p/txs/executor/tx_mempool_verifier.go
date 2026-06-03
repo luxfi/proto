@@ -86,7 +86,7 @@ func (v *MempoolTxVerifier) BaseTx(tx *txs.BaseTx) error {
 	return v.standardTx(tx)
 }
 
-// Etna Transactions:
+// Quasar Transactions:
 func (v *MempoolTxVerifier) ConvertNetworkToL1Tx(tx *txs.ConvertNetworkToL1Tx) error {
 	return v.standardTx(tx)
 }

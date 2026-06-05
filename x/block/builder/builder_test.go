@@ -14,8 +14,6 @@ import (
 	"github.com/luxfi/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/codecmock"
 	"github.com/luxfi/consensus/protocol/chain"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
@@ -23,6 +21,7 @@ import (
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/proto/internal/xcodectest"
 	"github.com/luxfi/proto/x/block"
 	blkexecutor "github.com/luxfi/proto/x/block/executor"
 	"github.com/luxfi/proto/x/block/executor/executormock"
@@ -321,13 +320,13 @@ func TestBuilderBuildBlock(t *testing.T) {
 				require.NoError(t, memPool.Add(tx2))
 
 				// To marshal the tx/block
-				codec := codecmock.NewManager(ctrl)
-				codec.EXPECT().Marshal(gomock.Any(), gomock.Any()).Return([]byte{1, 2, 3}, nil).AnyTimes()
-				codec.EXPECT().Size(gomock.Any(), gomock.Any()).Return(2, nil).AnyTimes()
+				codecMock := xcodectest.NewCodecMock(ctrl)
+				codecMock.EXPECT().Marshal(gomock.Any(), gomock.Any()).Return([]byte{1, 2, 3}, nil).AnyTimes()
+				codecMock.EXPECT().Size(gomock.Any(), gomock.Any()).Return(2, nil).AnyTimes()
 
 				return New(
 					&txexecutor.Backend{
-						Codec: codec,
+						Codec: codecMock,
 						Ctx:   context.Background(),
 						Log:   log.NewNoOpLogger(),
 					},
@@ -393,13 +392,13 @@ func TestBuilderBuildBlock(t *testing.T) {
 				require.NoError(t, memPool.Add(tx))
 
 				// To marshal the tx/block
-				codec := codecmock.NewManager(ctrl)
-				codec.EXPECT().Marshal(gomock.Any(), gomock.Any()).Return([]byte{1, 2, 3}, nil).AnyTimes()
-				codec.EXPECT().Size(gomock.Any(), gomock.Any()).Return(2, nil).AnyTimes()
+				codecMock := xcodectest.NewCodecMock(ctrl)
+				codecMock.EXPECT().Marshal(gomock.Any(), gomock.Any()).Return([]byte{1, 2, 3}, nil).AnyTimes()
+				codecMock.EXPECT().Size(gomock.Any(), gomock.Any()).Return(2, nil).AnyTimes()
 
 				return New(
 					&txexecutor.Backend{
-						Codec: codec,
+						Codec: codecMock,
 						Ctx:   context.Background(),
 						Log:   log.NewNoOpLogger(),
 					},
@@ -467,13 +466,13 @@ func TestBuilderBuildBlock(t *testing.T) {
 				require.NoError(t, memPool.Add(tx))
 
 				// To marshal the tx/block
-				codec := codecmock.NewManager(ctrl)
-				codec.EXPECT().Marshal(gomock.Any(), gomock.Any()).Return([]byte{1, 2, 3}, nil).AnyTimes()
-				codec.EXPECT().Size(gomock.Any(), gomock.Any()).Return(2, nil).AnyTimes()
+				codecMock := xcodectest.NewCodecMock(ctrl)
+				codecMock.EXPECT().Marshal(gomock.Any(), gomock.Any()).Return([]byte{1, 2, 3}, nil).AnyTimes()
+				codecMock.EXPECT().Size(gomock.Any(), gomock.Any()).Return(2, nil).AnyTimes()
 
 				return New(
 					&txexecutor.Backend{
-						Codec: codec,
+						Codec: codecMock,
 						Ctx:   context.Background(),
 						Log:   log.NewNoOpLogger(),
 					},
@@ -514,6 +513,7 @@ func TestBlockBuilderAddLocalTx(t *testing.T) {
 	require.True(ok)
 
 	parser, err := block.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			&secp256k1fx.Fx{},
 		},
@@ -594,7 +594,7 @@ func createTxs() []*txs.Tx {
 	}}
 }
 
-func createParentTxs(cm codec.Manager) ([]*txs.Tx, error) {
+func createParentTxs(cm txs.Codec) ([]*txs.Tx, error) {
 	countTxs := 1
 	testTxs := make([]*txs.Tx, 0, countTxs)
 	for i := 0; i < countTxs; i++ {

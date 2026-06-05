@@ -8,10 +8,8 @@ import (
 	"fmt"
 
 	"github.com/luxfi/address"
-	"github.com/luxfi/codec"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/ordering"
-	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -60,11 +58,26 @@ type GenesisOwners struct {
 	Minters   []string
 }
 
-// NewGenesis creates a new Genesis from genesis data
+// NewGenesis creates a new Genesis from genesis data.
+//
+// The genesisCodec is the wire codec used to compute deterministic
+// per-fx output bytes for the InitialState.Sort canonicalization step.
+// It must already be wired through a Parser (see
+// luxfi/proto/x/txs.NewParser) so that fx-owned output types
+// (secp256k1fx.TransferOutput, secp256k1fx.MintOutput) are
+// register-resolvable before Marshal is called.
+//
+// Wave 1A of the codec rip (#101): the codec is now an injected
+// dependency rather than constructed inline — proto/x/genesis no
+// longer carries any github.com/luxfi/codec import.
 func NewGenesis(
 	networkID uint32,
 	genesisData map[string]GenesisAssetDefinition,
+	genesisCodec txs.Codec,
 ) (*Genesis, error) {
+	if genesisCodec == nil {
+		return nil, fmt.Errorf("genesis: genesisCodec must be non-nil")
+	}
 	g := &Genesis{}
 	for assetAlias, assetDefinition := range genesisData {
 		asset := GenesisAsset{
@@ -124,11 +137,7 @@ func NewGenesis(
 		}
 
 		if len(initialState.Outs) > 0 {
-			codec, err := newGenesisCodec()
-			if err != nil {
-				return nil, err
-			}
-			initialState.Sort(codec)
+			initialState.Sort(genesisCodec)
 			asset.States = append(asset.States, initialState)
 		}
 
@@ -140,23 +149,15 @@ func NewGenesis(
 	return g, nil
 }
 
-// Bytes serializes the Genesis to bytes using the XVM genesis codec
-func (g *Genesis) Bytes() ([]byte, error) {
-	codec, err := newGenesisCodec()
-	if err != nil {
-		return nil, err
+// Bytes serializes the Genesis to bytes using the supplied genesis
+// codec. The codec must accept Genesis and all its transitively
+// referenced fx-owned types (see NewGenesis godoc).
+//
+// Wave 1A: the genesisCodec is now an injected dependency, supplied
+// by the caller's Parser.GenesisCodec().
+func (g *Genesis) Bytes(genesisCodec txs.Codec) ([]byte, error) {
+	if genesisCodec == nil {
+		return nil, fmt.Errorf("genesis: genesisCodec must be non-nil")
 	}
-	return codec.Marshal(txs.CodecVersion, g)
-}
-
-func newGenesisCodec() (codec.Manager, error) {
-	parser, err := txs.NewParser(
-		[]fxs.Fx{
-			&secp256k1fx.Fx{},
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("problem creating parser: %w", err)
-	}
-	return parser.GenesisCodec(), nil
+	return genesisCodec.Marshal(txs.CodecVersion, g)
 }

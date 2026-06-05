@@ -4,20 +4,26 @@
 package block
 
 import (
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/xcodectest"
 	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
+
+// errCantUnpackVersion is the proto/x-local sentinel matching the
+// upstream codec.ErrCantUnpackVersion. We assert via error string
+// because we deliberately don't import the codec package — Wave 1A.
+var errCantUnpackVersion = errors.New("couldn't unpack codec version")
 
 var (
 	chainID = ids.GenerateTestID()
@@ -29,6 +35,7 @@ func TestInvalidBlock(t *testing.T) {
 	require := require.New(t)
 
 	parser, err := NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			&secp256k1fx.Fx{},
 		},
@@ -36,7 +43,10 @@ func TestInvalidBlock(t *testing.T) {
 	require.NoError(err)
 
 	_, err = parser.ParseBlock(nil)
-	require.ErrorIs(err, codec.ErrCantUnpackVersion)
+	// The codec error sentinel lives in luxfi/codec — proto/x is
+	// codec-free post Wave 1A — so we assert via the error's message.
+	require.Error(err)
+	require.Contains(err.Error(), errCantUnpackVersion.Error())
 }
 
 func TestStandardBlocks(t *testing.T) {
@@ -44,6 +54,7 @@ func TestStandardBlocks(t *testing.T) {
 	require := require.New(t)
 
 	parser, err := NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			&secp256k1fx.Fx{},
 		},
@@ -78,7 +89,7 @@ func TestStandardBlocks(t *testing.T) {
 	require.Equal(parsed.Txs(), parsedStandardBlk.Txs())
 }
 
-func createTestTxs(cm codec.Manager) ([]*txs.Tx, error) {
+func createTestTxs(cm txs.Codec) ([]*txs.Tx, error) {
 	countTxs := 1
 	testTxs := make([]*txs.Tx, 0, countTxs)
 	for i := 0; i < countTxs; i++ {

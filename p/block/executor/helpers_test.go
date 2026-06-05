@@ -172,7 +172,7 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 
 	res.backend = &executor.Backend{
 		Config:       res.config,
-		Ctx:          rt,
+		Rt:           rt,
 		Clk:          res.clk,
 		Bootstrapped: res.isBootstrapped,
 		Fx:           res.fx,

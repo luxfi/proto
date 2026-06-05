@@ -208,7 +208,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					&output0,
 					&output1,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 				outputs[0], outputs[1] = outputs[1], outputs[0]
 
 				baseTx := baseTx
@@ -309,7 +309,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					&output0,
 					&output1,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 
 				baseTx := baseTx
 				baseTx.Outs = outputs
@@ -711,7 +711,7 @@ func TestSyntacticVerifierCreateAssetTx(t *testing.T) {
 					&output0,
 					&output1,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 				outputs[0], outputs[1] = outputs[1], outputs[0]
 
 				tx := tx
@@ -812,7 +812,7 @@ func TestSyntacticVerifierCreateAssetTx(t *testing.T) {
 					&output0,
 					&output1,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 
 				tx := tx
 				tx.Outs = outputs
@@ -1240,7 +1240,7 @@ func TestSyntacticVerifierOperationTx(t *testing.T) {
 					&output0,
 					&output1,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 				outputs[0], outputs[1] = outputs[1], outputs[0]
 
 				tx := tx
@@ -1334,7 +1334,7 @@ func TestSyntacticVerifierOperationTx(t *testing.T) {
 				outputs := []*lux.TransferableOutput{
 					&output,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 
 				tx := tx
 				tx.Outs = outputs
@@ -1717,7 +1717,7 @@ func TestSyntacticVerifierImportTx(t *testing.T) {
 					&output0,
 					&output1,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 				outputs[0], outputs[1] = outputs[1], outputs[0]
 
 				tx := tx
@@ -1830,7 +1830,7 @@ func TestSyntacticVerifierImportTx(t *testing.T) {
 				outputs := []*lux.TransferableOutput{
 					&output,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 
 				tx := tx
 				tx.Outs = outputs
@@ -2124,7 +2124,7 @@ func TestSyntacticVerifierExportTx(t *testing.T) {
 					&output0,
 					&output1,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 				outputs[0], outputs[1] = outputs[1], outputs[0]
 
 				tx := tx
@@ -2155,7 +2155,7 @@ func TestSyntacticVerifierExportTx(t *testing.T) {
 					&output0,
 					&output1,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 				outputs[0], outputs[1] = outputs[1], outputs[0]
 
 				tx := tx
@@ -2249,7 +2249,7 @@ func TestSyntacticVerifierExportTx(t *testing.T) {
 				outputs := []*lux.TransferableOutput{
 					&output,
 				}
-				lux.SortTransferableOutputs(outputs, codec)
+				lux.SortTransferableOutputs(outputs)
 
 				tx := tx
 				tx.Outs = outputs

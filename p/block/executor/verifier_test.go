@@ -88,7 +88,7 @@ func newTestVerifier(t testing.TB, c testVerifierConfig) *verifier {
 		fx    = &secp256k1fx.Fx{}
 	)
 	require.NoError(fx.InitializeVM(&secp256k1fx.TestVM{
-		Clk: *clock,
+		Clk: clock,
 		Log: log.NoLog{},
 	}))
 
@@ -107,7 +107,7 @@ func newTestVerifier(t testing.TB, c testVerifierConfig) *verifier {
 				SybilProtectionEnabled: true,
 				UpgradeConfig:          c.Upgrades,
 			},
-			Ctx: c.Context,
+			Rt:  c.Context,
 			Clk: clock,
 			Fx:  fx,
 			FlowChecker: utxo.NewVerifier(

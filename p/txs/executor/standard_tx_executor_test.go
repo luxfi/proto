@@ -16,7 +16,6 @@ import (
 
 	"github.com/luxfi/atomic"
 	"github.com/luxfi/codec"
-	"github.com/luxfi/consensus"
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto"
@@ -46,6 +45,7 @@ import (
 	"github.com/luxfi/proto/p/warp/payload"
 	"github.com/luxfi/runtime"
 	"github.com/luxfi/sdk/wallet/primary/common"
+	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/upgrade/upgradetest"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -1779,7 +1779,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1808,7 +1808,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1837,7 +1837,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1869,7 +1869,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1898,7 +1898,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1930,7 +1930,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1961,7 +1961,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensus.Context{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1995,7 +1995,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2154,7 +2154,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2182,7 +2182,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2215,7 +2215,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2255,7 +2255,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2296,7 +2296,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &consensus.Context{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2341,7 +2341,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Bootstrapped: atomic.NewAtomic(true),
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
-						Ctx:          &runtime.Runtime{},
+						Rt:           &runtime.Runtime{},
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2368,6 +2368,7 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 	var (
 		fx = &secp256k1fx.Fx{}
 		vm = &secp256k1fx.TestVM{
+			Clk: &mockable.Clock{},
 			Log: log.NoLog{},
 		}
 	)
@@ -2404,7 +2405,7 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 			nil, // chainIDs
 		)
 		flowChecker = utxo.NewVerifier(
-			&vm.Clk,
+			vm.Clk,
 			fx,
 		)
 	)
@@ -2424,7 +2425,7 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 			Bootstrapped: atomic.NewAtomic(true),
 			Fx:           fx,
 			FlowChecker:  flowChecker,
-			Ctx:          ctx,
+			Rt:           ctx,
 		},
 		state.PickFeeCalculator(defaultConfig, baseState),
 		createNetTx,
@@ -2584,7 +2585,6 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 					nil, // validationIDs
 					nil, // chainIDs
 				)
-				chainID   = ids.GenerateTestID()
 				address   = crypto.RandomBytes(32)
 				validator = &txs.ConvertNetworkToL1Validator{
 					NodeID:                nodeID.Bytes(),
@@ -2615,7 +2615,7 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 					Bootstrapped: atomic.NewAtomic(true),
 					Fx:           fx,
 					FlowChecker:  flowChecker,
-					Ctx:          ctx,
+					Rt:           ctx,
 				},
 				feeCalculator: state.PickFeeCalculator(defaultConfig, baseState),
 				tx:            convertNetToL1Tx,
@@ -2703,6 +2703,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 	var (
 		fx = &secp256k1fx.Fx{}
 		vm = &secp256k1fx.TestVM{
+			Clk: &mockable.Clock{},
 			Log: log.NoLog{},
 		}
 	)
@@ -2740,7 +2741,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 			nil, // chainIDs
 		)
 		flowChecker = utxo.NewVerifier(
-			&vm.Clk,
+			vm.Clk,
 			fx,
 		)
 
@@ -2749,7 +2750,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 			Bootstrapped: atomic.NewAtomic(true),
 			Fx:           fx,
 			FlowChecker:  flowChecker,
-			Ctx:          ctx,
+			Rt:           ctx,
 		}
 		feeCalculator = state.PickFeeCalculator(defaultConfig, baseState)
 	)
@@ -3173,7 +3174,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 					Bootstrapped: atomic.NewAtomic(true),
 					Fx:           fx,
 					FlowChecker:  flowChecker,
-					Ctx:          ctx,
+					Rt:           ctx,
 				},
 				feeCalculator: state.PickFeeCalculator(defaultConfig, baseState),
 				tx:            registerL1ValidatorTx,
@@ -3238,6 +3239,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 	var (
 		fx = &secp256k1fx.Fx{}
 		vm = &secp256k1fx.TestVM{
+			Clk: &mockable.Clock{},
 			Log: log.NoLog{},
 		}
 	)
@@ -3275,7 +3277,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 			nil, // chainIDs
 		)
 		flowChecker = utxo.NewVerifier(
-			&vm.Clk,
+			vm.Clk,
 			fx,
 		)
 
@@ -3284,7 +3286,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 			Bootstrapped: atomic.NewAtomic(true),
 			Fx:           fx,
 			FlowChecker:  flowChecker,
-			Ctx:          ctx,
+			Rt:           ctx,
 		}
 		feeCalculator = state.PickFeeCalculator(defaultConfig, baseState)
 	)
@@ -3685,7 +3687,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 					Bootstrapped: atomic.NewAtomic(true),
 					Fx:           fx,
 					FlowChecker:  flowChecker,
-					Ctx:          ctx,
+					Rt:           ctx,
 				},
 				feeCalculator: state.PickFeeCalculator(defaultConfig, baseState),
 				tx:            setL1ValidatorWeightTx,
@@ -3748,6 +3750,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 	var (
 		fx = &secp256k1fx.Fx{}
 		vm = &secp256k1fx.TestVM{
+			Clk: &mockable.Clock{},
 			Log: log.NoLog{},
 		}
 	)
@@ -3785,7 +3788,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 			nil, // chainIDs
 		)
 		flowChecker = utxo.NewVerifier(
-			&vm.Clk,
+			vm.Clk,
 			fx,
 		)
 
@@ -3794,7 +3797,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 			Bootstrapped: atomic.NewAtomic(true),
 			Fx:           fx,
 			FlowChecker:  flowChecker,
-			Ctx:          ctx,
+			Rt:           ctx,
 		}
 		feeCalculator = state.PickFeeCalculator(defaultConfig, baseState)
 	)
@@ -4005,7 +4008,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 					Bootstrapped: atomic.NewAtomic(true),
 					Fx:           fx,
 					FlowChecker:  flowChecker,
-					Ctx:          ctx,
+					Rt:           ctx,
 				},
 				feeCalculator: state.PickFeeCalculator(defaultConfig, baseState),
 				tx:            increaseL1ValidatorBalanceTx,
@@ -4048,6 +4051,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 	var (
 		fx = &secp256k1fx.Fx{}
 		vm = &secp256k1fx.TestVM{
+			Clk: &mockable.Clock{},
 			Log: log.NoLog{},
 		}
 	)
@@ -4086,7 +4090,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 			nil, // chainIDs
 		)
 		flowChecker = utxo.NewVerifier(
-			&vm.Clk,
+			vm.Clk,
 			fx,
 		)
 
@@ -4095,7 +4099,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 			Bootstrapped: atomic.NewAtomic(true),
 			Fx:           fx,
 			FlowChecker:  flowChecker,
-			Ctx:          ctx,
+			Rt:           ctx,
 		}
 		feeCalculator = state.PickFeeCalculator(defaultConfig, baseState)
 	)
@@ -4291,7 +4295,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 					Bootstrapped: atomic.NewAtomic(true),
 					Fx:           fx,
 					FlowChecker:  flowChecker,
-					Ctx:          ctx,
+					Rt:           ctx,
 				},
 				feeCalculator: state.PickFeeCalculator(defaultConfig, baseState),
 				tx:            disableL1ValidatorTx,

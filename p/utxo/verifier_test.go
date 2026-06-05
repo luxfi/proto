@@ -36,7 +36,7 @@ func (*dummyUnsignedTx) Visit(txs.Visitor) error {
 func TestVerifySpendUTXOs(t *testing.T) {
 	fx := &secp256k1fx.Fx{}
 
-	require.NoError(t, fx.Initialize(&secp256k1fx.TestVM{}))
+	require.NoError(t, fx.Initialize(&secp256k1fx.TestVM{Clk: &mockable.Clock{}}))
 	require.NoError(t, fx.Bootstrapped())
 
 	luxAssetID := ids.GenerateTestID()

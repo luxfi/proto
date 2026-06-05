@@ -16,6 +16,7 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/xcodectest"
 	"github.com/luxfi/proto/x/config"
 	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/txs"
@@ -43,6 +44,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 
 	fx := &secp256k1fx.Fx{}
 	parser, err := txs.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			fx,
 		},
@@ -423,6 +425,7 @@ func TestSyntacticVerifierCreateAssetTx(t *testing.T) {
 
 	fx := &secp256k1fx.Fx{}
 	parser, err := txs.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			fx,
 		},
@@ -1043,6 +1046,7 @@ func TestSyntacticVerifierOperationTx(t *testing.T) {
 
 	fx := &secp256k1fx.Fx{}
 	parser, err := txs.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			fx,
 		},
@@ -1536,6 +1540,7 @@ func TestSyntacticVerifierImportTx(t *testing.T) {
 
 	fx := &secp256k1fx.Fx{}
 	parser, err := txs.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			fx,
 		},
@@ -1943,6 +1948,7 @@ func TestSyntacticVerifierExportTx(t *testing.T) {
 
 	fx := &secp256k1fx.Fx{}
 	parser, err := txs.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			fx,
 		},

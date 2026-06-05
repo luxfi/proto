@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package txs
+package txs_test
 
 import (
 	"testing"
@@ -10,7 +10,9 @@ import (
 
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/xcodectest"
 	"github.com/luxfi/proto/x/fxs"
+	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/verify"
@@ -71,8 +73,8 @@ func TestImportTxSerialization(t *testing.T) {
 		0x00, 0x00, 0x00, 0x00,
 	}
 
-	tx := &Tx{Unsigned: &ImportTx{
-		BaseTx: BaseTx{BaseTx: lux.BaseTx{
+	tx := &txs.Tx{Unsigned: &txs.ImportTx{
+		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID: 2,
 			BlockchainID: ids.ID{
 				0xff, 0xff, 0xff, 0xff, 0xee, 0xee, 0xee, 0xee,
@@ -108,7 +110,8 @@ func TestImportTxSerialization(t *testing.T) {
 		}},
 	}}
 
-	parser, err := NewParser(
+	parser, err := txs.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			&secp256k1fx.Fx{},
 		},
@@ -189,7 +192,7 @@ func TestImportTxSerialization(t *testing.T) {
 func TestImportTxNotState(t *testing.T) {
 	require := require.New(t)
 
-	intf := interface{}(&ImportTx{})
+	intf := interface{}(&txs.ImportTx{})
 	_, ok := intf.(verify.State)
 	require.False(ok, "should not be marked as state")
 }

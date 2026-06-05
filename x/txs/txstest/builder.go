@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/ids"
 	wkeychain "github.com/luxfi/keychain"
 	"github.com/luxfi/math/set"
@@ -31,7 +30,7 @@ type Builder struct {
 }
 
 func New(
-	codec codec.Manager,
+	codec txs.Codec,
 	ctx context.Context,
 	cfg *config.Config,
 	feeAssetID ids.ID,

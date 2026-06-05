@@ -6,7 +6,6 @@ package executor
 import (
 	"fmt"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/proto/x/state"
@@ -18,7 +17,7 @@ import (
 var _ txs.Visitor = (*Executor)(nil)
 
 type Executor struct {
-	Codec          codec.Manager
+	Codec          txs.Codec
 	State          state.Chain // state will be modified
 	Tx             *txs.Tx
 	Inputs         set.Set[ids.ID]             // imported inputs

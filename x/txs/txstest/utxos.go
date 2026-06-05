@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/proto/x/state"
+	"github.com/luxfi/proto/x/txs"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	"github.com/luxfi/sdk/wallet/chain/x/signer"
 	lux "github.com/luxfi/utxo"
@@ -29,7 +29,7 @@ func newUTXOs(
 	ctx context.Context,
 	state state.State,
 	sharedMemory atomic.SharedMemory,
-	codec codec.Manager,
+	codec txs.Codec,
 ) *utxos {
 	// Use empty chain ID - caller should set this if needed
 	chainID := ids.Empty
@@ -50,7 +50,7 @@ type utxos struct {
 	xchainID     ids.ID
 	state        state.State
 	sharedMemory atomic.SharedMemory
-	codec        codec.Manager
+	codec        txs.Codec
 }
 
 func (u *utxos) UTXOs(addrs set.Set[ids.ShortID], sourceChainID ids.ID) ([]*lux.UTXO, error) {

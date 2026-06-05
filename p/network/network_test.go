@@ -89,7 +89,11 @@ func (m *mockValidatorState) GetCurrentHeight(ctx context.Context) (uint64, erro
 	return m.height, nil
 }
 
-func (m *mockValidatorState) GetChainID(ctx context.Context, chainID ids.ID) (ids.ID, error) {
+func (m *mockValidatorState) GetChainID(netID ids.ID) (ids.ID, error) {
+	return ids.Empty, nil
+}
+
+func (m *mockValidatorState) GetNetworkID(chainID ids.ID) (ids.ID, error) {
 	return ids.Empty, nil
 }
 

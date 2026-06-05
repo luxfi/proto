@@ -398,8 +398,8 @@ func (h *handler) Spend(
 	}
 
 	lux.SortTransferableInputsWithSigners(ins, signers)  // sort inputs and keys
-	lux.SortTransferableOutputs(returnedOuts, txs.Codec) // sort outputs
-	lux.SortTransferableOutputs(stakedOuts, txs.Codec)   // sort outputs
+	lux.SortTransferableOutputs(returnedOuts) // sort outputs
+	lux.SortTransferableOutputs(stakedOuts)   // sort outputs
 
 	return ins, returnedOuts, stakedOuts, signers, nil
 }
@@ -558,7 +558,7 @@ func (h *handler) VerifySpendUTXOs(
 		amount := in.Amount()
 
 		if now >= locktime {
-			newUnlockedConsumed, err := safemath.Add64(unlockedConsumed[realAssetID], amount)
+			newUnlockedConsumed, err := safemath.Add(unlockedConsumed[realAssetID], amount)
 			if err != nil {
 				return err
 			}
@@ -586,7 +586,7 @@ func (h *handler) VerifySpendUTXOs(
 			owners = make(map[ids.ID]uint64)
 			lockedConsumedAsset[locktime] = owners
 		}
-		newAmount, err := safemath.Add64(owners[ownerID], amount)
+		newAmount, err := safemath.Add(owners[ownerID], amount)
 		if err != nil {
 			return err
 		}
@@ -607,7 +607,7 @@ func (h *handler) VerifySpendUTXOs(
 		amount := output.Amount()
 
 		if locktime == 0 {
-			newUnlockedProduced, err := safemath.Add64(unlockedProduced[assetID], amount)
+			newUnlockedProduced, err := safemath.Add(unlockedProduced[assetID], amount)
 			if err != nil {
 				return err
 			}
@@ -635,7 +635,7 @@ func (h *handler) VerifySpendUTXOs(
 			owners = make(map[ids.ID]uint64)
 			lockedProducedAsset[locktime] = owners
 		}
-		newAmount, err := safemath.Add64(owners[ownerID], amount)
+		newAmount, err := safemath.Add(owners[ownerID], amount)
 		if err != nil {
 			return err
 		}

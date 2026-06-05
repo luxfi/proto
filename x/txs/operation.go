@@ -8,7 +8,6 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/x/fxs"
@@ -44,7 +43,7 @@ func (op *Operation) Verify() error {
 
 type operationAndCodec struct {
 	op    *Operation
-	codec codec.Manager
+	codec Codec
 }
 
 func (o *operationAndCodec) Compare(other *operationAndCodec) int {
@@ -59,7 +58,7 @@ func (o *operationAndCodec) Compare(other *operationAndCodec) int {
 	return bytes.Compare(oBytes, otherBytes)
 }
 
-func SortOperations(ops []*Operation, c codec.Manager) {
+func SortOperations(ops []*Operation, c Codec) {
 	sortableOps := make([]*operationAndCodec, len(ops))
 	for i, op := range ops {
 		sortableOps[i] = &operationAndCodec{
@@ -74,7 +73,7 @@ func SortOperations(ops []*Operation, c codec.Manager) {
 	}
 }
 
-func IsSortedAndUniqueOperations(ops []*Operation, c codec.Manager) bool {
+func IsSortedAndUniqueOperations(ops []*Operation, c Codec) bool {
 	sortableOps := make([]*operationAndCodec, len(ops))
 	for i, op := range ops {
 		sortableOps[i] = &operationAndCodec{
@@ -88,7 +87,7 @@ func IsSortedAndUniqueOperations(ops []*Operation, c codec.Manager) bool {
 type innerSortOperationsWithSigners struct {
 	ops     []*Operation
 	signers [][]*secp256k1.PrivateKey
-	codec   codec.Manager
+	codec   Codec
 }
 
 func (ops *innerSortOperationsWithSigners) Less(i, j int) bool {
@@ -115,6 +114,6 @@ func (ops *innerSortOperationsWithSigners) Swap(i, j int) {
 	ops.signers[j], ops.signers[i] = ops.signers[i], ops.signers[j]
 }
 
-func SortOperationsWithSigners(ops []*Operation, signers [][]*secp256k1.PrivateKey, codec codec.Manager) {
+func SortOperationsWithSigners(ops []*Operation, signers [][]*secp256k1.PrivateKey, codec Codec) {
 	sort.Sort(&innerSortOperationsWithSigners{ops: ops, signers: signers, codec: codec})
 }

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/x/txs"
@@ -29,7 +28,7 @@ type StandardBlock struct {
 	bytes   []byte
 }
 
-func (b *StandardBlock) initialize(bytes []byte, cm codec.Manager) error {
+func (b *StandardBlock) initialize(bytes []byte, cm txs.Codec) error {
 	b.BlockID = hash.ComputeHash256Array(bytes)
 	b.bytes = bytes
 	for _, tx := range b.Transactions {
@@ -72,14 +71,14 @@ func NewStandardBlock(
 	parentID ids.ID,
 	height uint64,
 	timestamp time.Time,
-	txs []*txs.Tx,
-	cm codec.Manager,
+	transactions []*txs.Tx,
+	cm txs.Codec,
 ) (*StandardBlock, error) {
 	blk := &StandardBlock{
 		PrntID:       parentID,
 		Hght:         height,
 		Time:         uint64(timestamp.Unix()),
-		Transactions: txs,
+		Transactions: transactions,
 	}
 
 	// We serialize this block as a pointer so that it can be deserialized into

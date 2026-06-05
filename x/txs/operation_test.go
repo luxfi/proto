@@ -1,16 +1,16 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package txs
+package txs_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/xcodectest"
+	"github.com/luxfi/proto/x/txs"
 	"github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
@@ -31,21 +31,21 @@ func (o *testOperable) Outs() []verify.State {
 }
 
 func TestOperationVerifyNil(t *testing.T) {
-	op := (*Operation)(nil)
+	op := (*txs.Operation)(nil)
 	err := op.Verify()
-	require.ErrorIs(t, err, ErrNilOperation)
+	require.ErrorIs(t, err, txs.ErrNilOperation)
 }
 
 func TestOperationVerifyEmpty(t *testing.T) {
-	op := &Operation{
+	op := &txs.Operation{
 		Asset: lux.Asset{ID: ids.Empty},
 	}
 	err := op.Verify()
-	require.ErrorIs(t, err, ErrNilFxOperation)
+	require.ErrorIs(t, err, txs.ErrNilFxOperation)
 }
 
 func TestOperationVerifyUTXOIDsNotSorted(t *testing.T) {
-	op := &Operation{
+	op := &txs.Operation{
 		Asset: lux.Asset{ID: ids.Empty},
 		UTXOIDs: []*lux.UTXOID{
 			{
@@ -60,12 +60,12 @@ func TestOperationVerifyUTXOIDsNotSorted(t *testing.T) {
 		Op: &testOperable{},
 	}
 	err := op.Verify()
-	require.ErrorIs(t, err, ErrNotSortedAndUniqueUTXOIDs)
+	require.ErrorIs(t, err, txs.ErrNotSortedAndUniqueUTXOIDs)
 }
 
 func TestOperationVerify(t *testing.T) {
 	assetID := ids.GenerateTestID()
-	op := &Operation{
+	op := &txs.Operation{
 		Asset: lux.Asset{ID: assetID},
 		UTXOIDs: []*lux.UTXOID{
 			{
@@ -81,13 +81,10 @@ func TestOperationVerify(t *testing.T) {
 func TestOperationSorting(t *testing.T) {
 	require := require.New(t)
 
-	c := linearcodec.NewDefault()
+	m, c := xcodectest.NewRuntimeCodec()
 	require.NoError(c.RegisterType(&testOperable{}))
 
-	m := codec.NewDefaultManager()
-	require.NoError(m.RegisterCodec(CodecVersion, c))
-
-	ops := []*Operation{
+	ops := []*txs.Operation{
 		{
 			Asset: lux.Asset{ID: ids.Empty},
 			UTXOIDs: []*lux.UTXOID{
@@ -109,10 +106,10 @@ func TestOperationSorting(t *testing.T) {
 			Op: &testOperable{},
 		},
 	}
-	require.False(IsSortedAndUniqueOperations(ops, m))
-	SortOperations(ops, m)
-	require.True(IsSortedAndUniqueOperations(ops, m))
-	ops = append(ops, &Operation{
+	require.False(txs.IsSortedAndUniqueOperations(ops, m))
+	txs.SortOperations(ops, m)
+	require.True(txs.IsSortedAndUniqueOperations(ops, m))
+	ops = append(ops, &txs.Operation{
 		Asset: lux.Asset{ID: ids.Empty},
 		UTXOIDs: []*lux.UTXOID{
 			{
@@ -122,11 +119,11 @@ func TestOperationSorting(t *testing.T) {
 		},
 		Op: &testOperable{},
 	})
-	require.False(IsSortedAndUniqueOperations(ops, m))
+	require.False(txs.IsSortedAndUniqueOperations(ops, m))
 }
 
 func TestOperationTxNotState(t *testing.T) {
-	intf := interface{}(&OperationTx{})
+	intf := interface{}(&txs.OperationTx{})
 	_, ok := intf.(verify.State)
 	require.False(t, ok)
 }

@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package txs
+package txs_test
 
 import (
 	"testing"
@@ -10,7 +10,9 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/xcodectest"
 	"github.com/luxfi/proto/x/fxs"
+	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/verify"
@@ -96,8 +98,8 @@ func TestCreateAssetTxSerialization(t *testing.T) {
 		0x00, 0x00, 0x00, 0x00,
 	}
 
-	tx := &Tx{Unsigned: &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: lux.BaseTx{
+	tx := &txs.Tx{Unsigned: &txs.CreateAssetTx{
+		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID: 2,
 			BlockchainID: ids.ID{
 				0xff, 0xff, 0xff, 0xff, 0xee, 0xee, 0xee, 0xee,
@@ -164,7 +166,7 @@ func TestCreateAssetTxSerialization(t *testing.T) {
 		Name:         "Volatility Index",
 		Symbol:       "VIX",
 		Denomination: 2,
-		States: []*InitialState{
+		States: []*txs.InitialState{
 			{
 				FxIndex: 0,
 				Outs: []verify.State{
@@ -192,7 +194,8 @@ func TestCreateAssetTxSerialization(t *testing.T) {
 		},
 	}}
 
-	parser, err := NewParser(
+	parser, err := txs.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			&secp256k1fx.Fx{},
 		},
@@ -324,8 +327,8 @@ func TestCreateAssetTxSerializationAgain(t *testing.T) {
 		0x00, 0x00, 0x00, 0x00,
 	}
 
-	unsignedTx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: lux.BaseTx{
+	unsignedTx := &txs.CreateAssetTx{
+		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Memo:         []byte{0x00, 0x01, 0x02, 0x03},
@@ -333,7 +336,7 @@ func TestCreateAssetTxSerializationAgain(t *testing.T) {
 		Name:         "name",
 		Symbol:       "symb",
 		Denomination: 0,
-		States: []*InitialState{
+		States: []*txs.InitialState{
 			{
 				FxIndex: 0,
 				Outs: []verify.State{
@@ -347,7 +350,7 @@ func TestCreateAssetTxSerializationAgain(t *testing.T) {
 			},
 		},
 	}
-	tx := &Tx{Unsigned: unsignedTx}
+	tx := &txs.Tx{Unsigned: unsignedTx}
 	for _, key := range keys[:3] {
 		addr := key.PublicKey().Address()
 
@@ -363,7 +366,8 @@ func TestCreateAssetTxSerializationAgain(t *testing.T) {
 		})
 	}
 
-	parser, err := NewParser(
+	parser, err := txs.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{
 			&secp256k1fx.Fx{},
 		},
@@ -378,7 +382,7 @@ func TestCreateAssetTxSerializationAgain(t *testing.T) {
 func TestCreateAssetTxNotState(t *testing.T) {
 	require := require.New(t)
 
-	intf := interface{}(&CreateAssetTx{})
+	intf := interface{}(&txs.CreateAssetTx{})
 	_, ok := intf.(verify.State)
 	require.False(ok, "should not be marked as state")
 }

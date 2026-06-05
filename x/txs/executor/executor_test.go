@@ -15,6 +15,7 @@ import (
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/metric"
+	"github.com/luxfi/proto/internal/xcodectest"
 	"github.com/luxfi/proto/x/block"
 	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/state"
@@ -36,6 +37,7 @@ func TestBaseTxExecutor(t *testing.T) {
 
 	secpFx := &secp256k1fx.Fx{}
 	parser, err := block.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{secpFx},
 	)
 	require.NoError(err)
@@ -143,6 +145,7 @@ func TestCreateAssetTxExecutor(t *testing.T) {
 
 	secpFx := &secp256k1fx.Fx{}
 	parser, err := block.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{secpFx},
 	)
 	require.NoError(err)
@@ -288,6 +291,7 @@ func TestOperationTxExecutor(t *testing.T) {
 
 	secpFx := &secp256k1fx.Fx{}
 	parser, err := block.NewParser(
+		xcodectest.New(),
 		[]fxs.Fx{secpFx},
 	)
 	require.NoError(err)

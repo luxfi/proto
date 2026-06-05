@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package txs
+package txs_test
 
 import (
 	"errors"
@@ -10,9 +10,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/xcodectest"
+	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/verify"
@@ -23,10 +23,8 @@ var errTest = errors.New("non-nil error")
 func TestInitialStateVerifySerialization(t *testing.T) {
 	require := require.New(t)
 
-	c := linearcodec.NewDefault()
+	m, c := xcodectest.NewRuntimeCodec()
 	require.NoError(c.RegisterType(&secp256k1fx.TransferOutput{}))
-	m := codec.NewDefaultManager()
-	require.NoError(m.RegisterCodec(CodecVersion, c))
 
 	expected := []byte{
 		// Codec version:
@@ -47,7 +45,7 @@ func TestInitialStateVerifySerialization(t *testing.T) {
 		0x43, 0xab, 0x08, 0x59,
 	}
 
-	is := &InitialState{
+	is := &txs.InitialState{
 		FxIndex: 0,
 		Outs: []verify.State{
 			&secp256k1fx.TransferOutput{
@@ -72,7 +70,7 @@ func TestInitialStateVerifySerialization(t *testing.T) {
 		},
 	}
 
-	isBytes, err := m.Marshal(CodecVersion, is)
+	isBytes, err := m.Marshal(txs.CodecVersion, is)
 	require.NoError(err)
 	require.Equal(expected, isBytes)
 }
@@ -80,57 +78,49 @@ func TestInitialStateVerifySerialization(t *testing.T) {
 func TestInitialStateVerifyNil(t *testing.T) {
 	require := require.New(t)
 
-	c := linearcodec.NewDefault()
-	m := codec.NewDefaultManager()
-	require.NoError(m.RegisterCodec(CodecVersion, c))
+	m, _ := xcodectest.NewRuntimeCodec()
 	numFxs := 1
 
-	is := (*InitialState)(nil)
+	is := (*txs.InitialState)(nil)
 	err := is.Verify(m, numFxs)
-	require.ErrorIs(err, ErrNilInitialState)
+	require.ErrorIs(err, txs.ErrNilInitialState)
 }
 
 func TestInitialStateVerifyUnknownFxID(t *testing.T) {
 	require := require.New(t)
 
-	c := linearcodec.NewDefault()
-	m := codec.NewDefaultManager()
-	require.NoError(m.RegisterCodec(CodecVersion, c))
+	m, _ := xcodectest.NewRuntimeCodec()
 	numFxs := 1
 
-	is := InitialState{
+	is := txs.InitialState{
 		FxIndex: 1,
 	}
 	err := is.Verify(m, numFxs)
-	require.ErrorIs(err, ErrUnknownFx)
+	require.ErrorIs(err, txs.ErrUnknownFx)
 }
 
 func TestInitialStateVerifyNilOutput(t *testing.T) {
 	require := require.New(t)
 
-	c := linearcodec.NewDefault()
-	m := codec.NewDefaultManager()
-	require.NoError(m.RegisterCodec(CodecVersion, c))
+	m, _ := xcodectest.NewRuntimeCodec()
 	numFxs := 1
 
-	is := InitialState{
+	is := txs.InitialState{
 		FxIndex: 0,
 		Outs:    []verify.State{nil},
 	}
 	err := is.Verify(m, numFxs)
-	require.ErrorIs(err, ErrNilFxOutput)
+	require.ErrorIs(err, txs.ErrNilFxOutput)
 }
 
 func TestInitialStateVerifyInvalidOutput(t *testing.T) {
 	require := require.New(t)
 
-	c := linearcodec.NewDefault()
+	m, c := xcodectest.NewRuntimeCodec()
 	require.NoError(c.RegisterType(&lux.TestState{}))
-	m := codec.NewDefaultManager()
-	require.NoError(m.RegisterCodec(CodecVersion, c))
 	numFxs := 1
 
-	is := InitialState{
+	is := txs.InitialState{
 		FxIndex: 0,
 		Outs:    []verify.State{&lux.TestState{Err: errTest}},
 	}
@@ -141,13 +131,11 @@ func TestInitialStateVerifyInvalidOutput(t *testing.T) {
 func TestInitialStateVerifyUnsortedOutputs(t *testing.T) {
 	require := require.New(t)
 
-	c := linearcodec.NewDefault()
+	m, c := xcodectest.NewRuntimeCodec()
 	require.NoError(c.RegisterType(&lux.TestTransferable{}))
-	m := codec.NewDefaultManager()
-	require.NoError(m.RegisterCodec(CodecVersion, c))
 	numFxs := 1
 
-	is := InitialState{
+	is := txs.InitialState{
 		FxIndex: 0,
 		Outs: []verify.State{
 			&lux.TestTransferable{Val: 1},
@@ -155,27 +143,27 @@ func TestInitialStateVerifyUnsortedOutputs(t *testing.T) {
 		},
 	}
 	err := is.Verify(m, numFxs)
-	require.ErrorIs(err, ErrOutputsNotSorted)
+	require.ErrorIs(err, txs.ErrOutputsNotSorted)
 	is.Sort(m)
 	require.NoError(is.Verify(m, numFxs))
 }
 
 func TestInitialStateCompare(t *testing.T) {
 	tests := []struct {
-		a        *InitialState
-		b        *InitialState
+		a        *txs.InitialState
+		b        *txs.InitialState
 		expected int
 	}{
 		{
-			a:        &InitialState{},
-			b:        &InitialState{},
+			a:        &txs.InitialState{},
+			b:        &txs.InitialState{},
 			expected: 0,
 		},
 		{
-			a: &InitialState{
+			a: &txs.InitialState{
 				FxIndex: 1,
 			},
-			b:        &InitialState{},
+			b:        &txs.InitialState{},
 			expected: 1,
 		},
 	}

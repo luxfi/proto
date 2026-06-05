@@ -60,7 +60,6 @@ func (u *utxos) UTXOs(addrs set.Set[ids.ShortID], sourceChainID ids.ID) ([]*lux.
 
 	atomicUTXOs, _, _, err := lux.GetAtomicUTXOs(
 		u.sharedMemory,
-		u.codec,
 		sourceChainID,
 		addrs,
 		ids.ShortEmpty,
@@ -77,7 +76,6 @@ func (u *utxos) GetUTXO(addrs set.Set[ids.ShortID], chainID, utxoID ids.ID) (*lu
 
 	atomicUTXOs, _, _, err := lux.GetAtomicUTXOs(
 		u.sharedMemory,
-		u.codec,
 		chainID,
 		addrs,
 		ids.ShortEmpty,

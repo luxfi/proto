@@ -18,6 +18,8 @@ import (
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
+	xlog "github.com/luxfi/log"
+	"github.com/luxfi/proto/internal/xcodectest"
 	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/state"
 	"github.com/luxfi/proto/x/state/statemock"
@@ -38,9 +40,10 @@ func TestSemanticVerifierBaseTx(t *testing.T) {
 	typeToFxIndex := make(map[reflect.Type]int)
 	secpFx := &secp256k1fx.Fx{}
 	parser, err := txs.NewCustomParser(
+		xcodectest.New(),
 		typeToFxIndex,
 		new(mockable.Clock),
-		nil,
+		xlog.Noop(),
 		[]fxs.Fx{
 			secpFx,
 		},
@@ -403,9 +406,10 @@ func TestSemanticVerifierExportTx(t *testing.T) {
 	typeToFxIndex := make(map[reflect.Type]int)
 	secpFx := &secp256k1fx.Fx{}
 	parser, err := txs.NewCustomParser(
+		xcodectest.New(),
 		typeToFxIndex,
 		new(mockable.Clock),
-		nil,
+		xlog.Noop(),
 		[]fxs.Fx{
 			secpFx,
 		},
@@ -818,9 +822,10 @@ func TestSemanticVerifierExportTxDifferentNet(t *testing.T) {
 	typeToFxIndex := make(map[reflect.Type]int)
 	secpFx := &secp256k1fx.Fx{}
 	parser, err := txs.NewCustomParser(
+		xcodectest.New(),
 		typeToFxIndex,
 		new(mockable.Clock),
-		nil,
+		xlog.Noop(),
 		[]fxs.Fx{
 			secpFx,
 		},
@@ -938,9 +943,10 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 	typeToFxIndex := make(map[reflect.Type]int)
 	fx := &secp256k1fx.Fx{}
 	parser, err := txs.NewCustomParser(
+		xcodectest.New(),
 		typeToFxIndex,
 		new(mockable.Clock),
-		nil,
+		xlog.Noop(),
 		[]fxs.Fx{
 			fx,
 		},

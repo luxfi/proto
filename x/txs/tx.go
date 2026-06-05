@@ -6,7 +6,6 @@ package txs
 import (
 	"fmt"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
@@ -47,7 +46,7 @@ type Tx struct {
 	bytes []byte
 }
 
-func (t *Tx) Initialize(c codec.Manager) error {
+func (t *Tx) Initialize(c Codec) error {
 	signedBytes, err := c.Marshal(CodecVersion, t)
 	if err != nil {
 		return fmt.Errorf("problem creating transaction: %w", err)
@@ -101,7 +100,7 @@ func (t *Tx) InputIDs() set.Set[ids.ID] {
 	return t.Unsigned.InputIDs()
 }
 
-func (t *Tx) SignSECP256K1Fx(c codec.Manager, signers [][]*secp256k1.PrivateKey) error {
+func (t *Tx) SignSECP256K1Fx(c Codec, signers [][]*secp256k1.PrivateKey) error {
 	unsignedBytes, err := c.Marshal(CodecVersion, &t.Unsigned)
 	if err != nil {
 		return fmt.Errorf("problem creating transaction: %w", err)
@@ -130,7 +129,7 @@ func (t *Tx) SignSECP256K1Fx(c codec.Manager, signers [][]*secp256k1.PrivateKey)
 	return nil
 }
 
-func (t *Tx) SignPropertyFx(c codec.Manager, signers [][]*secp256k1.PrivateKey) error {
+func (t *Tx) SignPropertyFx(c Codec, signers [][]*secp256k1.PrivateKey) error {
 	unsignedBytes, err := c.Marshal(CodecVersion, &t.Unsigned)
 	if err != nil {
 		return fmt.Errorf("problem creating transaction: %w", err)
@@ -159,7 +158,7 @@ func (t *Tx) SignPropertyFx(c codec.Manager, signers [][]*secp256k1.PrivateKey) 
 	return nil
 }
 
-func (t *Tx) SignNFTFx(c codec.Manager, signers [][]*secp256k1.PrivateKey) error {
+func (t *Tx) SignNFTFx(c Codec, signers [][]*secp256k1.PrivateKey) error {
 	unsignedBytes, err := c.Marshal(CodecVersion, &t.Unsigned)
 	if err != nil {
 		return fmt.Errorf("problem creating transaction: %w", err)

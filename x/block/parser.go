@@ -7,7 +7,6 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/luxfi/codec"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/txs"
@@ -30,8 +29,12 @@ type parser struct {
 	txs.Parser
 }
 
-func NewParser(fxs []fxs.Fx) (Parser, error) {
-	p, err := txs.NewParser(fxs)
+// NewParser wires the block-level type registry on top of a tx-level
+// parser. The caller injects the four ParserCodecs (codec.Manager /
+// linearcodec or zapcodec instances). proto/x/block stays free of
+// any github.com/luxfi/codec import — Wave 1A of the codec rip (#101).
+func NewParser(codecs txs.ParserCodecs, fxList []fxs.Fx) (Parser, error) {
+	p, err := txs.NewParser(codecs, fxList)
 	if err != nil {
 		return nil, err
 	}
@@ -47,13 +50,16 @@ func NewParser(fxs []fxs.Fx) (Parser, error) {
 	}, err
 }
 
+// NewCustomParser is NewParser with explicit clock and logger
+// injection.
 func NewCustomParser(
+	codecs txs.ParserCodecs,
 	typeToFxIndex map[reflect.Type]int,
 	clock *mockable.Clock,
-	log log.Logger,
-	fxs []fxs.Fx,
+	logger log.Logger,
+	fxList []fxs.Fx,
 ) (Parser, error) {
-	p, err := txs.NewCustomParser(typeToFxIndex, clock, log, fxs)
+	p, err := txs.NewCustomParser(codecs, typeToFxIndex, clock, logger, fxList)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +83,7 @@ func (p *parser) ParseGenesisBlock(bytes []byte) (Block, error) {
 	return parse(p.GenesisCodec(), bytes)
 }
 
-func parse(cm codec.Manager, bytes []byte) (Block, error) {
+func parse(cm txs.Codec, bytes []byte) (Block, error) {
 	var blk Block
 	if _, err := cm.Unmarshal(bytes, &blk); err != nil {
 		return nil, err

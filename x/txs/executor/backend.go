@@ -7,11 +7,11 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/proto/x/config"
 	"github.com/luxfi/proto/x/fxs"
+	"github.com/luxfi/proto/x/txs"
 	consContext "github.com/luxfi/runtime"
 	"github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/verify"
@@ -23,7 +23,7 @@ type Backend struct {
 	Config        *config.Config
 	Fxs           []*fxs.ParsedFx
 	TypeToFxIndex map[reflect.Type]int
-	Codec         codec.Manager
+	Codec         txs.Codec
 	// Note: FeeAssetID may be different than ctx.UTXOAssetID if this XVM is
 	// running in a chain.
 	FeeAssetID   ids.ID

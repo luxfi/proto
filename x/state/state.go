@@ -181,7 +181,7 @@ func New(
 		return nil, err
 	}
 
-	utxoState, err := lux.NewMeteredUTXOState(utxoDB, parser.Codec(), registry, trackChecksums)
+	utxoState, err := lux.NewMeteredUTXOState(utxoDB, registry, trackChecksums)
 	if err != nil {
 		return nil, err
 	}

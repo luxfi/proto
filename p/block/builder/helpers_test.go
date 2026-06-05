@@ -64,34 +64,6 @@ const (
 
 var testNet1 *txs.Tx
 
-// mockValidatorState implements runtime.ValidatorState for testing
-type mockValidatorState struct{}
-
-func (m *mockValidatorState) GetChainID(netID ids.ID) (ids.ID, error) {
-	// Return the platform chain ID for any network in tests.
-	return constants.PlatformChainID, nil
-}
-
-func (m *mockValidatorState) GetNetworkID(chainID ids.ID) (ids.ID, error) {
-	// Return Primary Network ID for all chains
-	return constants.PrimaryNetworkID, nil
-}
-
-func (m *mockValidatorState) GetValidatorSet(height uint64, netID ids.ID) (map[ids.NodeID]uint64, error) {
-	// Return an empty validator set for tests
-	return make(map[ids.NodeID]uint64), nil
-}
-
-func (m *mockValidatorState) GetCurrentHeight(ctx context.Context) (uint64, error) {
-	// Return a default height for tests
-	return 100, nil
-}
-
-func (m *mockValidatorState) GetMinimumHeight(ctx context.Context) (uint64, error) {
-	// Return a minimum height for tests
-	return 0, nil
-}
-
 type mutableSharedMemory struct {
 	chainatomic.SharedMemory
 }
@@ -147,8 +119,10 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 	}
 	res.ctx.SharedMemory = res.msm
 
-	// Create a mock ValidatorState that implements runtime.ValidatorState
-	res.ctx.ValidatorState = &mockValidatorState{}
+	// Reuse the consensus-test ValidatorState already wired into rt.
+	// It implements validators.State (verified at compile time in
+	// consensustest's context.go), so the type assertion below holds.
+	res.ctx.ValidatorState = rt.ValidatorState
 
 	res.ctx.Lock.Lock()
 	defer res.ctx.Lock.Unlock()
@@ -177,19 +151,20 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 
 	genesisID := res.state.GetLastAccepted()
 	// Convert testcontext.Context to runtime.Runtime
+	validatorState, _ := res.ctx.ValidatorState.(validators.State)
 	backendConsensusCtx := &runtime.Runtime{
 		NetworkID:      res.ctx.NetworkID,
 		ChainID:        res.ctx.ChainID,
 		NodeID:         res.ctx.NodeID,
 		UTXOAssetID:    res.ctx.UTXOAssetID,
 		Log:            res.ctx.Log,
-		ValidatorState: res.ctx.ValidatorState,
+		ValidatorState: validatorState,
 		SharedMemory:   res.ctx.SharedMemory,
 	}
 
 	res.backend = txexecutor.Backend{
 		Config:       res.config,
-		Ctx:          backendConsensusCtx,
+		Rt:           backendConsensusCtx,
 		Clk:          res.clk,
 		Bootstrapped: res.isBootstrapped,
 		Fx:           res.fx,

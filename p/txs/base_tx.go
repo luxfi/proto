@@ -95,7 +95,7 @@ func (tx *BaseTx) SyntacticVerify(rt *runtime.Runtime) error {
 		}
 	}
 	switch {
-	case !lux.IsSortedTransferableOutputs(tx.Outs, Codec):
+	case !lux.IsSortedTransferableOutputs(tx.Outs):
 		return errOutputsNotSorted
 	case !isSortedAndUniqueByCompare(tx.Ins):
 		return errInputsNotSortedUnique

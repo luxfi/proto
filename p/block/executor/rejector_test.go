@@ -133,7 +133,7 @@ func TestRejectBlock(t *testing.T) {
 			testCtx := testcontext.New(context.Background())
 			rejector := &rejector{
 				backend: &backend{
-					ctx: &runtime.Runtime{
+					rt: &runtime.Runtime{
 						NetworkID:   testCtx.NetworkID,
 						ChainID:     testCtx.ChainID,
 						NodeID:      testCtx.NodeID,

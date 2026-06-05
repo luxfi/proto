@@ -81,6 +81,26 @@ type environment struct {
 	backend        Backend
 }
 
+// castValidatorState narrows the testcontext.Context.ValidatorState
+// (declared as interface{}) into a concrete validators.State, returning
+// nil when the conversion fails so the runtime.Runtime struct literal
+// accepts the value.
+func castValidatorState(v interface{}) validators.State {
+	if vs, ok := v.(validators.State); ok {
+		return vs
+	}
+	return nil
+}
+
+// castWarpSigner narrows the testcontext.Context.WarpSigner
+// (declared as interface{}) into a concrete runtime.WarpSigner.
+func castWarpSigner(v interface{}) consensuscontext.WarpSigner {
+	if ws, ok := v.(consensuscontext.WarpSigner); ok {
+		return ws
+	}
+	return nil
+}
+
 func (e *environment) GetState(blkID ids.ID) (state.Chain, bool) {
 	if blkID == lastAcceptedID {
 		return e.state, true
@@ -127,13 +147,13 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 		XChainID:       ctx.XChainID,
 		CChainID:       ctx.CChainID,
 		UTXOAssetID:    ctx.UTXOAssetID,
-		ValidatorState: ctx.ValidatorState,
+		ValidatorState: castValidatorState(ctx.ValidatorState),
 		SharedMemory:   ctx.SharedMemory,
 		ChainDataDir:   ctx.ChainDataDir,
 		Log:            ctx.Log,
 		Lock:           sync.RWMutex{}, // Create new RWMutex
 		Keystore:       nil,            // No keystore needed for test
-		WarpSigner:     ctx.WarpSigner,
+		WarpSigner:     castWarpSigner(ctx.WarpSigner),
 	}
 
 	// Initialize utxo.UTXOAssetID from the consensus context
@@ -155,7 +175,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 
 	backend := Backend{
 		Config:       config,
-		Ctx:          rt,
+		Rt:           rt,
 		Clk:          &mockable.Clock{},
 		Bootstrapped: &isBootstrapped,
 		Fx:           fx,
@@ -227,13 +247,13 @@ func newWallet(t testing.TB, e *environment, c walletConfig) wallet.Wallet {
 		XChainID:       e.ctx.XChainID,
 		CChainID:       e.ctx.CChainID,
 		UTXOAssetID:    e.ctx.UTXOAssetID,
-		ValidatorState: e.ctx.ValidatorState,
+		ValidatorState: castValidatorState(e.ctx.ValidatorState),
 		SharedMemory:   e.ctx.SharedMemory,
 		ChainDataDir:   e.ctx.ChainDataDir,
 		Log:            e.ctx.Log,
 		Lock:           sync.RWMutex{}, // Create new RWMutex
 		Keystore:       nil,            // No keystore needed for test
-		WarpSigner:     e.ctx.WarpSigner,
+		WarpSigner:     castWarpSigner(e.ctx.WarpSigner),
 	}
 	// Create a basic Config for wallet
 	walletConfig := &config.Config{

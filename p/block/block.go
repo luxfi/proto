@@ -34,7 +34,9 @@ type Block interface {
 
 	// note: initialize does not assume that block transactions
 	// are initialized, and initializes them itself if they aren't.
-	initialize(bytes []byte) error
+	// The Codec is the wire codec used to initialize embedded txs
+	// (which need it to compute their own canonical TxID).
+	initialize(bytes []byte, c Codec) error
 }
 
 type BanffBlock interface {
@@ -42,10 +44,14 @@ type BanffBlock interface {
 	Timestamp() time.Time
 }
 
-func initialize(blk Block, commonBlk *CommonBlock) error {
+// initialize is the canonical block-bytes computation. It marshals the
+// block through the supplied Codec, records the resulting bytes on the
+// CommonBlock, and returns any marshal error. Tx-level Initialize is
+// handled in each concrete block's own initialize() method.
+func initialize(c Codec, blk Block, commonBlk *CommonBlock) error {
 	// We serialize this block as a pointer so that it can be deserialized into
 	// a Block
-	bytes, err := Codec.Marshal(CodecVersion, &blk)
+	bytes, err := c.Marshal(CodecVersion, &blk)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal block: %w", err)
 	}

@@ -7,4 +7,9 @@ import "github.com/luxfi/proto/p/block"
 
 const CodecVersion = block.CodecVersion
 
-var Codec = block.GenesisCodec
+// Codec is an alias for block.Codec — same wire codec interface,
+// re-exported under the genesis package name for callers that want to
+// reference the genesis-bound codec by its semantic name. The block
+// genesis codec (block.RegisterTypes bound through a
+// codec.NewManager(math.MaxInt32)) is the canonical concrete instance.
+type Codec = block.Codec

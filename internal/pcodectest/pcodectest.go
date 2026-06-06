@@ -18,6 +18,8 @@ import (
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
 
+	"github.com/luxfi/proto/p/block"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/proto/p/warp"
 	warpmsg "github.com/luxfi/proto/p/warp/message"
 	"github.com/luxfi/proto/p/warp/payload"
@@ -65,4 +67,76 @@ func NewWarpCodec() warp.Codec {
 		panic(err)
 	}
 	return cm
+}
+
+// PVMCodecs bundles the runtime and genesis PVM codecs with their
+// underlying linearcodec registries. Tests that exercise both the
+// regular and genesis codec paths (e.g. proto/p/block, proto/p/state)
+// pull a single bundle.
+type PVMCodecs struct {
+	Codec            txs.Codec
+	GenesisCodec     txs.Codec
+	Registry         txs.LinearRegistry
+	GenesisRegistry  txs.LinearRegistry
+}
+
+// NewPVMCodecs returns a PVMCodecs bundle backed by two fresh
+// linearcodec registries and two codec.Manager instances, one for
+// runtime txs and one for genesis txs (with the larger MaxInt32 size
+// budget). Each call produces independent codecs — safe to use per-test.
+// Both registries are pre-seeded with the full Apricot/Banff/Durango/
+// Quasar block + tx type set, including the historical SkipRegistrations
+// pre-amble.
+func NewPVMCodecs() PVMCodecs {
+	c := linearcodec.NewDefault()
+	gc := linearcodec.NewDefault()
+	cm := codec.NewDefaultManager()
+	gcm := codec.NewManager(math.MaxInt32)
+	if err := block.RegisterTypes(c); err != nil {
+		panic(err)
+	}
+	if err := block.RegisterTypes(gc); err != nil {
+		panic(err)
+	}
+	if err := cm.RegisterCodec(txs.CodecVersion, c); err != nil {
+		panic(err)
+	}
+	if err := gcm.RegisterCodec(txs.CodecVersion, gc); err != nil {
+		panic(err)
+	}
+	return PVMCodecs{
+		Codec:           cm,
+		GenesisCodec:    gcm,
+		Registry:        c,
+		GenesisRegistry: gc,
+	}
+}
+
+// NewPVMRuntimeCodec returns a single linearcodec-backed codec.Manager
+// for runtime tx wire bytes. Used by tests that need a txs.Codec
+// directly without going through a Parser.
+func NewPVMRuntimeCodec() (txs.Codec, txs.LinearRegistry) {
+	c := linearcodec.NewDefault()
+	cm := codec.NewDefaultManager()
+	if err := block.RegisterTypes(c); err != nil {
+		panic(err)
+	}
+	if err := cm.RegisterCodec(txs.CodecVersion, c); err != nil {
+		panic(err)
+	}
+	return cm, c
+}
+
+// NewPVMGenesisCodec returns a single linearcodec-backed codec.Manager
+// for genesis tx wire bytes (MaxInt32 size budget).
+func NewPVMGenesisCodec() (txs.Codec, txs.LinearRegistry) {
+	c := linearcodec.NewDefault()
+	cm := codec.NewManager(math.MaxInt32)
+	if err := block.RegisterTypes(c); err != nil {
+		panic(err)
+	}
+	if err := cm.RegisterCodec(txs.CodecVersion, c); err != nil {
+		panic(err)
+	}
+	return cm, c
 }

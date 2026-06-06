@@ -134,22 +134,30 @@ type Handler interface {
 	Verifier
 }
 
+// NewHandler builds a Handler backed by the supplied codec. The codec
+// is the PVM runtime tx codec (proto/internal/pcodectest.NewPVMRuntimeCodec
+// or the production PVM wiring) — it's used to compute deterministic
+// owner-id bytes for stakeable-lock matching, so callers must pass the
+// same codec instance everywhere a locked owner is encoded.
 func NewHandler(
 	ctx context.Context,
+	c txs.Codec,
 	clk *mockable.Clock,
 	fx fx.Fx,
 ) Handler {
 	return &handler{
-		ctx: ctx,
-		clk: clk,
-		fx:  fx,
+		ctx:   ctx,
+		codec: c,
+		clk:   clk,
+		fx:    fx,
 	}
 }
 
 type handler struct {
-	ctx context.Context
-	clk *mockable.Clock
-	fx  fx.Fx
+	ctx   context.Context
+	codec txs.Codec
+	clk   *mockable.Clock
+	fx    fx.Fx
 }
 
 func (h *handler) Spend(
@@ -571,7 +579,7 @@ func (h *handler) VerifySpendUTXOs(
 			return fmt.Errorf("expected fx.Owned but got %T", out)
 		}
 		owner := owned.Owners()
-		ownerBytes, err := txs.Codec.Marshal(txs.CodecVersion, owner)
+		ownerBytes, err := h.codec.Marshal(txs.CodecVersion, owner)
 		if err != nil {
 			return fmt.Errorf("couldn't marshal owner: %w", err)
 		}
@@ -620,7 +628,7 @@ func (h *handler) VerifySpendUTXOs(
 			return fmt.Errorf("expected fx.Owned but got %T", out)
 		}
 		owner := owned.Owners()
-		ownerBytes, err := txs.Codec.Marshal(txs.CodecVersion, owner)
+		ownerBytes, err := h.codec.Marshal(txs.CodecVersion, owner)
 		if err != nil {
 			return fmt.Errorf("couldn't marshal owner: %w", err)
 		}

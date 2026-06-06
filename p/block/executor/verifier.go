@@ -73,7 +73,7 @@ func (v *verifier) BanffProposalBlock(b *block.BanffProposalBlock) error {
 		return err
 	}
 
-	feeCalculator := state.PickFeeCalculator(v.txExecutorBackend.Config, onDecisionState)
+	feeCalculator := state.PickFeeCalculator(v.txExecutorBackend.Config, v.txExecutorBackend.WarpCodec, onDecisionState)
 	inputs, atomicRequests, onAcceptFunc, gasConsumed, _, err := v.processStandardTxs(
 		b.Transactions,
 		feeCalculator,
@@ -129,7 +129,7 @@ func (v *verifier) BanffStandardBlock(b *block.BanffStandardBlock) error {
 		return err
 	}
 
-	feeCalculator := state.PickFeeCalculator(v.txExecutorBackend.Config, onAcceptState)
+	feeCalculator := state.PickFeeCalculator(v.txExecutorBackend.Config, v.txExecutorBackend.WarpCodec, onAcceptState)
 	return v.standardBlock( // Must be the last validity check on the block
 		b,
 		b.Transactions,
@@ -526,7 +526,7 @@ func (v *verifier) processStandardTxs(txs []*txs.Tx, feeCalculator txfee.Calcula
 	if timestamp := diff.GetTimestamp(); v.txExecutorBackend.Config.UpgradeConfig.IsQuasarActivated(timestamp) {
 		var blockComplexity gas.Dimensions
 		for _, tx := range txs {
-			txComplexity, err := txfee.TxComplexity(tx.Unsigned)
+			txComplexity, err := txfee.TxComplexity(v.txExecutorBackend.WarpCodec, tx.Unsigned)
 			if err != nil {
 				txID := tx.ID()
 				v.MarkDropped(txID, err)

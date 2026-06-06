@@ -233,6 +233,24 @@ func (m *multiManager) Unmarshal(bytes []byte, dest interface{}) (uint16, error)
 	}
 	c, exists := m.codecs[version]
 	if !exists {
+		// LP-023 cutover compat: pre-Dec-25-2025 writers used BE for
+		// the version prefix. If LE decode yields an unregistered
+		// version, retry as BE before erroring. Registered version IDs
+		// are small (0..N for a few codec generations) — BE-decoded
+		// small numbers don't collide with LE-decoded small numbers
+		// except at palindromic byte pairs (where the two decodings
+		// agree).
+		beVersion := peekVersionBE(bytes)
+		if cBE, beExists := m.codecs[beVersion]; beExists {
+			p.Offset = VersionSize
+			if err := cBE.UnmarshalFrom(p, dest); err != nil {
+				return beVersion, err
+			}
+			if p.Offset != len(bytes) {
+				return beVersion, ErrExtraSpace
+			}
+			return beVersion, nil
+		}
 		return version, ErrUnknownVersion
 	}
 	if err := c.UnmarshalFrom(p, dest); err != nil {

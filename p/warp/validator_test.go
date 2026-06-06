@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package warp
+package warp_test
 
 import (
 	"context"
@@ -19,6 +19,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/metric"
+	"github.com/luxfi/proto/p/warp"
 	"github.com/luxfi/upgrade"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/validators/validatorsmock"
@@ -34,15 +35,15 @@ type testValidatorStateAdapter struct {
 	validators.State
 }
 
-func (t *testValidatorStateAdapter) GetValidatorSet(ctx context.Context, height uint64, chainID ids.ID) (map[ids.NodeID]*ValidatorData, error) {
+func (t *testValidatorStateAdapter) GetValidatorSet(ctx context.Context, height uint64, chainID ids.ID) (map[ids.NodeID]*warp.ValidatorData, error) {
 	validatorSet, err := t.State.GetValidatorSet(ctx, height, chainID)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make(map[ids.NodeID]*ValidatorData, len(validatorSet))
+	result := make(map[ids.NodeID]*warp.ValidatorData, len(validatorSet))
 	for nodeID, validator := range validatorSet {
-		result[nodeID] = &ValidatorData{
+		result[nodeID] = &warp.ValidatorData{
 			NodeID:    validator.NodeID,
 			PublicKey: validator.PublicKey,
 			Weight:    validator.Weight,
@@ -55,7 +56,7 @@ func TestGetCanonicalValidatorSet(t *testing.T) {
 	type test struct {
 		name           string
 		stateF         func(*gomock.Controller) validators.State
-		expectedVdrs   []*Validator
+		expectedVdrs   []*warp.Validator
 		expectedWeight uint64
 		expectedErr    error
 	}
@@ -91,7 +92,7 @@ func TestGetCanonicalValidatorSet(t *testing.T) {
 				)
 				return state
 			},
-			expectedVdrs:   []*Validator{testVdrs[0].vdr, testVdrs[1].vdr},
+			expectedVdrs:   []*warp.Validator{testVdrs[0].vdr, testVdrs[1].vdr},
 			expectedWeight: 6,
 			expectedErr:    nil,
 		},
@@ -121,7 +122,7 @@ func TestGetCanonicalValidatorSet(t *testing.T) {
 				)
 				return state
 			},
-			expectedVdrs: []*Validator{
+			expectedVdrs: []*warp.Validator{
 				{
 					PublicKey:      testVdrs[0].vdr.PublicKey,
 					PublicKeyBytes: testVdrs[0].vdr.PublicKeyBytes,
@@ -157,7 +158,7 @@ func TestGetCanonicalValidatorSet(t *testing.T) {
 				)
 				return state
 			},
-			expectedVdrs:   []*Validator{testVdrs[1].vdr},
+			expectedVdrs:   []*warp.Validator{testVdrs[1].vdr},
 			expectedWeight: 6,
 			expectedErr:    nil,
 		},
@@ -174,7 +175,7 @@ func TestGetCanonicalValidatorSet(t *testing.T) {
 				State: state,
 			}
 
-			validators, err := GetCanonicalValidatorSetFromSubchainID(t.Context(), wrappedState, pChainHeight, chainID)
+			validators, err := warp.GetCanonicalValidatorSetFromSubchainID(t.Context(), wrappedState, pChainHeight, chainID)
 			require.ErrorIs(err, tt.expectedErr)
 			if err != nil {
 				return
@@ -200,7 +201,7 @@ func TestFilterValidators(t *testing.T) {
 	sk0, err := localsigner.New()
 	require.NoError(t, err)
 	pk0 := sk0.PublicKey()
-	vdr0 := &Validator{
+	vdr0 := &warp.Validator{
 		PublicKey:      pk0,
 		PublicKeyBytes: bls.PublicKeyToUncompressedBytes(pk0),
 		Weight:         1,
@@ -209,7 +210,7 @@ func TestFilterValidators(t *testing.T) {
 	sk1, err := localsigner.New()
 	require.NoError(t, err)
 	pk1 := sk1.PublicKey()
-	vdr1 := &Validator{
+	vdr1 := &warp.Validator{
 		PublicKey:      pk1,
 		PublicKeyBytes: bls.PublicKeyToUncompressedBytes(pk1),
 		Weight:         2,
@@ -218,8 +219,8 @@ func TestFilterValidators(t *testing.T) {
 	type test struct {
 		name         string
 		indices      set.Bits
-		vdrs         []*Validator
-		expectedVdrs []*Validator
+		vdrs         []*warp.Validator
+		expectedVdrs []*warp.Validator
 		expectedErr  error
 	}
 
@@ -227,34 +228,34 @@ func TestFilterValidators(t *testing.T) {
 		{
 			name:         "empty",
 			indices:      set.NewBits(),
-			vdrs:         []*Validator{},
-			expectedVdrs: []*Validator{},
+			vdrs:         []*warp.Validator{},
+			expectedVdrs: []*warp.Validator{},
 			expectedErr:  nil,
 		},
 		{
 			name:        "unknown validator",
 			indices:     set.NewBits(2),
-			vdrs:        []*Validator{vdr0, vdr1},
-			expectedErr: ErrUnknownValidator,
+			vdrs:        []*warp.Validator{vdr0, vdr1},
+			expectedErr: warp.ErrUnknownValidator,
 		},
 		{
 			name:    "two filtered out",
 			indices: set.NewBits(),
-			vdrs: []*Validator{
+			vdrs: []*warp.Validator{
 				vdr0,
 				vdr1,
 			},
-			expectedVdrs: []*Validator{},
+			expectedVdrs: []*warp.Validator{},
 			expectedErr:  nil,
 		},
 		{
 			name:    "one filtered out",
 			indices: set.NewBits(1),
-			vdrs: []*Validator{
+			vdrs: []*warp.Validator{
 				vdr0,
 				vdr1,
 			},
-			expectedVdrs: []*Validator{
+			expectedVdrs: []*warp.Validator{
 				vdr1,
 			},
 			expectedErr: nil,
@@ -262,11 +263,11 @@ func TestFilterValidators(t *testing.T) {
 		{
 			name:    "none filtered out",
 			indices: set.NewBits(0, 1),
-			vdrs: []*Validator{
+			vdrs: []*warp.Validator{
 				vdr0,
 				vdr1,
 			},
-			expectedVdrs: []*Validator{
+			expectedVdrs: []*warp.Validator{
 				vdr0,
 				vdr1,
 			},
@@ -278,7 +279,7 @@ func TestFilterValidators(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
 
-			vdrs, err := FilterValidators(tt.indices, tt.vdrs)
+			vdrs, err := warp.FilterValidators(tt.indices, tt.vdrs)
 			require.ErrorIs(err, tt.expectedErr)
 			if tt.expectedErr != nil {
 				return
@@ -289,19 +290,19 @@ func TestFilterValidators(t *testing.T) {
 }
 
 func TestSumWeight(t *testing.T) {
-	vdr0 := &Validator{
+	vdr0 := &warp.Validator{
 		Weight: 1,
 	}
-	vdr1 := &Validator{
+	vdr1 := &warp.Validator{
 		Weight: 2,
 	}
-	vdr2 := &Validator{
+	vdr2 := &warp.Validator{
 		Weight: math.MaxUint64,
 	}
 
 	type test struct {
 		name        string
-		vdrs        []*Validator
+		vdrs        []*warp.Validator
 		expectedSum uint64
 		expectedErr error
 	}
@@ -309,23 +310,23 @@ func TestSumWeight(t *testing.T) {
 	tests := []test{
 		{
 			name:        "empty",
-			vdrs:        []*Validator{},
+			vdrs:        []*warp.Validator{},
 			expectedSum: 0,
 		},
 		{
 			name:        "one",
-			vdrs:        []*Validator{vdr0},
+			vdrs:        []*warp.Validator{vdr0},
 			expectedSum: 1,
 		},
 		{
 			name:        "two",
-			vdrs:        []*Validator{vdr0, vdr1},
+			vdrs:        []*warp.Validator{vdr0, vdr1},
 			expectedSum: 3,
 		},
 		{
 			name:        "overflow",
-			vdrs:        []*Validator{vdr0, vdr2},
-			expectedErr: ErrWeightOverflow,
+			vdrs:        []*warp.Validator{vdr0, vdr2},
+			expectedErr: warp.ErrWeightOverflow,
 		},
 	}
 
@@ -333,7 +334,7 @@ func TestSumWeight(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
 
-			sum, err := SumWeight(tt.vdrs)
+			sum, err := warp.SumWeight(tt.vdrs)
 			require.ErrorIs(err, tt.expectedErr)
 			if tt.expectedErr != nil {
 				return
@@ -368,10 +369,10 @@ func BenchmarkGetCanonicalValidatorSet(b *testing.B) {
 		}
 		// Create a simple validator state for benchmarking
 		wrappedState := newMockValidatorState(
-			func() map[ids.NodeID]*ValidatorData {
-				result := make(map[ids.NodeID]*ValidatorData, len(getValidatorsOutput))
+			func() map[ids.NodeID]*warp.ValidatorData {
+				result := make(map[ids.NodeID]*warp.ValidatorData, len(getValidatorsOutput))
 				for nodeID, vdr := range getValidatorsOutput {
-					result[nodeID] = &ValidatorData{
+					result[nodeID] = &warp.ValidatorData{
 						NodeID:    vdr.NodeID,
 						PublicKey: vdr.PublicKey,
 						Weight:    vdr.Weight,
@@ -384,7 +385,7 @@ func BenchmarkGetCanonicalValidatorSet(b *testing.B) {
 
 		b.Run(strconv.Itoa(size), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				_, err := GetCanonicalValidatorSetFromSubchainID(b.Context(), wrappedState, pChainHeight, chainID)
+				_, err := warp.GetCanonicalValidatorSetFromSubchainID(b.Context(), wrappedState, pChainHeight, chainID)
 				require.NoError(b, err)
 			}
 		})
@@ -394,16 +395,16 @@ func BenchmarkGetCanonicalValidatorSet(b *testing.B) {
 // mockValidatorState is a test mock that tracks call counts
 type mockValidatorState struct {
 	callCount int
-	data      map[ids.NodeID]*ValidatorData
+	data      map[ids.NodeID]*warp.ValidatorData
 	err       error
 }
 
-func (m *mockValidatorState) GetValidatorSet(ctx context.Context, height uint64, chainID ids.ID) (map[ids.NodeID]*ValidatorData, error) {
+func (m *mockValidatorState) GetValidatorSet(ctx context.Context, height uint64, chainID ids.ID) (map[ids.NodeID]*warp.ValidatorData, error) {
 	m.callCount++
 	return m.data, m.err
 }
 
-func newMockValidatorState(data map[ids.NodeID]*ValidatorData, err error) *mockValidatorState {
+func newMockValidatorState(data map[ids.NodeID]*warp.ValidatorData, err error) *mockValidatorState {
 	return &mockValidatorState{data: data, err: err}
 }
 
@@ -416,7 +417,7 @@ func TestCachedValidatorState(t *testing.T) {
 	// Create test validator data
 	nodeID1 := ids.GenerateTestNodeID()
 	nodeID2 := ids.GenerateTestNodeID()
-	testData := map[ids.NodeID]*ValidatorData{
+	testData := map[ids.NodeID]*warp.ValidatorData{
 		nodeID1: {
 			NodeID:    nodeID1,
 			PublicKey: bls.PublicKeyToUncompressedBytes(testVdrs[0].vdr.PublicKey),
@@ -435,7 +436,7 @@ func TestCachedValidatorState(t *testing.T) {
 		upgradeConfig     *upgrade.Config
 		networkID         uint32
 		expectedCallCount int
-		operations        func(*testing.T, *CachedValidatorState)
+		operations        func(*testing.T, *warp.CachedValidatorState)
 	}
 
 	tests := []test{
@@ -445,7 +446,7 @@ func TestCachedValidatorState(t *testing.T) {
 			upgradeConfig:     &upgrade.Config{GraniteTime: time.Now().Add(1 * time.Hour)},
 			networkID:         constants.MainnetID,
 			expectedCallCount: 2, // Should call underlying state twice (no caching)
-			operations: func(t *testing.T, cached *CachedValidatorState) {
+			operations: func(t *testing.T, cached *warp.CachedValidatorState) {
 				vdrs1, err := cached.GetValidatorSet(ctx, height, chain1)
 				require.NoError(t, err)
 				require.Equal(t, testData, vdrs1)
@@ -461,7 +462,7 @@ func TestCachedValidatorState(t *testing.T) {
 			upgradeConfig:     &upgrade.Config{GraniteTime: time.Now().Add(-1 * time.Hour)},
 			networkID:         constants.MainnetID,
 			expectedCallCount: 1, // Should call underlying state once, then use cache
-			operations: func(t *testing.T, cached *CachedValidatorState) {
+			operations: func(t *testing.T, cached *warp.CachedValidatorState) {
 				vdrs1, err := cached.GetValidatorSet(ctx, height, chain1)
 				require.NoError(t, err)
 				require.Equal(t, testData, vdrs1)
@@ -477,7 +478,7 @@ func TestCachedValidatorState(t *testing.T) {
 			upgradeConfig:     &upgrade.Config{GraniteTime: time.Now().Add(-1 * time.Hour)},
 			networkID:         constants.MainnetID,
 			expectedCallCount: 2, // Two different heights = two calls
-			operations: func(t *testing.T, cached *CachedValidatorState) {
+			operations: func(t *testing.T, cached *warp.CachedValidatorState) {
 				vdrs1, err := cached.GetValidatorSet(ctx, height, chain1)
 				require.NoError(t, err)
 				require.Equal(t, testData, vdrs1)
@@ -493,7 +494,7 @@ func TestCachedValidatorState(t *testing.T) {
 			upgradeConfig:     &upgrade.Config{GraniteTime: time.Now().Add(-1 * time.Hour)},
 			networkID:         constants.MainnetID,
 			expectedCallCount: 2, // Two different chains = two calls
-			operations: func(t *testing.T, cached *CachedValidatorState) {
+			operations: func(t *testing.T, cached *warp.CachedValidatorState) {
 				vdrs1, err := cached.GetValidatorSet(ctx, height, chain1)
 				require.NoError(t, err)
 				require.Equal(t, testData, vdrs1)
@@ -509,7 +510,7 @@ func TestCachedValidatorState(t *testing.T) {
 			upgradeConfig:     &upgrade.Config{GraniteTime: time.Now().Add(-1 * time.Hour)},
 			networkID:         constants.MainnetID,
 			expectedCallCount: 1,
-			operations: func(t *testing.T, cached *CachedValidatorState) {
+			operations: func(t *testing.T, cached *warp.CachedValidatorState) {
 				_, err := cached.GetValidatorSet(ctx, height, chain1)
 				require.ErrorIs(t, err, errTest)
 			},
@@ -521,7 +522,7 @@ func TestCachedValidatorState(t *testing.T) {
 			require := require.New(t)
 			registerer := metric.NewRegistry()
 
-			cached, err := NewCachedValidatorState(tt.state, tt.upgradeConfig, tt.networkID, registerer)
+			cached, err := warp.NewCachedValidatorState(tt.state, tt.upgradeConfig, tt.networkID, registerer)
 			require.NoError(err)
 			require.NotNil(cached)
 

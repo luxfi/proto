@@ -12,8 +12,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
@@ -29,6 +27,8 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
 	log "github.com/luxfi/log"
+	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/config"
 	"github.com/luxfi/timer/mockable"
 
@@ -48,6 +48,28 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
+
+// helpersTestPVMCodecs / helpersTestWarpCodec / helpersTestMetadataCodec
+// are the proto/p codec set that every newEnvironment-backed test in
+// proto/p/txs/executor shares. Built once at package init via
+// pvmcodectest. Backend.{TxCodec,WarpCodec,WarpMsgCodec,PayloadCodec}
+// fields are populated from these codecs at environment construction
+// time so each Visitor's Marshal path has a non-nil codec.
+var (
+	helpersTestPVMCodecs    = pvmcodectest.NewPVMCodecs()
+	helpersTestWarpCodec    = pvmcodectest.NewWarpCodec()
+	helpersTestMessageCodec = pvmcodectest.NewMessageCodec()
+	helpersTestPayloadCodec = pvmcodectest.NewPayloadCodec()
+
+	// testCodec is an alias for the PVM runtime codec; the executor's
+	// test suite calls NewSigned / Initialize / Marshal / Unmarshal with
+	// this codec instead of the legacy package-level txs.Codec singleton.
+	testCodec txs.Codec = helpersTestPVMCodecs.Codec
+)
+
+// _ pcodectest.LinearCodec — pcodectest is imported for ErrCantUnpackVersion
+// and Errs by other files in this package. Keep the import live here.
+var _ = pcodectest.NewLinearCodec
 
 const (
 	defaultMinValidatorStake = 5 * constants.MilliLux
@@ -162,7 +184,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 	rewards := reward.NewCalculator(config.RewardConfig)
 	baseState := statetest.New(t, statetest.Config{
 		DB:         baseDB,
-		Genesis:    genesistest.NewBytes(t, genesistest.Config{}),
+		Genesis:    genesistest.NewBytes(t, helpersTestPVMCodecs.GenesisCodec, genesistest.Config{}),
 		Validators: config.Validators,
 		Upgrades:   config.UpgradeConfig,
 		Context:    rt,
@@ -171,7 +193,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 	lastAcceptedID = baseState.GetLastAccepted()
 
 	uptimes := consensusuptime.NoOpCalculator{}
-	utxosHandler := utxo.NewHandler(ctx.Context, &mockable.Clock{}, fx)
+	utxosHandler := utxo.NewHandler(ctx.Context, helpersTestPVMCodecs.Codec, &mockable.Clock{}, fx)
 
 	backend := Backend{
 		Config:       config,
@@ -182,6 +204,10 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment {
 		FlowChecker:  utxosHandler,
 		Uptimes:      uptimes,
 		Rewards:      rewards,
+		TxCodec:      helpersTestPVMCodecs.Codec,
+		WarpCodec:    helpersTestWarpCodec,
+		WarpMsgCodec: helpersTestMessageCodec,
+		PayloadCodec: helpersTestPayloadCodec,
 	}
 
 	env := &environment{
@@ -297,7 +323,7 @@ func addNet(t *testing.T, env *environment) {
 	stateDiff, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, env.state)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, env.state)
 	_, _, _, err = StandardTx(
 		&env.backend,
 		feeCalculator,
@@ -353,14 +379,13 @@ func defaultClock(f upgradetest.Fork) *mockable.Clock {
 	return clk
 }
 
+// fxVMInt is the minimal secp256k1fx.VM stub used by the executor test
+// suite. secp256k1fx.VM only requires Clock() and Logger() since the
+// codec is now compile-time static (ZAP-native) — the historical
+// CodecRegistry method is gone.
 type fxVMInt struct {
-	registry codec.Registry
-	clk      *mockable.Clock
-	log      log.Logger
-}
-
-func (fvi *fxVMInt) CodecRegistry() codec.Registry {
-	return fvi.registry
+	clk *mockable.Clock
+	log log.Logger
 }
 
 func (fvi *fxVMInt) Clock() *mockable.Clock {
@@ -373,9 +398,8 @@ func (fvi *fxVMInt) Logger() log.Logger {
 
 func defaultFx(clk *mockable.Clock, log log.Logger, isBootstrapped bool) fx.Fx {
 	fxVMInt := &fxVMInt{
-		registry: linearcodec.NewDefault(),
-		clk:      clk,
-		log:      log,
+		clk: clk,
+		log: log,
 	}
 	res := &secp256k1fx.Fx{}
 	if err := res.Initialize(fxVMInt); err != nil {

@@ -30,7 +30,10 @@ func (b *BanffCommitBlock) Visit(v Visitor) error {
 	return v.BanffCommitBlock(b)
 }
 
+// NewBanffCommitBlock builds and initializes a BanffCommitBlock against
+// the supplied block Codec.
 func NewBanffCommitBlock(
+	c Codec,
 	timestamp time.Time,
 	parentID ids.ID,
 	height uint64,
@@ -44,14 +47,14 @@ func NewBanffCommitBlock(
 			},
 		},
 	}
-	return blk, initialize(blk, &blk.CommonBlock)
+	return blk, initialize(c, blk, &blk.CommonBlock)
 }
 
 type ApricotCommitBlock struct {
 	CommonBlock `serialize:"true"`
 }
 
-func (b *ApricotCommitBlock) initialize(bytes []byte) error {
+func (b *ApricotCommitBlock) initialize(bytes []byte, _ Codec) error {
 	b.CommonBlock.initialize(bytes)
 	return nil
 }
@@ -66,7 +69,10 @@ func (b *ApricotCommitBlock) Visit(v Visitor) error {
 	return v.ApricotCommitBlock(b)
 }
 
+// NewApricotCommitBlock builds and initializes an ApricotCommitBlock
+// against the supplied block Codec.
 func NewApricotCommitBlock(
+	c Codec,
 	parentID ids.ID,
 	height uint64,
 ) (*ApricotCommitBlock, error) {
@@ -76,7 +82,7 @@ func NewApricotCommitBlock(
 			Hght:   height,
 		},
 	}
-	return blk, initialize(blk, &blk.CommonBlock)
+	return blk, initialize(c, blk, &blk.CommonBlock)
 }
 
 // InitializeWithContext initializes the block with consensus context

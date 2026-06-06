@@ -149,7 +149,7 @@ func TestSetL1ValidatorWeightTxSerialization(t *testing.T) {
 		},
 		Message: message,
 	}
-	txBytes, err := Codec.Marshal(CodecVersion, &unsignedTx)
+	txBytes, err := testCodec.Marshal(CodecVersion, &unsignedTx)
 	require.NoError(err)
 
 	expectedBytes := []byte{

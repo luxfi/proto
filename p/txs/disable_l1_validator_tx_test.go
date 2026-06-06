@@ -158,7 +158,7 @@ func TestDisableL1ValidatorTxSerialization(t *testing.T) {
 			SigIndices: []uint32{9},
 		},
 	}
-	txBytes, err := Codec.Marshal(CodecVersion, &unsignedTx)
+	txBytes, err := testCodec.Marshal(CodecVersion, &unsignedTx)
 	require.NoError(err)
 
 	expectedBytes := []byte{

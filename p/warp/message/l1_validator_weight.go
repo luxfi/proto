@@ -35,8 +35,10 @@ func (s *L1ValidatorWeight) Verify() error {
 	return nil
 }
 
-// NewL1ValidatorWeight creates a new initialized L1ValidatorWeight.
+// NewL1ValidatorWeight creates a new initialized L1ValidatorWeight
+// using the supplied Codec.
 func NewL1ValidatorWeight(
+	c Codec,
 	validationID ids.ID,
 	nonce uint64,
 	weight uint64,
@@ -46,12 +48,13 @@ func NewL1ValidatorWeight(
 		Nonce:        nonce,
 		Weight:       weight,
 	}
-	return msg, Initialize(msg)
+	return msg, Initialize(c, msg)
 }
 
-// ParseL1ValidatorWeight parses bytes into an initialized L1ValidatorWeight.
-func ParseL1ValidatorWeight(b []byte) (*L1ValidatorWeight, error) {
-	payloadIntf, err := Parse(b)
+// ParseL1ValidatorWeight parses bytes into an initialized
+// L1ValidatorWeight using the supplied Codec.
+func ParseL1ValidatorWeight(c Codec, b []byte) (*L1ValidatorWeight, error) {
+	payloadIntf, err := Parse(c, b)
 	if err != nil {
 		return nil, err
 	}

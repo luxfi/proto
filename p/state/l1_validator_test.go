@@ -137,7 +137,7 @@ func TestGetL1Validator(t *testing.T) {
 		cacheWithoutL1Validator = lru.NewCache[ids.ID, maybe.Maybe[L1Validator]](10)
 	)
 
-	require.NoError(t, putL1Validator(dbWithL1Validator, cacheWithL1Validator, l1Validator))
+	require.NoError(t, putL1Validator(testGenesisBlockCodec, dbWithL1Validator, cacheWithL1Validator, l1Validator))
 	require.NoError(t, deleteL1Validator(dbWithoutL1Validator, cacheWithoutL1Validator, l1Validator.ValidationID))
 
 	tests := []struct {
@@ -179,7 +179,7 @@ func TestGetL1Validator(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
 
-			gotL1Validator, err := getL1Validator(test.cache, test.db, l1Validator.ValidationID)
+			gotL1Validator, err := getL1Validator(testGenesisBlockCodec, test.cache, test.db, l1Validator.ValidationID)
 			require.ErrorIs(err, test.expectedErr)
 			require.Equal(test.expectedL1Validator, gotL1Validator)
 
@@ -197,10 +197,10 @@ func TestPutL1Validator(t *testing.T) {
 		db          = memdb.New()
 		cache       = lru.NewCache[ids.ID, maybe.Maybe[L1Validator]](10)
 	)
-	expectedL1ValidatorBytes, err := block.GenesisCodec.Marshal(block.CodecVersion, l1Validator)
+	expectedL1ValidatorBytes, err := testGenesisBlockCodec.Marshal(block.CodecVersion, l1Validator)
 	require.NoError(err)
 
-	require.NoError(putL1Validator(db, cache, l1Validator))
+	require.NoError(putL1Validator(testGenesisBlockCodec, db, cache, l1Validator))
 
 	l1ValidatorBytes, err := db.Get(l1Validator.ValidationID[:])
 	require.NoError(err)

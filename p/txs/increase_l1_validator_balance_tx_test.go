@@ -156,7 +156,7 @@ func TestIncreaseL1ValidatorBalanceTxSerialization(t *testing.T) {
 		ValidationID: validationID,
 		Balance:      balance,
 	}
-	txBytes, err := Codec.Marshal(CodecVersion, &unsignedTx)
+	txBytes, err := testCodec.Marshal(CodecVersion, &unsignedTx)
 	require.NoError(err)
 
 	expectedBytes := []byte{

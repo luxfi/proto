@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package block
+package block_test
 
 import (
 	"testing"
@@ -10,16 +10,21 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pvmcodectest"
+	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 )
 
 func TestNewBanffProposalBlock(t *testing.T) {
+	codecs := pvmcodectest.NewPVMCodecs()
+	c := codecs.GenesisCodec
+
 	timestamp := time.Now().Truncate(time.Second)
 	parentID := ids.GenerateTestID()
 	height := uint64(1337)
-	proposalTx, err := testProposalTx()
+	proposalTx, err := testProposalTx(c)
 	require.NoError(t, err)
-	decisionTxs, err := testDecisionTxs()
+	decisionTxs, err := testDecisionTxs(c)
 	require.NoError(t, err)
 
 	type test struct {
@@ -45,7 +50,7 @@ func TestNewBanffProposalBlock(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
 
-			blk, err := NewBanffProposalBlock(
+			blk, err := block.NewBanffProposalBlock(c,
 				timestamp,
 				parentID,
 				height,
@@ -78,13 +83,15 @@ func TestNewBanffProposalBlock(t *testing.T) {
 
 func TestNewApricotProposalBlock(t *testing.T) {
 	require := require.New(t)
+	codecs := pvmcodectest.NewPVMCodecs()
+	c := codecs.GenesisCodec
 
 	parentID := ids.GenerateTestID()
 	height := uint64(1337)
-	proposalTx, err := testProposalTx()
+	proposalTx, err := testProposalTx(c)
 	require.NoError(err)
 
-	blk, err := NewApricotProposalBlock(
+	blk, err := block.NewApricotProposalBlock(c,
 		parentID,
 		height,
 		proposalTx,

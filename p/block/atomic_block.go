@@ -21,9 +21,9 @@ type ApricotAtomicBlock struct {
 	Tx          *txs.Tx `serialize:"true" json:"tx"`
 }
 
-func (b *ApricotAtomicBlock) initialize(bytes []byte) error {
+func (b *ApricotAtomicBlock) initialize(bytes []byte, c Codec) error {
 	b.CommonBlock.initialize(bytes)
-	if err := b.Tx.Initialize(txs.Codec); err != nil {
+	if err := b.Tx.Initialize(c); err != nil {
 		return fmt.Errorf("failed to initialize tx: %w", err)
 	}
 	return nil
@@ -41,7 +41,10 @@ func (b *ApricotAtomicBlock) Visit(v Visitor) error {
 	return v.ApricotAtomicBlock(b)
 }
 
+// NewApricotAtomicBlock builds and initializes an ApricotAtomicBlock
+// against the supplied block Codec.
 func NewApricotAtomicBlock(
+	c Codec,
 	parentID ids.ID,
 	height uint64,
 	tx *txs.Tx,
@@ -53,7 +56,7 @@ func NewApricotAtomicBlock(
 		},
 		Tx: tx,
 	}
-	return blk, initialize(blk, &blk.CommonBlock)
+	return blk, initialize(c, blk, &blk.CommonBlock)
 }
 
 // InitializeWithContext initializes the block with consensus context

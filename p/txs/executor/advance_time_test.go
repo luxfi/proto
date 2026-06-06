@@ -24,7 +24,7 @@ import (
 
 func newAdvanceTimeTx(t testing.TB, timestamp time.Time) (*txs.Tx, error) {
 	utx := &txs.AdvanceTimeTx{Time: uint64(timestamp.Unix())}
-	tx, err := txs.NewSigned(utx, txs.Codec, nil)
+	tx, err := txs.NewSigned(utx, testCodec, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func TestAdvanceTimeTxUpdatePrimaryNetworkStakers(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 	require.NoError(ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -111,7 +111,7 @@ func TestAdvanceTimeTxTimestampTooEarly(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 	err = ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -147,7 +147,7 @@ func TestAdvanceTimeTxTimestampTooLate(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -177,7 +177,7 @@ func TestAdvanceTimeTxTimestampTooLate(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -421,7 +421,7 @@ func TestAdvanceTimeTxUpdateStakers(t *testing.T) {
 				onAbortState, err := state.NewDiff(lastAcceptedID, env)
 				require.NoError(err)
 
-				feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+				feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 				require.NoError(ProposalTx(
 					&env.backend,
 					feeCalculator,
@@ -554,7 +554,7 @@ func TestAdvanceTimeTxRemoveNetValidator(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 	require.NoError(ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -635,7 +635,7 @@ func TestTrackedNet(t *testing.T) {
 			onAbortState, err := state.NewDiff(lastAcceptedID, env)
 			require.NoError(err)
 
-			feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+			feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 			require.NoError(ProposalTx(
 				&env.backend,
 				feeCalculator,
@@ -684,7 +684,7 @@ func TestAdvanceTimeTxDelegatorStakerWeight(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 	require.NoError(ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -784,7 +784,7 @@ func TestAdvanceTimeTxDelegatorStakers(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 	require.NoError(ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -881,7 +881,7 @@ func TestAdvanceTimeTxAfterBanff(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 	err = ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -903,11 +903,11 @@ func TestAdvanceTimeTxUnmarshal(t *testing.T) {
 	tx, err := newAdvanceTimeTx(t, chainTime.Add(time.Second))
 	require.NoError(err)
 
-	bytes, err := txs.Codec.Marshal(txs.CodecVersion, tx)
+	bytes, err := testCodec.Marshal(txs.CodecVersion, tx)
 	require.NoError(err)
 
 	var unmarshaledTx txs.Tx
-	_, err = txs.Codec.Unmarshal(bytes, &unmarshaledTx)
+	_, err = testCodec.Unmarshal(bytes, &unmarshaledTx)
 	require.NoError(err)
 
 	require.Equal(

@@ -24,12 +24,12 @@ type BanffProposalBlock struct {
 	ApricotProposalBlock `serialize:"true"`
 }
 
-func (b *BanffProposalBlock) initialize(bytes []byte) error {
-	if err := b.ApricotProposalBlock.initialize(bytes); err != nil {
+func (b *BanffProposalBlock) initialize(bytes []byte, c Codec) error {
+	if err := b.ApricotProposalBlock.initialize(bytes, c); err != nil {
 		return err
 	}
 	for _, tx := range b.Transactions {
-		if err := tx.Initialize(txs.Codec); err != nil {
+		if err := tx.Initialize(c); err != nil {
 			return fmt.Errorf("failed to initialize tx: %w", err)
 		}
 	}
@@ -59,7 +59,10 @@ func (b *BanffProposalBlock) Visit(v Visitor) error {
 	return v.BanffProposalBlock(b)
 }
 
+// NewBanffProposalBlock builds and initializes a BanffProposalBlock
+// against the supplied block Codec.
 func NewBanffProposalBlock(
+	c Codec,
 	timestamp time.Time,
 	parentID ids.ID,
 	height uint64,
@@ -77,7 +80,7 @@ func NewBanffProposalBlock(
 			Tx: proposalTx,
 		},
 	}
-	return blk, initialize(blk, &blk.CommonBlock)
+	return blk, initialize(c, blk, &blk.CommonBlock)
 }
 
 type ApricotProposalBlock struct {
@@ -85,9 +88,9 @@ type ApricotProposalBlock struct {
 	Tx          *txs.Tx `serialize:"true" json:"tx"`
 }
 
-func (b *ApricotProposalBlock) initialize(bytes []byte) error {
+func (b *ApricotProposalBlock) initialize(bytes []byte, c Codec) error {
 	b.CommonBlock.initialize(bytes)
-	if err := b.Tx.Initialize(txs.Codec); err != nil {
+	if err := b.Tx.Initialize(c); err != nil {
 		return fmt.Errorf("failed to initialize tx: %w", err)
 	}
 	return nil
@@ -107,8 +110,10 @@ func (b *ApricotProposalBlock) Visit(v Visitor) error {
 
 // NewApricotProposalBlock is kept for testing purposes only.
 // Following Banff activation and subsequent code cleanup, Apricot Proposal blocks
-// should be only verified (upon bootstrap), never created anymore
+// should be only verified (upon bootstrap), never created anymore.
+// It builds and initializes the block against the supplied block Codec.
 func NewApricotProposalBlock(
+	c Codec,
 	parentID ids.ID,
 	height uint64,
 	tx *txs.Tx,
@@ -120,7 +125,7 @@ func NewApricotProposalBlock(
 		},
 		Tx: tx,
 	}
-	return blk, initialize(blk, &blk.CommonBlock)
+	return blk, initialize(c, blk, &blk.CommonBlock)
 }
 
 // InitializeWithContext initializes the block with consensus context

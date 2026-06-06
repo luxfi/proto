@@ -533,7 +533,7 @@ func TestConvertNetworkToL1TxSerialization(t *testing.T) {
 			require := require.New(t)
 
 			var unsignedTx UnsignedTx = test.tx
-			txBytes, err := Codec.Marshal(CodecVersion, &unsignedTx)
+			txBytes, err := testCodec.Marshal(CodecVersion, &unsignedTx)
 			require.NoError(err)
 			// Skip byte comparison for tests with BLS signatures when CGO is disabled
 			// because CGO BLS (BLST) and pure Go BLS produce different signatures

@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package txheap
+package txheap_test
 
 import (
 	"testing"
@@ -10,14 +10,17 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/proto/p/txs/txheap"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func TestByEndTime(t *testing.T) {
 	require := require.New(t)
+	c, _ := pvmcodectest.NewPVMRuntimeCodec()
 
-	txHeap := NewByEndTime()
+	txHeap := txheap.NewByEndTime()
 
 	baseTime := time.Now()
 
@@ -30,7 +33,7 @@ func TestByEndTime(t *testing.T) {
 		RewardsOwner: &secp256k1fx.OutputOwners{},
 	}
 	tx0 := &txs.Tx{Unsigned: utx0}
-	require.NoError(tx0.Initialize(txs.Codec))
+	require.NoError(tx0.Initialize(c))
 
 	utx1 := &txs.AddValidatorTx{
 		Validator: txs.Validator{
@@ -41,7 +44,7 @@ func TestByEndTime(t *testing.T) {
 		RewardsOwner: &secp256k1fx.OutputOwners{},
 	}
 	tx1 := &txs.Tx{Unsigned: utx1}
-	require.NoError(tx1.Initialize(txs.Codec))
+	require.NoError(tx1.Initialize(c))
 
 	utx2 := &txs.AddValidatorTx{
 		Validator: txs.Validator{
@@ -52,7 +55,7 @@ func TestByEndTime(t *testing.T) {
 		RewardsOwner: &secp256k1fx.OutputOwners{},
 	}
 	tx2 := &txs.Tx{Unsigned: utx2}
-	require.NoError(tx2.Initialize(txs.Codec))
+	require.NoError(tx2.Initialize(c))
 
 	txHeap.Add(tx2)
 	require.Equal(utx2.EndTime(), txHeap.Timestamp())

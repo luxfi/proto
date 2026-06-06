@@ -8,8 +8,6 @@ package fee
 import (
 	"errors"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
@@ -25,57 +23,68 @@ import (
 	"github.com/luxfi/vm/components/verify"
 )
 
+// Wire-format size constants, mirroring legacy codec/wrappers values
+// byte-for-byte. proto/p carries no github.com/luxfi/codec import after
+// Wave 2A of the codec rip (#101); these constants give the fee package
+// the same numeric tariffs without that dependency.
+const (
+	codecVersionSize    = 2 // matches codecVersionSize / wrappersShortLen
+	wrappersIntLen      = 4
+	wrappersLongLen     = 8
+	wrappersShortLen    = 2
+)
+
 // Signature verification costs were conservatively based on benchmarks run on
 // an AWS c5.xlarge instance.
 const (
 	intrinsicValidatorBandwidth = ids.NodeIDLen + // nodeID
-		wrappers.LongLen + // start
-		wrappers.LongLen + // end
-		wrappers.LongLen // weight
+		wrappersLongLen + // start
+		wrappersLongLen + // end
+		wrappersLongLen // weight
 
 	intrinsicNetValidatorBandwidth = intrinsicValidatorBandwidth + // validator
 		ids.IDLen // subchainID
 
 	intrinsicOutputBandwidth = ids.IDLen + // assetID
-		wrappers.IntLen // output typeID
+		wrappersIntLen // output typeID
 
-	intrinsicStakeableLockedOutputBandwidth = wrappers.LongLen + // locktime
-		wrappers.IntLen // output typeID
+	intrinsicStakeableLockedOutputBandwidth = wrappersLongLen + // locktime
+		wrappersIntLen // output typeID
 
-	intrinsicSECP256k1FxOutputOwnersBandwidth = wrappers.LongLen + // locktime
-		wrappers.IntLen + // threshold
-		wrappers.IntLen // num addresses
+	intrinsicSECP256k1FxOutputOwnersBandwidth = wrappersLongLen + // locktime
+		wrappersIntLen + // threshold
+		wrappersIntLen // num addresses
 
-	intrinsicSECP256k1FxOutputBandwidth = wrappers.LongLen + // amount
+	intrinsicSECP256k1FxOutputBandwidth = wrappersLongLen + // amount
 		intrinsicSECP256k1FxOutputOwnersBandwidth
 
 	intrinsicInputBandwidth = ids.IDLen + // txID
-		wrappers.IntLen + // output index
+		wrappersIntLen + // output index
 		ids.IDLen + // assetID
-		wrappers.IntLen + // input typeID
-		wrappers.IntLen // credential typeID
+		wrappersIntLen + // input typeID
+		wrappersIntLen // credential typeID
 
-	intrinsicStakeableLockedInputBandwidth = wrappers.LongLen + // locktime
-		wrappers.IntLen // input typeID
+	intrinsicStakeableLockedInputBandwidth = wrappersLongLen + // locktime
+		wrappersIntLen // input typeID
 
-	intrinsicSECP256k1FxInputBandwidth = wrappers.IntLen + // num indices
-		wrappers.IntLen // num signatures
+	intrinsicSECP256k1FxInputBandwidth = wrappersIntLen + // num indices
+		wrappersIntLen // num signatures
 
-	intrinsicSECP256k1FxTransferableInputBandwidth = wrappers.LongLen + // amount
+	intrinsicSECP256k1FxTransferableInputBandwidth = wrappersLongLen + // amount
 		intrinsicSECP256k1FxInputBandwidth
 
-	intrinsicSECP256k1FxSignatureBandwidth = wrappers.IntLen + // signature index
+	intrinsicSECP256k1FxSignatureBandwidth = wrappersIntLen + // signature index
 		secp256k1.SignatureLen // signature length
 
 	intrinsicSECP256k1FxSignatureCompute = 200 // secp256k1 signature verification time is around 200us
 
-	intrinsicConvertNetworkToL1ValidatorBandwidth = wrappers.IntLen + // nodeID length
-		wrappers.LongLen + // weight
-		wrappers.LongLen + // balance
-		wrappers.IntLen + // remaining balance owner threshold
-		wrappers.IntLen + // remaining balance owner num addresses
-		wrappers.IntLen + // deactivation owner threshold
-		wrappers.IntLen // deactivation owner num addresses
+	intrinsicConvertNetworkToL1ValidatorBandwidth = wrappersIntLen + // nodeID length
+		wrappersLongLen + // weight
+		wrappersLongLen + // balance
+		wrappersIntLen + // remaining balance owner threshold
+		wrappersIntLen + // remaining balance owner num addresses
+		wrappersIntLen + // deactivation owner threshold
+		wrappersIntLen // deactivation owner num addresses
 
 	intrinsicBLSAggregateCompute           = 5     // BLS public key aggregation time is around 5us
 	intrinsicBLSVerifyCompute              = 1_000 // BLS verification time is around 1000us
@@ -100,44 +109,44 @@ var (
 	IntrinsicAddChainValidatorTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			intrinsicNetValidatorBandwidth + // netValidator
-			wrappers.IntLen + // netAuth typeID
-			wrappers.IntLen, // netAuthCredential typeID
+			wrappersIntLen + // netAuth typeID
+			wrappersIntLen, // netAuthCredential typeID
 		gas.DBRead:  3, // get net auth + check for net transformation + check for net conversion
 		gas.DBWrite: 3, // put current staker + write weight diff + write pk diff
 	}
 	IntrinsicCreateChainTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			ids.IDLen + // subchainID
-			wrappers.ShortLen + // chainName length
+			wrappersShortLen + // chainName length
 			ids.IDLen + // vmID
-			wrappers.IntLen + // num fxIDs
-			wrappers.IntLen + // genesis length
-			wrappers.IntLen + // chainAuth typeID
-			wrappers.IntLen, // chainAuthCredential typeID
+			wrappersIntLen + // num fxIDs
+			wrappersIntLen + // genesis length
+			wrappersIntLen + // chainAuth typeID
+			wrappersIntLen, // chainAuthCredential typeID
 		gas.DBRead:  3, // get chain auth + check for chain transformation + check for chain conversion
 		gas.DBWrite: 1, // put chain
 	}
 	IntrinsicCreateNetworkTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
-			wrappers.IntLen, // owner typeID
+			wrappersIntLen, // owner typeID
 		gas.DBWrite: 1, // write chain owner
 	}
 	IntrinsicImportTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			ids.IDLen + // source chainID
-			wrappers.IntLen, // num importing inputs
+			wrappersIntLen, // num importing inputs
 	}
 	IntrinsicExportTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			ids.IDLen + // destination chainID
-			wrappers.IntLen, // num exported outputs
+			wrappersIntLen, // num exported outputs
 	}
 	IntrinsicRemoveChainValidatorTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			ids.NodeIDLen + // nodeID
 			ids.IDLen + // netID
-			wrappers.IntLen + // netAuth typeID
-			wrappers.IntLen, // netAuthCredential typeID
+			wrappersIntLen + // netAuth typeID
+			wrappersIntLen, // netAuthCredential typeID
 		gas.DBRead:  1, // read net auth
 		gas.DBWrite: 3, // delete validator + write weight diff + write pk diff
 	}
@@ -145,11 +154,11 @@ var (
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			intrinsicValidatorBandwidth + // validator
 			ids.IDLen + // subchainID
-			wrappers.IntLen + // signer typeID
-			wrappers.IntLen + // num stake outs
-			wrappers.IntLen + // validator rewards typeID
-			wrappers.IntLen + // delegator rewards typeID
-			wrappers.IntLen, // delegation shares
+			wrappersIntLen + // signer typeID
+			wrappersIntLen + // num stake outs
+			wrappersIntLen + // validator rewards typeID
+			wrappersIntLen + // delegator rewards typeID
+			wrappersIntLen, // delegation shares
 		gas.DBRead:  1, // get staking config
 		gas.DBWrite: 3, // put current staker + write weight diff + write pk diff
 	}
@@ -157,17 +166,17 @@ var (
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			intrinsicValidatorBandwidth + // validator
 			ids.IDLen + // subchainID
-			wrappers.IntLen + // num stake outs
-			wrappers.IntLen, // delegator rewards typeID
+			wrappersIntLen + // num stake outs
+			wrappersIntLen, // delegator rewards typeID
 		gas.DBRead:  1, // get staking config
 		gas.DBWrite: 2, // put current staker + write weight diff
 	}
 	IntrinsicTransferChainOwnershipTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			ids.IDLen + // netID
-			wrappers.IntLen + // netAuth typeID
-			wrappers.IntLen + // owner typeID
-			wrappers.IntLen, // netAuthCredential typeID
+			wrappersIntLen + // netAuth typeID
+			wrappersIntLen + // owner typeID
+			wrappersIntLen, // netAuthCredential typeID
 		gas.DBRead:  1, // read net auth
 		gas.DBWrite: 1, // set net owner
 	}
@@ -175,71 +184,71 @@ var (
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			ids.IDLen + // netID
 			ids.IDLen + // assetID
-			wrappers.IntLen + // initialSupply
-			wrappers.IntLen + // maximumSupply
-			wrappers.IntLen + // minConsumptionRate
-			wrappers.IntLen + // maxConsumptionRate
-			wrappers.LongLen + // minValidatorStake
-			wrappers.LongLen + // maxValidatorStake
-			wrappers.IntLen + // minStakeDuration
-			wrappers.IntLen + // maxStakeDuration
-			wrappers.IntLen + // minDelegationFee
-			wrappers.IntLen + // minDelegatorStake
-			wrappers.IntLen + // maxValidatorWeightFactor
-			wrappers.IntLen + // uptimeRequirement
-			wrappers.IntLen + // netAuth typeID
-			wrappers.IntLen, // netAuthCredential typeID
+			wrappersIntLen + // initialSupply
+			wrappersIntLen + // maximumSupply
+			wrappersIntLen + // minConsumptionRate
+			wrappersIntLen + // maxConsumptionRate
+			wrappersLongLen + // minValidatorStake
+			wrappersLongLen + // maxValidatorStake
+			wrappersIntLen + // minStakeDuration
+			wrappersIntLen + // maxStakeDuration
+			wrappersIntLen + // minDelegationFee
+			wrappersIntLen + // minDelegatorStake
+			wrappersIntLen + // maxValidatorWeightFactor
+			wrappersIntLen + // uptimeRequirement
+			wrappersIntLen + // netAuth typeID
+			wrappersIntLen, // netAuthCredential typeID
 		gas.DBRead:  2, // get net auth + check for net transformation
 		gas.DBWrite: 1, // write net transformation
 	}
 	IntrinsicBaseTxComplexities = gas.Dimensions{
-		gas.Bandwidth: codec.VersionSize + // codecVersion
-			wrappers.IntLen + // typeID
-			wrappers.IntLen + // networkID
+		gas.Bandwidth: codecVersionSize + // codecVersion
+			wrappersIntLen + // typeID
+			wrappersIntLen + // networkID
 			ids.IDLen + // blockchainID
-			wrappers.IntLen + // number of outputs
-			wrappers.IntLen + // number of inputs
-			wrappers.IntLen + // length of memo
-			wrappers.IntLen, // number of credentials
+			wrappersIntLen + // number of outputs
+			wrappersIntLen + // number of inputs
+			wrappersIntLen + // length of memo
+			wrappersIntLen, // number of credentials
 	}
 	IntrinsicConvertNetworkToL1TxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			ids.IDLen + // subchainID
 			ids.IDLen + // chainID
-			wrappers.IntLen + // address length
-			wrappers.IntLen + // validators length
-			wrappers.IntLen + // chainAuth typeID
-			wrappers.IntLen, // chainAuthCredential typeID
+			wrappersIntLen + // address length
+			wrappersIntLen + // validators length
+			wrappersIntLen + // chainAuth typeID
+			wrappersIntLen, // chainAuthCredential typeID
 		gas.DBRead:  3, // chain auth + transformation lookup + conversion lookup
 		gas.DBWrite: 2, // write conversion manager + total weight
 	}
 	IntrinsicRegisterL1ValidatorTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
-			wrappers.LongLen + // balance
+			wrappersLongLen + // balance
 			bls.SignatureLen + // proof of possession
-			wrappers.IntLen, // message length
+			wrappersIntLen, // message length
 		gas.DBRead:  5, // conversion owner + expiry lookup + sov lookup + subchainID/nodeID lookup + weight lookup
 		gas.DBWrite: 6, // write current staker + expiry + write weight diff + write pk diff + subchainID/nodeID lookup + weight lookup
 		gas.Compute: intrinsicBLSPoPVerifyCompute,
 	}
 	IntrinsicSetL1ValidatorWeightTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
-			wrappers.IntLen, // message length
+			wrappersIntLen, // message length
 		gas.DBRead:  3, // read staker + read conversion + read weight
 		gas.DBWrite: 5, // remaining balance utxo + write weight diff + write pk diff + weights lookup + validator write
 	}
 	IntrinsicIncreaseL1ValidatorBalanceTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			ids.IDLen + // validationID
-			wrappers.LongLen, // balance
+			wrappersLongLen, // balance
 		gas.DBRead:  1, // read staker
 		gas.DBWrite: 5, // weight diff + deactivated weight diff + public key diff + delete staker + write staker
 	}
 	IntrinsicDisableL1ValidatorTxComplexities = gas.Dimensions{
 		gas.Bandwidth: IntrinsicBaseTxComplexities[gas.Bandwidth] +
 			ids.IDLen + // validationID
-			wrappers.IntLen + // auth typeID
-			wrappers.IntLen, // authCredential typeID
+			wrappersIntLen + // auth typeID
+			wrappersIntLen, // authCredential typeID
 		gas.DBRead:  1, // read staker
 		gas.DBWrite: 6, // write remaining balance utxo + weight diff + deactivated weight diff + public key diff + delete staker + write staker
 	}
@@ -251,13 +260,19 @@ var (
 	errUnsupportedSigner = errors.New("unsupported signer type")
 )
 
-func TxComplexity(txs ...txs.UnsignedTx) (gas.Dimensions, error) {
+// TxComplexity computes the gas-cost dimensions for one or more
+// unsigned PVM txs. The warpCodec is the proto/p/warp codec used by the
+// L1-validator family (Register / SetWeight / Increase / Disable) to
+// parse the warp message embedded in those txs; pass nil if none of
+// the supplied txs carry warp messages — TxComplexity will surface a
+// nil-codec error from the visitor at the first warp parse attempt.
+func TxComplexity(warpCodec warp.Codec, txList ...txs.UnsignedTx) (gas.Dimensions, error) {
 	var (
 		c          complexityVisitor
 		complexity gas.Dimensions
 	)
-	for _, tx := range txs {
-		c = complexityVisitor{}
+	for _, tx := range txList {
+		c = complexityVisitor{warpCodec: warpCodec}
 		err := tx.Visit(&c)
 		if err != nil {
 			return gas.Dimensions{}, err
@@ -486,9 +501,12 @@ func SignerComplexity(s signer.Signer) (gas.Dimensions, error) {
 	}
 }
 
-// WarpComplexity returns the complexity a warp message adds to a transaction.
-func WarpComplexity(message []byte) (gas.Dimensions, error) {
-	msg, err := warp.ParseMessage(message)
+// WarpComplexity returns the complexity a warp message adds to a
+// transaction. The warpCodec is the proto/p/warp codec used to parse
+// the supplied message bytes; callers thread it in from their PVM
+// parser bundle.
+func WarpComplexity(warpCodec warp.Codec, message []byte) (gas.Dimensions, error) {
+	msg, err := warp.ParseMessage(warpCodec, message)
 	if err != nil {
 		return gas.Dimensions{}, err
 	}
@@ -515,7 +533,8 @@ func WarpComplexity(message []byte) (gas.Dimensions, error) {
 }
 
 type complexityVisitor struct {
-	output gas.Dimensions
+	output    gas.Dimensions
+	warpCodec warp.Codec
 }
 
 func (*complexityVisitor) AddValidatorTx(*txs.AddValidatorTx) error {
@@ -767,7 +786,7 @@ func (c *complexityVisitor) RegisterL1ValidatorTx(tx *txs.RegisterL1ValidatorTx)
 	if err != nil {
 		return err
 	}
-	warpComplexity, err := WarpComplexity(tx.Message)
+	warpComplexity, err := WarpComplexity(c.warpCodec, tx.Message)
 	if err != nil {
 		return err
 	}
@@ -783,7 +802,7 @@ func (c *complexityVisitor) SetL1ValidatorWeightTx(tx *txs.SetL1ValidatorWeightT
 	if err != nil {
 		return err
 	}
-	warpComplexity, err := WarpComplexity(tx.Message)
+	warpComplexity, err := WarpComplexity(c.warpCodec, tx.Message)
 	if err != nil {
 		return err
 	}

@@ -31,7 +31,10 @@ func (b *BanffStandardBlock) Visit(v Visitor) error {
 	return v.BanffStandardBlock(b)
 }
 
+// NewBanffStandardBlock builds and initializes a BanffStandardBlock
+// against the supplied block Codec.
 func NewBanffStandardBlock(
+	c Codec,
 	timestamp time.Time,
 	parentID ids.ID,
 	height uint64,
@@ -47,7 +50,7 @@ func NewBanffStandardBlock(
 			Transactions: txs,
 		},
 	}
-	return blk, initialize(blk, &blk.CommonBlock)
+	return blk, initialize(c, blk, &blk.CommonBlock)
 }
 
 type ApricotStandardBlock struct {
@@ -55,10 +58,10 @@ type ApricotStandardBlock struct {
 	Transactions []*txs.Tx `serialize:"true" json:"txs"`
 }
 
-func (b *ApricotStandardBlock) initialize(bytes []byte) error {
+func (b *ApricotStandardBlock) initialize(bytes []byte, c Codec) error {
 	b.CommonBlock.initialize(bytes)
 	for _, tx := range b.Transactions {
-		if err := tx.Initialize(txs.Codec); err != nil {
+		if err := tx.Initialize(c); err != nil {
 			return fmt.Errorf("failed to initialize tx: %w", err)
 		}
 	}
@@ -81,8 +84,10 @@ func (b *ApricotStandardBlock) Visit(v Visitor) error {
 
 // NewApricotStandardBlock is kept for testing purposes only.
 // Following Banff activation and subsequent code cleanup, Apricot Standard blocks
-// should be only verified (upon bootstrap), never created anymore
+// should be only verified (upon bootstrap), never created anymore.
+// It builds and initializes the block against the supplied block Codec.
 func NewApricotStandardBlock(
+	c Codec,
 	parentID ids.ID,
 	height uint64,
 	txs []*txs.Tx,
@@ -94,7 +99,7 @@ func NewApricotStandardBlock(
 		},
 		Transactions: txs,
 	}
-	return blk, initialize(blk, &blk.CommonBlock)
+	return blk, initialize(c, blk, &blk.CommonBlock)
 }
 
 // InitializeWithContext initializes the block with consensus context

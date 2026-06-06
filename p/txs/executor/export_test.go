@@ -65,7 +65,7 @@ func TestNewExportTx(t *testing.T) {
 
 			stateDiff.SetTimestamp(tt.timestamp)
 
-			feeCalculator := state.PickFeeCalculator(env.config, stateDiff)
+			feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, stateDiff)
 			_, _, _, err = StandardTx(
 				&env.backend,
 				feeCalculator,

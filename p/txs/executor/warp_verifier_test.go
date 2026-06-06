@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
+	"github.com/luxfi/proto/internal/pcodectest"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
@@ -47,7 +47,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 		}
 	)
 
-	validUnsignedWarpMessage, err := warp.NewUnsignedMessage(
+	validUnsignedWarpMessage, err := warp.NewUnsignedMessage(helpersTestWarpCodec, 
 		constants.UnitTestID,
 		chainID,
 		nil,
@@ -66,14 +66,14 @@ func TestVerifyWarpMessages(t *testing.T) {
 		Signers:   set.NewBits(0, 1).Bytes(),
 		Signature: [bls.SignatureLen]byte(bls.SignatureToBytes(sig)),
 	}
-	validWarpMessage, err := warp.NewMessage(
+	validWarpMessage, err := warp.NewMessage(helpersTestWarpCodec, 
 		validUnsignedWarpMessage,
 		warpSignature,
 	)
 	require.NoError(t, err)
 
-	invalidWarpMessage, err := warp.NewMessage(
-		must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+	invalidWarpMessage, err := warp.NewMessage(helpersTestWarpCodec, 
+		must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 			constants.UnitTestID+1,
 			chainID,
 			nil,
@@ -154,7 +154,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 		{
 			name:        "RegisterL1ValidatorTx with unparsable message",
 			tx:          &txs.RegisterL1ValidatorTx{},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			name: "RegisterL1ValidatorTx with invalid message",
@@ -172,7 +172,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 		{
 			name:        "SetL1ValidatorWeightTx with unparsable message",
 			tx:          &txs.SetL1ValidatorWeightTx{},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			name: "SetL1ValidatorWeightTx with invalid message",
@@ -201,6 +201,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 			err := VerifyWarpMessages(
 				context.Background(),
 				constants.UnitTestID,
+				helpersTestWarpCodec,
 				state,
 				0,
 				test.tx,

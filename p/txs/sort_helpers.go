@@ -14,6 +14,14 @@ func sortByCompare[T interface{ Compare(T) int }](s []T) {
 	})
 }
 
+// SortByCompare is the exported entry point for sortByCompare. Tests in
+// external test packages (proto/p/txs_test, etc.) reach for this when
+// they need to assemble the canonical input/output ordering that
+// matches what the production txs.Tx serialiser produces.
+func SortByCompare[T interface{ Compare(T) int }](s []T) {
+	sortByCompare(s)
+}
+
 func isSortedAndUniqueByCompare[T interface{ Compare(T) int }](s []T) bool {
 	for i := 1; i < len(s); i++ {
 		if s[i-1].Compare(s[i]) >= 0 {

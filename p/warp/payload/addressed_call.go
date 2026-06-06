@@ -19,19 +19,20 @@ type AddressedCall struct {
 	bytes []byte
 }
 
-// NewAddressedCall creates a new *AddressedCall and initializes it.
-func NewAddressedCall(sourceAddress []byte, payload []byte) (*AddressedCall, error) {
+// NewAddressedCall creates a new *AddressedCall and initializes it
+// against the supplied Codec.
+func NewAddressedCall(c Codec, sourceAddress []byte, payload []byte) (*AddressedCall, error) {
 	ap := &AddressedCall{
 		SourceAddress: sourceAddress,
 		Payload:       payload,
 	}
-	return ap, initialize(ap)
+	return ap, initialize(c, ap)
 }
 
 // ParseAddressedCall converts a slice of bytes into an initialized
-// AddressedCall.
-func ParseAddressedCall(b []byte) (*AddressedCall, error) {
-	payloadIntf, err := Parse(b)
+// AddressedCall using the supplied Codec.
+func ParseAddressedCall(c Codec, b []byte) (*AddressedCall, error) {
+	payloadIntf, err := Parse(c, b)
 	if err != nil {
 		return nil, err
 	}

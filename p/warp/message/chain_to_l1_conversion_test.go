@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package message
+package message_test
 
 import (
 	"testing"
@@ -11,11 +11,14 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pvmcodectest"
+	"github.com/luxfi/proto/p/warp/message"
 	"github.com/luxfi/vm/types"
 )
 
 func TestChainToL1ConversionID(t *testing.T) {
 	require := require.New(t)
+	c := pvmcodectest.NewMessageCodec()
 
 	chainToL1ConversionDataBytes := []byte{
 		// Codec version:
@@ -55,7 +58,7 @@ func TestChainToL1ConversionID(t *testing.T) {
 	}
 	var expectedChainToL1ConversionID ids.ID = hash.ComputeHash256Array(chainToL1ConversionDataBytes)
 
-	chainToL1ConversionData := ChainToL1ConversionData{
+	chainToL1ConversionData := message.ChainToL1ConversionData{
 		ChainID: ids.ID{
 			0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 			0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
@@ -69,7 +72,7 @@ func TestChainToL1ConversionID(t *testing.T) {
 			0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f, 0x40,
 		},
 		ManagerAddress: []byte{0x41},
-		Validators: []ChainToL1ConversionValidatorData{
+		Validators: []message.ChainToL1ConversionValidatorData{
 			{
 				NodeID: types.JSONByteSlice([]byte{
 					0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49,
@@ -88,18 +91,19 @@ func TestChainToL1ConversionID(t *testing.T) {
 			},
 		},
 	}
-	chainToL1ConversionID, err := ChainToL1ConversionID(chainToL1ConversionData)
+	chainToL1ConversionID, err := message.ChainToL1ConversionID(c, chainToL1ConversionData)
 	require.NoError(err)
 	require.Equal(expectedChainToL1ConversionID, chainToL1ConversionID)
 }
 
 func TestChainToL1Conversion(t *testing.T) {
 	require := require.New(t)
+	c := pvmcodectest.NewMessageCodec()
 
-	msg, err := NewChainToL1Conversion(ids.GenerateTestID())
+	msg, err := message.NewChainToL1Conversion(c, ids.GenerateTestID())
 	require.NoError(err)
 
-	parsed, err := ParseChainToL1Conversion(msg.Bytes())
+	parsed, err := message.ParseChainToL1Conversion(c, msg.Bytes())
 	require.NoError(err)
 	require.Equal(msg, parsed)
 }

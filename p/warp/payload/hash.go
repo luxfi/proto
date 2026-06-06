@@ -17,17 +17,19 @@ type Hash struct {
 	bytes []byte
 }
 
-// NewHash creates a new *Hash and initializes it.
-func NewHash(hash ids.ID) (*Hash, error) {
+// NewHash creates a new *Hash and initializes it against the supplied
+// Codec.
+func NewHash(c Codec, hash ids.ID) (*Hash, error) {
 	bhp := &Hash{
 		Hash: hash,
 	}
-	return bhp, initialize(bhp)
+	return bhp, initialize(c, bhp)
 }
 
-// ParseHash converts a slice of bytes into an initialized Hash.
-func ParseHash(b []byte) (*Hash, error) {
-	payloadIntf, err := Parse(b)
+// ParseHash converts a slice of bytes into an initialized Hash using
+// the supplied Codec.
+func ParseHash(c Codec, b []byte) (*Hash, error) {
+	payloadIntf, err := Parse(c, b)
 	if err != nil {
 		return nil, err
 	}

@@ -15,19 +15,19 @@ type delegatorMetadata struct {
 	txID ids.ID
 }
 
-func parseDelegatorMetadata(bytes []byte, metadata *delegatorMetadata) error {
+func parseDelegatorMetadata(c MetadataCodec, bytes []byte, metadata *delegatorMetadata) error {
 	var err error
 	switch len(bytes) {
 	case database.Uint64Size:
 		// only potential reward was stored
 		metadata.PotentialReward, err = database.ParseUInt64(bytes)
 	default:
-		_, err = MetadataCodec.Unmarshal(bytes, metadata)
+		_, err = c.Unmarshal(bytes, metadata)
 	}
 	return err
 }
 
-func writeDelegatorMetadata(db database.KeyValueWriter, metadata *delegatorMetadata, codecVersion uint16) error {
+func writeDelegatorMetadata(c MetadataCodec, db database.KeyValueWriter, metadata *delegatorMetadata, codecVersion uint16) error {
 	// The "0" codec is skipped for [delegatorMetadata]. This is to ensure the
 	// [validatorMetadata] codec version is the same as the [delegatorMetadata]
 	// codec version.
@@ -35,7 +35,7 @@ func writeDelegatorMetadata(db database.KeyValueWriter, metadata *delegatorMetad
 	if codecVersion == 0 {
 		return database.PutUInt64(db, metadata.txID[:], metadata.PotentialReward)
 	}
-	metadataBytes, err := MetadataCodec.Marshal(codecVersion, metadata)
+	metadataBytes, err := c.Marshal(codecVersion, metadata)
 	if err != nil {
 		return err
 	}

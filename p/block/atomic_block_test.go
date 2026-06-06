@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package block
+package block_test
 
 import (
 	"testing"
@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pvmcodectest"
+	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
@@ -16,6 +18,8 @@ import (
 
 func TestNewApricotAtomicBlock(t *testing.T) {
 	require := require.New(t)
+	codecs := pvmcodectest.NewPVMCodecs()
+	c := codecs.GenesisCodec
 
 	parentID := ids.GenerateTestID()
 	height := uint64(1337)
@@ -31,9 +35,9 @@ func TestNewApricotAtomicBlock(t *testing.T) {
 		},
 		Creds: []verify.Verifiable{},
 	}
-	require.NoError(tx.Initialize(txs.Codec))
+	require.NoError(tx.Initialize(c))
 
-	blk, err := NewApricotAtomicBlock(
+	blk, err := block.NewApricotAtomicBlock(c,
 		parentID,
 		height,
 		tx,

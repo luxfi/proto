@@ -9,7 +9,6 @@ import (
 
 	"github.com/luxfi/metric"
 
-	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/ids"
 	utilmetric "github.com/luxfi/metric"
 	"github.com/luxfi/proto/p/block"
@@ -145,16 +144,14 @@ func New(registerer metric.Registerer) (Metrics, error) {
 		}),
 	}
 
-	errs := wrappers.Errs{Err: err}
 	registry, ok := registerer.(metric.Registry)
 	if !ok {
 		return nil, errors.New("registerer must be a Registry")
 	}
-	apiRequestMetrics, err := utilmetric.NewAPIInterceptor(registry)
-	errs.Add(err)
+	apiRequestMetrics, apiErr := utilmetric.NewAPIInterceptor(registry)
 	m.APIInterceptor = apiRequestMetrics
 
-	errs.Add(
+	regErr := errors.Join(
 		registerer.Register(metric.AsCollector(m.timeUntilUnstake)),
 		registerer.Register(metric.AsCollector(m.timeUntilNetUnstake)),
 		registerer.Register(metric.AsCollector(m.localStake)),
@@ -172,7 +169,7 @@ func New(registerer metric.Registerer) (Metrics, error) {
 		registerer.Register(metric.AsCollector(m.validatorSetsDuration)),
 	)
 
-	return m, errs.Err
+	return m, errors.Join(err, apiErr, regErr)
 }
 
 type metricsImpl struct {

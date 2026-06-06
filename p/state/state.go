@@ -21,8 +21,6 @@ import (
 	"github.com/luxfi/cache"
 	"github.com/luxfi/cache/lru"
 	"github.com/luxfi/cache/metercacher"
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/container/maybe"
@@ -263,21 +261,17 @@ type stateBlk struct {
 	Status uint32 `serialize:"true"`
 }
 
-// RegisterStateBlockType registers the stateBlk type with the given codec.
-// This is needed for backward compatibility with old block storage format.
-func RegisterStateBlockType(targetCodec codec.Registry) error {
+// RegisterStateBlockType registers the legacy stateBlk type with the
+// given block-genesis Registry. Callers MUST invoke this against the
+// genesis-side linearcodec.Codec before constructing a State whose
+// parseStoredBlock will encounter legacy-format blocks. After the Wave
+// 2A codec rip (#101) the state package no longer carries its own
+// init() side-effect — the registration is now explicit and ordered
+// alongside the rest of the PVM type registration in
+// proto/internal/pcodectest.NewPVMCodecs (and in the production PVM
+// wiring downstream).
+func RegisterStateBlockType(targetCodec block.Registry) error {
 	return targetCodec.RegisterType(&stateBlk{})
-}
-
-// Initialize the stateBlk type registration with the block codecs.
-// This must be called before using parseStoredBlock for backward compatibility.
-func init() {
-	// We need to register stateBlk with block.GenesisCodec so that
-	// parseStoredBlock can deserialize legacy block storage format.
-	// Since state imports block (no import cycle), we can register directly.
-	if err := block.RegisterGenesisType(&stateBlk{}); err != nil {
-		panic(err)
-	}
 }
 
 /*
@@ -360,6 +354,19 @@ func init() {
  */
 type state struct {
 	validatorState
+
+	// genesisCodec is the proto/p block-genesis codec (codec.Manager
+	// with the MaxInt32 size budget, all Apricot/Banff/Durango/Quasar
+	// types registered). Used for marshalling state-side payloads
+	// (owners, indexedHeights, L1Validator, fee state, etc.) and for
+	// parsing genesis-style block bytes via block.Parse. After the
+	// Wave 2A codec rip (#101), this is the only codec the state
+	// package holds for non-runtime work.
+	genesisCodec block.Codec
+
+	// txCodec is the proto/p runtime tx codec (codec.NewDefaultManager
+	// with the standard size budget). Used for parsing runtime UTXOs.
+	txCodec txs.Codec
 
 	validators validators.Manager
 	runtime    *runtime.Runtime
@@ -551,7 +558,7 @@ func txAndStatusSize(_ ids.ID, t *txAndStatus) int {
 	if t == nil {
 		return ids.IDLen + constants.PointerOverhead
 	}
-	return ids.IDLen + len(t.tx.Bytes()) + wrappers.IntLen + 2*constants.PointerOverhead
+	return ids.IDLen + len(t.tx.Bytes()) + 4 + 2*constants.PointerOverhead
 }
 
 func blockSize(_ ids.ID, blk block.Block) int {
@@ -561,9 +568,19 @@ func blockSize(_ ids.ID, blk block.Block) int {
 	return ids.IDLen + len(blk.Bytes()) + constants.PointerOverhead
 }
 
+// New constructs a State backed by db. genesisCodec is the proto/p
+// block-genesis codec (block.RegisterTypes bound through a
+// codec.NewManager(math.MaxInt32) — typically built via
+// proto/internal/pcodectest.NewPVMCodecs() in tests, or via the PVM's
+// own codec wiring in production). txCodec is the runtime tx codec
+// (codec.NewDefaultManager bound through the same RegisterTypes).
+// Both codecs MUST have stateBlk pre-registered on the genesisCodec
+// registry — see RegisterStateBlockType.
 func New(
 	db database.Database,
 	genesisBytes []byte,
+	genesisCodec block.Codec,
+	txCodec txs.Codec,
 	metricsReg metric.Registerer,
 	validators validators.Manager,
 	upgrades upgrade.Config,
@@ -625,7 +642,7 @@ func New(
 		"l1_validator_weights_cache",
 		reg,
 		lru.NewSizedCache(execCfg.L1WeightsCacheSize, func(ids.ID, uint64) int {
-			return ids.IDLen + wrappers.LongLen
+			return ids.IDLen + 8
 		}),
 	)
 	if err != nil {
@@ -639,8 +656,8 @@ func New(
 			execCfg.L1InactiveValidatorsCacheSize,
 			func(_ ids.ID, maybeL1Validator maybe.Maybe[L1Validator]) int {
 				const (
-					l1ValidatorOverhead      = ids.IDLen + ids.NodeIDLen + 4*wrappers.LongLen + 3*constants.PointerOverhead
-					maybeL1ValidatorOverhead = wrappers.BoolLen + l1ValidatorOverhead
+					l1ValidatorOverhead      = ids.IDLen + ids.NodeIDLen + 4*8 + 3*constants.PointerOverhead
+					maybeL1ValidatorOverhead = 1 + l1ValidatorOverhead
 					entryOverhead            = ids.IDLen + maybeL1ValidatorOverhead
 				)
 				if maybeL1Validator.IsNothing() {
@@ -660,7 +677,7 @@ func New(
 		"l1_validator_chain_id_node_id_cache",
 		reg,
 		lru.NewSizedCache(execCfg.L1NetIDNodeIDCacheSize, func(chainIDNodeID, bool) int {
-			return ids.IDLen + ids.NodeIDLen + wrappers.BoolLen
+			return ids.IDLen + ids.NodeIDLen + 1
 		}),
 	)
 	if err != nil {
@@ -765,6 +782,9 @@ func New(
 
 	s := &state{
 		validatorState: newValidatorState(),
+
+		genesisCodec: genesisCodec,
+		txCodec:      txCodec,
 
 		validators: validators,
 		runtime:    rt,
@@ -987,7 +1007,7 @@ func (s *state) getPersistedL1Validator(validationID ids.ID) (L1Validator, error
 		return l1Validator, nil
 	}
 
-	return getL1Validator(s.inactiveCache, s.inactiveDB, validationID)
+	return getL1Validator(s.genesisCodec, s.inactiveCache, s.inactiveDB, validationID)
 }
 
 func (s *state) HasL1Validator(chainID ids.ID, nodeID ids.NodeID) (bool, error) {
@@ -1122,7 +1142,7 @@ func (s *state) GetNetOwner(netID ids.ID) (fx.Owner, error) {
 	ownerBytes, err := s.chainOwnerDB.Get(netID[:])
 	if err == nil {
 		var owner fx.Owner
-		if _, err := block.GenesisCodec.Unmarshal(ownerBytes, &owner); err != nil {
+		if _, err := s.genesisCodec.Unmarshal(ownerBytes, &owner); err != nil {
 			return nil, err
 		}
 		s.chainOwnerCache.Put(netID, fxOwnerAndSize{
@@ -1172,7 +1192,7 @@ func (s *state) GetNetToL1Conversion(chainID ids.ID) (NetToL1Conversion, error) 
 	}
 
 	var c NetToL1Conversion
-	if _, err := block.GenesisCodec.Unmarshal(bytes, &c); err != nil {
+	if _, err := s.genesisCodec.Unmarshal(bytes, &c); err != nil {
 		return NetToL1Conversion{}, err
 	}
 	s.chainToL1ConversionCache.Put(chainID, c)
@@ -1329,11 +1349,11 @@ func (s *state) GetTx(txID ids.ID) (*txs.Tx, status.Status, error) {
 	}
 
 	stx := txBytesAndStatus{}
-	if _, err := txs.GenesisCodec.Unmarshal(txBytes, &stx); err != nil {
+	if _, err := s.genesisCodec.Unmarshal(txBytes, &stx); err != nil {
 		return nil, status.Unknown, err
 	}
 
-	tx, err := txs.Parse(txs.GenesisCodec, stx.Tx)
+	tx, err := txs.Parse(s.genesisCodec, stx.Tx)
 	if err != nil {
 		return nil, status.Unknown, err
 	}
@@ -1370,7 +1390,7 @@ func (s *state) GetRewardUTXOs(txID ids.ID) ([]*lux.UTXO, error) {
 	utxos := []*lux.UTXO(nil)
 	for it.Next() {
 		utxo := &lux.UTXO{}
-		if _, err := txs.Codec.Unmarshal(it.Value(), utxo); err != nil {
+		if _, err := s.txCodec.Unmarshal(it.Value(), utxo); err != nil {
 			return nil, err
 		}
 		utxos = append(utxos, utxo)
@@ -1667,7 +1687,7 @@ func (s *state) syncGenesis(genesisBlk block.Block, genesis *genesis.Genesis) er
 	// We must directly write it since both feeState and persistedFeeState
 	// start as zero values and won't trigger the write in writeMetadata
 	initialFeeState := gas.State{}
-	if err := putFeeState(s.singletonDB, initialFeeState); err != nil {
+	if err := putFeeState(s.genesisCodec, s.singletonDB, initialFeeState); err != nil {
 		return fmt.Errorf("failed to write initial fee state: %w", err)
 	}
 	s.feeState = initialFeeState
@@ -1771,7 +1791,7 @@ func (s *state) loadMetadata() error {
 	s.persistedTimestamp = timestamp
 	s.SetTimestamp(timestamp)
 
-	feeState, err := getFeeState(s.singletonDB)
+	feeState, err := getFeeState(s.genesisCodec, s.singletonDB)
 	if err != nil {
 		return err
 	}
@@ -1825,7 +1845,7 @@ func (s *state) loadMetadata() error {
 	}
 
 	indexedHeights := &heightRange{}
-	_, err = block.GenesisCodec.Unmarshal(indexedHeightsBytes, indexedHeights)
+	_, err = s.genesisCodec.Unmarshal(indexedHeightsBytes, indexedHeights)
 	if err != nil {
 		return err
 	}
@@ -1876,7 +1896,7 @@ func (s *state) loadActiveL1Validators() error {
 				ValidationID: validationID,
 			}
 		)
-		if _, err := block.GenesisCodec.Unmarshal(value, &l1Validator); err != nil {
+		if _, err := s.genesisCodec.Unmarshal(value, &l1Validator); err != nil {
 			return fmt.Errorf("failed to unmarshal L1 validator: %w", err)
 		}
 
@@ -1923,7 +1943,7 @@ func (s *state) loadCurrentValidators() error {
 			// always be present on disk.
 			metadata.StakerStartTime = uint64(scheduledStakerTx.StartTime().Unix())
 		}
-		if err := parseValidatorMetadata(metadataBytes, metadata); err != nil {
+		if err := parseValidatorMetadata(s.genesisCodec, metadataBytes, metadata); err != nil {
 			return err
 		}
 
@@ -1982,7 +2002,7 @@ func (s *state) loadCurrentValidators() error {
 			metadata.StakerStartTime = startTime
 			metadata.LastUpdated = startTime
 		}
-		if err := parseValidatorMetadata(metadataBytes, metadata); err != nil {
+		if err := parseValidatorMetadata(s.genesisCodec, metadataBytes, metadata); err != nil {
 			return err
 		}
 
@@ -2033,7 +2053,7 @@ func (s *state) loadCurrentValidators() error {
 				// database.
 				metadata.StakerStartTime = uint64(scheduledStakerTx.StartTime().Unix())
 			}
-			err = parseDelegatorMetadata(metadataBytes, metadata)
+			err = parseDelegatorMetadata(s.genesisCodec, metadataBytes, metadata)
 			if err != nil {
 				return err
 			}
@@ -2178,7 +2198,7 @@ func (s *state) initValidatorSets() error {
 		}
 
 		var l1Validator L1Validator
-		if _, err := block.GenesisCodec.Unmarshal(inactiveIt.Value(), &l1Validator); err != nil {
+		if _, err := s.genesisCodec.Unmarshal(inactiveIt.Value(), &l1Validator); err != nil {
 			return fmt.Errorf("failed to unmarshal inactive L1 validator: %w", err)
 		}
 		l1Validator.ValidationID = validationID
@@ -2270,7 +2290,7 @@ func (s *state) write(updateValidators bool, height uint64) error {
 		s.writeValidatorDiffs(height),
 		s.writeCurrentStakers(codecVersion),
 		s.writePendingStakers(),
-		s.WriteValidatorMetadata(s.currentValidatorList, s.currentNetValidatorList, codecVersion), // Must be called after writeCurrentStakers
+		s.WriteValidatorMetadata(s.genesisCodec, s.currentValidatorList, s.currentNetValidatorList, codecVersion), // Must be called after writeCurrentStakers
 		s.writeL1Validators(),
 		s.writeTXs(),
 		s.writeRewardUTXOs(),
@@ -2330,12 +2350,12 @@ func (s *state) init(genesisBytes []byte) error {
 	// genesisBlock.Accept() because then it'd look for genesisBlock's
 	// non-existent parent)
 	genesisID := hash.ComputeHash256Array(genesisBytes)
-	genesisBlock, err := block.NewApricotCommitBlock(genesisID, 0 /*height*/)
+	genesisBlock, err := block.NewApricotCommitBlock(s.genesisCodec, genesisID, 0 /*height*/)
 	if err != nil {
 		return err
 	}
 
-	parsedGenesis, err := genesis.Parse(genesisBytes)
+	parsedGenesis, err := genesis.Parse(s.genesisCodec, genesisBytes)
 	if err != nil {
 		return err
 	}
@@ -2449,7 +2469,7 @@ func (s *state) GetStatelessBlock(blockID ids.ID) (block.Block, error) {
 		return nil, err
 	}
 
-	blk, _, err := parseStoredBlock(blkBytes)
+	blk, _, err := parseStoredBlock(s.genesisCodec, blkBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -2873,7 +2893,7 @@ func (s *state) writeCurrentStakers(codecVersion uint16) error {
 					PotentialDelegateeReward: 0,
 				}
 
-				metadataBytes, err := MetadataCodec.Marshal(codecVersion, metadata)
+				metadataBytes, err := s.genesisCodec.Marshal(codecVersion, metadata)
 				if err != nil {
 					return fmt.Errorf("failed to serialize current validator: %w", err)
 				}
@@ -2892,6 +2912,7 @@ func (s *state) writeCurrentStakers(codecVersion uint16) error {
 			}
 
 			err := writeCurrentDelegatorDiff(
+				s.genesisCodec,
 				delegatorDB,
 				validatorDiff,
 				codecVersion,
@@ -2906,6 +2927,7 @@ func (s *state) writeCurrentStakers(codecVersion uint16) error {
 }
 
 func writeCurrentDelegatorDiff(
+	c MetadataCodec,
 	currentDelegatorList linkeddb.LinkedDB,
 	validatorDiff *diffValidator,
 	codecVersion uint16,
@@ -2921,7 +2943,7 @@ func writeCurrentDelegatorDiff(
 			PotentialReward: staker.PotentialReward,
 			StakerStartTime: uint64(staker.StartTime.Unix()),
 		}
-		if err := writeDelegatorMetadata(currentDelegatorList, metadata, codecVersion); err != nil {
+		if err := writeDelegatorMetadata(c, currentDelegatorList, metadata, codecVersion); err != nil {
 			return fmt.Errorf("failed to write current delegator to list: %w", err)
 		}
 	}
@@ -3068,9 +3090,9 @@ func (s *state) writeL1Validators() error {
 		var err error
 		if l1Validator.IsActive() {
 			s.activeL1Validators.put(l1Validator)
-			err = putL1Validator(s.activeDB, emptyL1ValidatorCache, l1Validator)
+			err = putL1Validator(s.genesisCodec, s.activeDB, emptyL1ValidatorCache, l1Validator)
 		} else {
-			err = putL1Validator(s.inactiveDB, s.inactiveCache, l1Validator)
+			err = putL1Validator(s.genesisCodec, s.inactiveDB, s.inactiveCache, l1Validator)
 		}
 		if err != nil {
 			return err
@@ -3092,7 +3114,7 @@ func (s *state) writeTXs() error {
 
 		// Note that we're serializing a [txBytesAndStatus] here, not a
 		// *txs.Tx, so we don't use [txs.Codec].
-		txBytes, err := txs.GenesisCodec.Marshal(txs.CodecVersion, &stx)
+		txBytes, err := s.genesisCodec.Marshal(txs.CodecVersion, &stx)
 		if err != nil {
 			return fmt.Errorf("failed to serialize tx: %w", err)
 		}
@@ -3117,7 +3139,7 @@ func (s *state) writeRewardUTXOs() error {
 		txDB := linkeddb.NewDefault(rawTxDB)
 
 		for _, utxo := range utxos {
-			utxoBytes, err := txs.GenesisCodec.Marshal(txs.CodecVersion, utxo)
+			utxoBytes, err := s.genesisCodec.Marshal(txs.CodecVersion, utxo)
 			if err != nil {
 				return fmt.Errorf("failed to serialize reward UTXO: %w", err)
 			}
@@ -3161,7 +3183,7 @@ func (s *state) writeNetOwners() error {
 	for chainID, owner := range s.chainOwners {
 		delete(s.chainOwners, chainID)
 
-		ownerBytes, err := block.GenesisCodec.Marshal(block.CodecVersion, &owner)
+		ownerBytes, err := s.genesisCodec.Marshal(block.CodecVersion, &owner)
 		if err != nil {
 			return fmt.Errorf("failed to marshal net owner: %w", err)
 		}
@@ -3182,7 +3204,7 @@ func (s *state) writeNetToL1Conversions() error {
 	for chainID, c := range s.chainToL1Conversions {
 		delete(s.chainToL1Conversions, chainID)
 
-		bytes, err := block.GenesisCodec.Marshal(block.CodecVersion, &c)
+		bytes, err := s.genesisCodec.Marshal(block.CodecVersion, &c)
 		if err != nil {
 			return fmt.Errorf("failed to marshal chain conversion: %w", err)
 		}
@@ -3254,7 +3276,7 @@ func (s *state) writeMetadata() error {
 		s.persistedTimestamp = s.timestamp
 	}
 	if s.feeState != s.persistedFeeState {
-		if err := putFeeState(s.singletonDB, s.feeState); err != nil {
+		if err := putFeeState(s.genesisCodec, s.singletonDB, s.feeState); err != nil {
 			return fmt.Errorf("failed to write fee state: %w", err)
 		}
 		s.persistedFeeState = s.feeState
@@ -3288,7 +3310,7 @@ func (s *state) writeMetadata() error {
 		s.persistedLastAccepted = currentLastAccepted
 	}
 	if s.indexedHeights != nil {
-		indexedHeightsBytes, err := block.GenesisCodec.Marshal(block.CodecVersion, s.indexedHeights)
+		indexedHeightsBytes, err := s.genesisCodec.Marshal(block.CodecVersion, s.indexedHeights)
 		if err != nil {
 			return err
 		}
@@ -3299,27 +3321,28 @@ func (s *state) writeMetadata() error {
 	return nil
 }
 
-// Returns the block and whether it is a [stateBlk].
-// Invariant: blkBytes is safe to parse with blocks.GenesisCodec
+// parseStoredBlock returns the block and whether it is a [stateBlk]
+// using the supplied genesis-side block Codec. Invariant: blkBytes is
+// safe to parse with the genesis Codec.
 //
 // TODO: Remove after v1.14.x is activated
-func parseStoredBlock(blkBytes []byte) (block.Block, bool, error) {
+func parseStoredBlock(genesisCodec block.Codec, blkBytes []byte) (block.Block, bool, error) {
 	// Attempt to parse as blocks.Block
-	blk, err := block.Parse(block.GenesisCodec, blkBytes)
+	blk, err := block.Parse(genesisCodec, blkBytes)
 	if err == nil {
 		return blk, false, nil
 	}
 
 	// Fallback to [stateBlk] using our legacy codec
 	blkState := stateBlk{}
-	if _, err := block.GenesisCodec.Unmarshal(blkBytes, &blkState); err != nil {
+	if _, err := genesisCodec.Unmarshal(blkBytes, &blkState); err != nil {
 		// If we can't unmarshal as stateBlk, this might not be a block at all
 		// (could be an index entry or other data in the blockDB)
 		// Return the original parse error
 		return nil, false, err
 	}
 
-	blk, err = block.Parse(block.GenesisCodec, blkState.Bytes)
+	blk, err = block.Parse(genesisCodec, blkState.Bytes)
 	return blk, true, err
 }
 
@@ -3363,7 +3386,7 @@ func (s *state) ReindexBlocks(lock sync.Locker, log log.Logger) error {
 			continue
 		}
 
-		blk, isStateBlk, err := parseStoredBlock(valueBytes)
+		blk, isStateBlk, err := parseStoredBlock(s.genesisCodec, valueBytes)
 		if err != nil {
 			// Skip entries that can't be parsed as blocks
 			// This could be metadata or other non-block data
@@ -3489,15 +3512,15 @@ func isInitialized(db database.KeyValueReader) (bool, error) {
 	return db.Has(InitializedKey)
 }
 
-func putFeeState(db database.KeyValueWriter, feeState gas.State) error {
-	feeStateBytes, err := block.GenesisCodec.Marshal(block.CodecVersion, feeState)
+func putFeeState(c block.Codec, db database.KeyValueWriter, feeState gas.State) error {
+	feeStateBytes, err := c.Marshal(block.CodecVersion, feeState)
 	if err != nil {
 		return err
 	}
 	return db.Put(FeeStateKey, feeStateBytes)
 }
 
-func getFeeState(db database.KeyValueReader) (gas.State, error) {
+func getFeeState(c block.Codec, db database.KeyValueReader) (gas.State, error) {
 	feeStateBytes, err := db.Get(FeeStateKey)
 	if err == database.ErrNotFound {
 		return gas.State{}, nil
@@ -3507,7 +3530,7 @@ func getFeeState(db database.KeyValueReader) (gas.State, error) {
 	}
 
 	var feeState gas.State
-	if _, err := block.GenesisCodec.Unmarshal(feeStateBytes, &feeState); err != nil {
+	if _, err := c.Unmarshal(feeStateBytes, &feeState); err != nil {
 		return gas.State{}, err
 	}
 	return feeState, nil

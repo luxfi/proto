@@ -68,7 +68,7 @@ type Config struct {
 	InitialBalance uint64
 }
 
-func New(t testing.TB, c Config) *platformvmgenesis.Genesis {
+func New(t testing.TB, codec platformvmgenesis.Codec, c Config) *platformvmgenesis.Genesis {
 	if c.NetworkID == 0 {
 		c.NetworkID = constants.UnitTestID
 	}
@@ -149,7 +149,7 @@ func New(t testing.TB, c Config) *platformvmgenesis.Genesis {
 			DelegationShares: ValidatorDelegationShares,
 		}
 		validatorTx := &txs.Tx{Unsigned: validator}
-		require.NoError(validatorTx.Initialize(txs.GenesisCodec))
+		require.NoError(validatorTx.Initialize(codec))
 
 		genesis.Validators[i] = validatorTx
 	}
@@ -165,15 +165,15 @@ func New(t testing.TB, c Config) *platformvmgenesis.Genesis {
 		ChainAuth:         &secp256k1fx.Input{},
 	}
 	chainTx := &txs.Tx{Unsigned: chain}
-	require.NoError(chainTx.Initialize(txs.GenesisCodec))
+	require.NoError(chainTx.Initialize(codec))
 
 	genesis.Chains = []*txs.Tx{chainTx}
 	return genesis
 }
 
-func NewBytes(t testing.TB, c Config) []byte {
-	g := New(t, c)
-	genesisBytes, err := platformvmgenesis.Codec.Marshal(platformvmgenesis.CodecVersion, g)
+func NewBytes(t testing.TB, codec platformvmgenesis.Codec, c Config) []byte {
+	g := New(t, codec, c)
+	genesisBytes, err := codec.Marshal(platformvmgenesis.CodecVersion, g)
 	require.NoError(t, err)
 	return genesisBytes
 }

@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package block
+package block_test
 
 import (
 	"testing"
@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -18,6 +20,7 @@ import (
 
 func TestNewBanffStandardBlock(t *testing.T) {
 	require := require.New(t)
+	c := pcodectest.NewPVMCodecs().GenesisCodec
 
 	timestamp := time.Now().Truncate(time.Second)
 	parentID := ids.GenerateTestID()
@@ -39,9 +42,9 @@ func TestNewBanffStandardBlock(t *testing.T) {
 		},
 		Creds: []verify.Verifiable{},
 	}
-	require.NoError(tx.Initialize(txs.Codec))
+	require.NoError(tx.Initialize(c))
 
-	blk, err := NewBanffStandardBlock(
+	blk, err := block.NewBanffStandardBlock(c,
 		timestamp,
 		parentID,
 		height,
@@ -61,6 +64,7 @@ func TestNewBanffStandardBlock(t *testing.T) {
 
 func TestNewApricotStandardBlock(t *testing.T) {
 	require := require.New(t)
+	c := pcodectest.NewPVMCodecs().GenesisCodec
 
 	parentID := ids.GenerateTestID()
 	height := uint64(1337)
@@ -81,9 +85,9 @@ func TestNewApricotStandardBlock(t *testing.T) {
 		},
 		Creds: []verify.Verifiable{},
 	}
-	require.NoError(tx.Initialize(txs.Codec))
+	require.NoError(tx.Initialize(c))
 
-	blk, err := NewApricotStandardBlock(
+	blk, err := block.NewApricotStandardBlock(c,
 		parentID,
 		height,
 		[]*txs.Tx{tx},

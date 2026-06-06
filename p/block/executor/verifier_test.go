@@ -110,11 +110,15 @@ func newTestVerifier(t testing.TB, c testVerifierConfig) *verifier {
 			Rt:  c.Context,
 			Clk: clock,
 			Fx:  fx,
-			FlowChecker: utxo.NewVerifier(
+			FlowChecker: utxo.NewVerifier(blockExecutorTestPVMCodecs.Codec,
 				clock,
 				fx,
 			),
 			Bootstrapped: atomic.NewAtomic(true),
+			TxCodec:      blockExecutorTestPVMCodecs.Codec,
+			WarpCodec:    blockExecutorTestWarpCodec,
+			WarpMsgCodec: blockExecutorTestMessageCodec,
+			PayloadCodec: blockExecutorTestPayloadCodec,
 		},
 	}
 }
@@ -133,14 +137,14 @@ func TestVerifierVisitProposalBlock(t *testing.T) {
 			},
 		}
 	)
-	require.NoError(proposalTx.Initialize(txs.Codec))
+	require.NoError(proposalTx.Initialize(testCodec))
 
 	// Build the block that will be executed on top of the last accepted block.
 	lastAcceptedID := verifier.state.GetLastAccepted()
 	lastAccepted, err := verifier.state.GetStatelessBlock(lastAcceptedID)
 	require.NoError(err)
 
-	proposalBlock, err := block.NewApricotProposalBlock(
+	proposalBlock, err := block.NewApricotProposalBlock(testBlockCodec, 
 		lastAcceptedID,
 		lastAccepted.Height()+1,
 		proposalTx,
@@ -235,7 +239,7 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 	lastAccepted, err := verifier.state.GetStatelessBlock(lastAcceptedID)
 	require.NoError(err)
 
-	atomicBlock, err := block.NewApricotAtomicBlock(
+	atomicBlock, err := block.NewApricotAtomicBlock(testBlockCodec, 
 		lastAcceptedID,
 		lastAccepted.Height()+1,
 		atomicTx,
@@ -267,7 +271,7 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 		Out:   exportedOutput.Out,
 	}
 	exportedUTXOID := exportedUTXO.InputID()
-	exportedUTXOBytes, err := txs.Codec.Marshal(txs.CodecVersion, exportedUTXO)
+	exportedUTXOBytes, err := testCodec.Marshal(txs.CodecVersion, exportedUTXO)
 	require.NoError(err)
 
 	require.Equal(
@@ -331,7 +335,7 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 	)
 
 	inputID := utxo.InputID()
-	utxoBytes, err := txs.Codec.Marshal(txs.CodecVersion, utxo)
+	utxoBytes, err := testCodec.Marshal(txs.CodecVersion, utxo)
 	require.NoError(err)
 
 	require.NoError(xChainSM.Apply(map[ids.ID]*chainatomic.Requests{
@@ -389,7 +393,7 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 	lastAccepted, err := verifier.state.GetStatelessBlock(lastAcceptedID)
 	require.NoError(err)
 
-	firstBlock, err := block.NewApricotStandardBlock(
+	firstBlock, err := block.NewApricotStandardBlock(testBlockCodec, 
 		lastAcceptedID,
 		lastAccepted.Height()+1,
 		[]*txs.Tx{tx},
@@ -448,7 +452,7 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 	// onAcceptState diff, so when the second block tries to execute the same
 	// transaction, the UTXO lookup fails with "not found".
 	{
-		secondBlock, err := block.NewApricotStandardBlock(
+		secondBlock, err := block.NewApricotStandardBlock(testBlockCodec, 
 			firstBlockID,
 			firstBlock.Height()+1,
 			[]*txs.Tx{tx}, // Replay the prior transaction
@@ -508,7 +512,7 @@ func TestVerifierVisitCommitBlock(t *testing.T) {
 		backend: backend,
 	}
 
-	apricotBlk, err := block.NewApricotCommitBlock(
+	apricotBlk, err := block.NewApricotCommitBlock(testBlockCodec, 
 		parentID,
 		2,
 	)
@@ -584,7 +588,7 @@ func TestVerifierVisitAbortBlock(t *testing.T) {
 		backend: backend,
 	}
 
-	apricotBlk, err := block.NewApricotAbortBlock(
+	apricotBlk, err := block.NewApricotAbortBlock(testBlockCodec, 
 		parentID,
 		2,
 	)
@@ -647,7 +651,7 @@ func TestVerifyUnverifiedParent(t *testing.T) {
 		backend: backend,
 	}
 
-	blk, err := block.NewApricotAbortBlock(parentID /*not in memory or persisted state*/, 2 /*height*/)
+	blk, err := block.NewApricotAbortBlock(testBlockCodec, parentID /*not in memory or persisted state*/, 2 /*height*/)
 	require.NoError(err)
 
 	// Set expectations for dependencies.
@@ -724,7 +728,7 @@ func TestBanffAbortBlockTimestampChecks(t *testing.T) {
 
 			// build and verify child block
 			childHeight := parentHeight + 1
-			statelessAbortBlk, err := block.NewBanffAbortBlock(test.childTime, parentID, childHeight)
+			statelessAbortBlk, err := block.NewBanffAbortBlock(testBlockCodec, test.childTime, parentID, childHeight)
 			require.NoError(err)
 
 			// setup parent state
@@ -827,7 +831,7 @@ func TestBanffCommitBlockTimestampChecks(t *testing.T) {
 
 			// build and verify child block
 			childHeight := parentHeight + 1
-			statelessCommitBlk, err := block.NewBanffCommitBlock(test.childTime, parentID, childHeight)
+			statelessCommitBlk, err := block.NewBanffCommitBlock(testBlockCodec, test.childTime, parentID, childHeight)
 			require.NoError(err)
 
 			// setup parent state
@@ -905,7 +909,7 @@ func TestVerifierVisitApricotStandardBlockWithProposalBlockParent(t *testing.T) 
 		backend: backend,
 	}
 
-	blk, err := block.NewApricotStandardBlock(
+	blk, err := block.NewApricotStandardBlock(testBlockCodec, 
 		parentID,
 		2,
 		[]*txs.Tx{
@@ -965,7 +969,7 @@ func TestVerifierVisitBanffStandardBlockWithProposalBlockParent(t *testing.T) {
 		backend: backend,
 	}
 
-	blk, err := block.NewBanffStandardBlock(
+	blk, err := block.NewBanffStandardBlock(testBlockCodec, 
 		parentTime.Add(time.Second),
 		parentID,
 		2,
@@ -1013,7 +1017,7 @@ func TestVerifierVisitApricotCommitBlockUnexpectedParentState(t *testing.T) {
 		},
 	}
 
-	blk, err := block.NewApricotCommitBlock(
+	blk, err := block.NewApricotCommitBlock(testBlockCodec, 
 		parentID,
 		2,
 	)
@@ -1058,7 +1062,7 @@ func TestVerifierVisitBanffCommitBlockUnexpectedParentState(t *testing.T) {
 		},
 	}
 
-	blk, err := block.NewBanffCommitBlock(
+	blk, err := block.NewBanffCommitBlock(testBlockCodec, 
 		timestamp,
 		parentID,
 		2,
@@ -1102,7 +1106,7 @@ func TestVerifierVisitApricotAbortBlockUnexpectedParentState(t *testing.T) {
 		},
 	}
 
-	blk, err := block.NewApricotAbortBlock(
+	blk, err := block.NewApricotAbortBlock(testBlockCodec, 
 		parentID,
 		2,
 	)
@@ -1147,7 +1151,7 @@ func TestVerifierVisitBanffAbortBlockUnexpectedParentState(t *testing.T) {
 		},
 	}
 
-	blk, err := block.NewBanffAbortBlock(
+	blk, err := block.NewBanffAbortBlock(testBlockCodec, 
 		timestamp,
 		parentID,
 		2,
@@ -1187,7 +1191,7 @@ func TestBlockExecutionWithComplexity(t *testing.T) {
 	baseTx1, err := wallet.IssueBaseTx([]*lux.TransferableOutput{})
 	require.NoError(t, err)
 
-	blockComplexity, err := txfee.TxComplexity(baseTx0.Unsigned, baseTx1.Unsigned)
+	blockComplexity, err := txfee.TxComplexity(blockExecutorTestWarpCodec, baseTx0.Unsigned, baseTx1.Unsigned)
 	require.NoError(t, err)
 	blockGas, err := blockComplexity.ToGas(verifier.txExecutorBackend.Config.DynamicFeeConfig.Weights)
 	require.NoError(t, err)
@@ -1240,7 +1244,7 @@ func TestBlockExecutionWithComplexity(t *testing.T) {
 			lastAccepted, err := verifier.state.GetStatelessBlock(lastAcceptedID)
 			require.NoError(err)
 
-			blk, err := block.NewBanffStandardBlock(
+			blk, err := block.NewBanffStandardBlock(testBlockCodec, 
 				timestamp,
 				lastAcceptedID,
 				lastAccepted.Height()+1,
@@ -1445,7 +1449,7 @@ func TestDeactivateLowBalanceL1ValidatorBlockChanges(t *testing.T) {
 
 			require.NoError(verifier.state.PutL1Validator(fractionalTimeL1Validator))
 
-			blk, err := block.NewBanffStandardBlock(
+			blk, err := block.NewBanffStandardBlock(testBlockCodec, 
 				genesistest.DefaultValidatorStartTime.Add(test.durationToAdvance),
 				verifier.state.GetLastAccepted(),
 				1,   // This block is built on top of the genesis

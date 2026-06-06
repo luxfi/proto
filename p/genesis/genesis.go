@@ -12,6 +12,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
 	"github.com/luxfi/ordering"
+	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/signer"
 	"github.com/luxfi/proto/p/stakeable"
 	"github.com/luxfi/proto/p/txs"
@@ -51,18 +52,23 @@ type Genesis struct {
 	Message       string    `serialize:"true"`
 }
 
-func Parse(genesisBytes []byte) (*Genesis, error) {
+// Parse decodes a Genesis from wire bytes using the supplied block
+// Codec. Both the outer Genesis container and the per-validator /
+// per-chain Tx Initialize calls use the same codec — callers pass the
+// genesis-sized codec (codec.NewManager(math.MaxInt32) bound through
+// block.RegisterTypes) here.
+func Parse(c block.Codec, genesisBytes []byte) (*Genesis, error) {
 	gen := &Genesis{}
-	if _, err := Codec.Unmarshal(genesisBytes, gen); err != nil {
+	if _, err := c.Unmarshal(genesisBytes, gen); err != nil {
 		return nil, err
 	}
 	for _, tx := range gen.Validators {
-		if err := tx.Initialize(txs.GenesisCodec); err != nil {
+		if err := tx.Initialize(c); err != nil {
 			return nil, err
 		}
 	}
 	for _, tx := range gen.Chains {
-		if err := tx.Initialize(txs.GenesisCodec); err != nil {
+		if err := tx.Initialize(c); err != nil {
 			return nil, err
 		}
 	}
@@ -157,7 +163,12 @@ func bech32ToID(addrStr string) (ids.ShortID, error) {
 // [time] is the Platform Chain's time at network genesis.
 // [initialSupply] is the initial supply of the LUX asset.
 // [message] is the message to be sent to the genesis UTXOs.
+// New constructs a Genesis from the supplied parameters. The supplied
+// genesis Codec is used to initialize every embedded txs.Tx — callers
+// pass the genesis-sized codec (block.RegisterTypes bound through a
+// codec.NewManager(math.MaxInt32)) here.
 func New(
+	c block.Codec,
 	luxAssetID ids.ID,
 	networkID uint32,
 	allocations []Allocation,
@@ -307,7 +318,7 @@ func New(
 			}}
 		}
 
-		if err := tx.Initialize(txs.GenesisCodec); err != nil {
+		if err := tx.Initialize(c); err != nil {
 			return nil, err
 		}
 
@@ -329,7 +340,7 @@ func New(
 			GenesisData:       chain.GenesisData,
 			ChainAuth:         &secp256k1fx.Input{},
 		}}
-		if err := tx.Initialize(txs.GenesisCodec); err != nil {
+		if err := tx.Initialize(c); err != nil {
 			return nil, err
 		}
 
@@ -350,7 +361,8 @@ func New(
 	return g, nil
 }
 
-// Bytes serializes the Genesis to bytes using the PlatformVM genesis codec
-func (g *Genesis) Bytes() ([]byte, error) {
-	return Codec.Marshal(CodecVersion, g)
+// Bytes serializes the Genesis to bytes using the supplied PlatformVM
+// genesis codec.
+func (g *Genesis) Bytes(c block.Codec) ([]byte, error) {
+	return c.Marshal(CodecVersion, g)
 }

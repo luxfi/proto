@@ -36,6 +36,7 @@ type options struct {
 	primaryUptimePercentage float64
 	uptimes                 uptime.Calculator
 	state                   state.Chain
+	codec                   block.Codec
 
 	// outputs populated by this struct's methods:
 	preferredBlock block.Block
@@ -55,7 +56,7 @@ func (o *options) BanffProposalBlock(b *block.BanffProposalBlock) error {
 	blkID := b.ID()
 	nextHeight := b.Height() + 1
 
-	commitBlock, err := block.NewBanffCommitBlock(timestamp, blkID, nextHeight)
+	commitBlock, err := block.NewBanffCommitBlock(o.codec, timestamp, blkID, nextHeight)
 	if err != nil {
 		return fmt.Errorf(
 			"failed to create commit block: %w",
@@ -63,7 +64,7 @@ func (o *options) BanffProposalBlock(b *block.BanffProposalBlock) error {
 		)
 	}
 
-	abortBlock, err := block.NewBanffAbortBlock(timestamp, blkID, nextHeight)
+	abortBlock, err := block.NewBanffAbortBlock(o.codec, timestamp, blkID, nextHeight)
 	if err != nil {
 		return fmt.Errorf(
 			"failed to create abort block: %w",
@@ -112,7 +113,7 @@ func (o *options) ApricotProposalBlock(b *block.ApricotProposalBlock) error {
 	nextHeight := b.Height() + 1
 
 	var err error
-	o.preferredBlock, err = block.NewApricotCommitBlock(blkID, nextHeight)
+	o.preferredBlock, err = block.NewApricotCommitBlock(o.codec, blkID, nextHeight)
 	if err != nil {
 		return fmt.Errorf(
 			"failed to create commit block: %w",
@@ -120,7 +121,7 @@ func (o *options) ApricotProposalBlock(b *block.ApricotProposalBlock) error {
 		)
 	}
 
-	o.alternateBlock, err = block.NewApricotAbortBlock(blkID, nextHeight)
+	o.alternateBlock, err = block.NewApricotAbortBlock(o.codec, blkID, nextHeight)
 	if err != nil {
 		return fmt.Errorf(
 			"failed to create abort block: %w",

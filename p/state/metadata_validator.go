@@ -6,8 +6,6 @@ package state
 import (
 	"time"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
@@ -17,8 +15,10 @@ import (
 // preDelegateeRewardSize is the size of codec marshalling
 // [preDelegateeRewardMetadata].
 //
-// CodecVersionLen + UpDurationLen + LastUpdatedLen + PotentialRewardLen
-const preDelegateeRewardSize = codec.VersionSize + 3*wrappers.LongLen
+// codec.VersionSize (= wrappers.ShortLen) + 3 * wrappers.LongLen
+// We use the inline literals (2 + 24) here rather than importing
+// luxfi/codec so proto/p stays free of that dependency post Wave 2A.
+const preDelegateeRewardSize = 2 + 3*8
 
 var _ validatorState = (*metadata)(nil)
 
@@ -43,7 +43,7 @@ type validatorMetadata struct {
 // With Banff we wrote the potential reward.
 // With Cortina we wrote the potential reward with the potential delegatee reward.
 // We now write the uptime, reward, and delegatee reward together.
-func parseValidatorMetadata(bytes []byte, metadata *validatorMetadata) error {
+func parseValidatorMetadata(c MetadataCodec, bytes []byte, metadata *validatorMetadata) error {
 	switch len(bytes) {
 	case 0:
 	// nothing was stored
@@ -60,7 +60,7 @@ func parseValidatorMetadata(bytes []byte, metadata *validatorMetadata) error {
 		// potential reward and uptime was stored but potential delegatee reward
 		// was not
 		tmp := preDelegateeRewardMetadata{}
-		if _, err := MetadataCodec.Unmarshal(bytes, &tmp); err != nil {
+		if _, err := c.Unmarshal(bytes, &tmp); err != nil {
 			return err
 		}
 
@@ -69,7 +69,7 @@ func parseValidatorMetadata(bytes []byte, metadata *validatorMetadata) error {
 		metadata.PotentialReward = tmp.PotentialReward
 	default:
 		// everything was stored
-		if _, err := MetadataCodec.Unmarshal(bytes, metadata); err != nil {
+		if _, err := c.Unmarshal(bytes, metadata); err != nil {
 			return err
 		}
 	}
@@ -128,8 +128,11 @@ type validatorState interface {
 	DeleteValidatorMetadata(vdrID ids.NodeID, netID ids.ID)
 
 	// WriteValidatorMetadata writes all staged updates from prior calls to
-	// SetUptime or SetDelegateeReward.
+	// SetUptime or SetDelegateeReward. The supplied codec is the
+	// state-side MetadataCodec wired through the proto/p/state
+	// constructor — callers thread it in from their PVM state bundle.
 	WriteValidatorMetadata(
+		c MetadataCodec,
 		dbPrimary database.KeyValueWriter,
 		dbNet database.KeyValueWriter,
 		codecVersion uint16,
@@ -231,6 +234,7 @@ func (m *metadata) DeleteValidatorMetadata(vdrID ids.NodeID, netID ids.ID) {
 }
 
 func (m *metadata) WriteValidatorMetadata(
+	c MetadataCodec,
 	dbPrimary database.KeyValueWriter,
 	dbNet database.KeyValueWriter,
 	codecVersion uint16,
@@ -240,7 +244,7 @@ func (m *metadata) WriteValidatorMetadata(
 			metadata := m.metadata[vdrID][netID]
 			metadata.LastUpdated = uint64(metadata.lastUpdated.Unix())
 
-			metadataBytes, err := MetadataCodec.Marshal(codecVersion, metadata)
+			metadataBytes, err := c.Marshal(codecVersion, metadata)
 			if err != nil {
 				return err
 			}

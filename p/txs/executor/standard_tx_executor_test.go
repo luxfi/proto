@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/atomic"
-	"github.com/luxfi/codec"
+	"github.com/luxfi/proto/internal/pcodectest"
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto"
@@ -108,7 +108,7 @@ func TestStandardTxExecutorAddValidatorTxEmptyID(t *testing.T) {
 		stateDiff, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, stateDiff)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, stateDiff)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -359,7 +359,7 @@ func TestStandardTxExecutorAddDelegator(t *testing.T) {
 
 			env.config.UpgradeConfig.BanffTime = onAcceptState.GetTimestamp()
 
-			feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+			feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 			_, _, _, err = StandardTx(
 				&env.backend,
 				feeCalculator,
@@ -405,7 +405,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -439,7 +439,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -492,7 +492,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -541,7 +541,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -573,7 +573,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -605,7 +605,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -640,7 +640,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -707,7 +707,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -750,7 +750,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -789,7 +789,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -828,7 +828,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -875,7 +875,7 @@ func TestApricotStandardTxExecutorAddNetValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -923,7 +923,7 @@ func TestQuasarStandardTxExecutorAddNetValidator(t *testing.T) {
 		},
 	)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 	_, _, _, err = StandardTx(
 		&env.backend,
 		feeCalculator,
@@ -963,7 +963,7 @@ func TestBanffStandardTxExecutorAddValidator(t *testing.T) {
 		onAcceptState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -1005,7 +1005,7 @@ func TestBanffStandardTxExecutorAddValidator(t *testing.T) {
 		require.NoError(onAcceptState.PutCurrentValidator(staker))
 		onAcceptState.AddTx(tx, status.Committed)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -1044,7 +1044,7 @@ func TestBanffStandardTxExecutorAddValidator(t *testing.T) {
 		require.NoError(onAcceptState.PutPendingValidator(staker))
 		onAcceptState.AddTx(tx, status.Committed)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -1084,7 +1084,7 @@ func TestBanffStandardTxExecutorAddValidator(t *testing.T) {
 			onAcceptState.DeleteUTXO(utxoID)
 		}
 
-		feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 		_, _, _, err = StandardTx(
 			&env.backend,
 			feeCalculator,
@@ -1183,7 +1183,7 @@ func TestDurangoDisabledTransactions(t *testing.T) {
 			require.NoError(err)
 
 			tx := tt.buildTx(t, env)
-			feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+			feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 			_, _, _, err = StandardTx(
 				&env.backend,
 				feeCalculator,
@@ -1394,7 +1394,7 @@ func TestDurangoMemoField(t *testing.T) {
 				onAcceptState, err := state.NewDiff(env.state.GetLastAccepted(), env)
 				require.NoError(err)
 
-				feeCalculator := state.PickFeeCalculator(env.config, onAcceptState)
+				feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAcceptState)
 				_, _, _, err = StandardTx(
 					&env.backend,
 					feeCalculator,
@@ -1585,7 +1585,7 @@ func TestDurangoMemoField(t *testing.T) {
 			env.ctx.Lock.Lock()
 			defer env.ctx.Lock.Unlock()
 
-			feeCalculator := state.PickFeeCalculator(env.config, env.state)
+			feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, env.state)
 
 			// Populated memo field should error
 			tx, onAcceptState := tt.setupTest(t, env, []byte{'m', 'e', 'm', 'o'})
@@ -1621,7 +1621,7 @@ func TestQuasarDisabledTransactions(t *testing.T) {
 	onAcceptState, err := state.NewDiff(env.state.GetLastAccepted(), env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, env.state)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, env.state)
 	tx := &txs.Tx{
 		Unsigned: &txs.TransformChainTx{},
 	}
@@ -1690,7 +1690,7 @@ func newRemoveChainValidatorTx(t *testing.T) (*txs.RemoveChainValidatorTx, *txs.
 		Unsigned: unsignedTx,
 		Creds:    creds,
 	}
-	require.NoError(t, tx.Initialize(txs.Codec))
+	require.NoError(t, tx.Initialize(testCodec))
 	return unsignedTx, tx
 }
 
@@ -1780,6 +1780,10 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1801,7 +1805,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 				cfg := &config.Internal{
 					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Durango, env.latestForkTime),
 				}
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -1809,6 +1813,10 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1830,7 +1838,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 				cfg := &config.Internal{
 					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Durango, env.latestForkTime),
 				}
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -1838,6 +1846,10 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1862,7 +1874,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 				cfg := &config.Internal{
 					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Durango, env.latestForkTime),
 				}
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -1870,6 +1882,10 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1891,7 +1907,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 				cfg := &config.Internal{
 					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Durango, env.latestForkTime),
 				}
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -1899,6 +1915,10 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1923,7 +1943,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 				cfg := &config.Internal{
 					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Durango, env.latestForkTime),
 				}
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -1931,6 +1951,10 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1954,7 +1978,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 				cfg := &config.Internal{
 					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Durango, env.latestForkTime),
 				}
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -1962,6 +1986,10 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -1988,7 +2016,7 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 				cfg := &config.Internal{
 					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Durango, env.latestForkTime),
 				}
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -1996,6 +2024,10 @@ func TestStandardExecutorRemoveChainValidatorTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2087,7 +2119,7 @@ func newTransformChainTx(t *testing.T) (*txs.TransformChainTx, *txs.Tx) {
 		Unsigned: unsignedTx,
 		Creds:    creds,
 	}
-	require.NoError(t, tx.Initialize(txs.Codec))
+	require.NoError(t, tx.Initialize(testCodec))
 	return unsignedTx, tx
 }
 
@@ -2147,7 +2179,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 				cfg := &config.Internal{
 					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Durango, env.latestForkTime),
 				}
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -2155,6 +2187,10 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2175,7 +2211,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 				cfg := &config.Internal{
 					UpgradeConfig: upgradetest.GetConfigWithUpgradeTime(upgradetest.Durango, env.latestForkTime),
 				}
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -2183,6 +2219,10 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2208,7 +2248,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 					MaxStakeDuration: math.MaxInt64,
 				}
 
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -2216,6 +2256,10 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2248,7 +2292,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 					MaxStakeDuration: math.MaxInt64,
 				}
 
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -2256,6 +2300,10 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2289,7 +2337,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 					UpgradeConfig:    upgradetest.GetConfigWithUpgradeTime(upgradetest.Durango, env.latestForkTime),
 					MaxStakeDuration: math.MaxInt64,
 				}
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -2297,6 +2345,10 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2334,7 +2386,7 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 					MaxStakeDuration: math.MaxInt64,
 				}
 
-				feeCalculator := state.PickFeeCalculator(cfg, env.state)
+				feeCalculator := state.PickFeeCalculator(cfg, helpersTestWarpCodec, env.state)
 				e := &standardTxExecutor{
 					backend: &Backend{
 						Config:       cfg,
@@ -2342,6 +2394,10 @@ func TestStandardExecutorTransformChainTx(t *testing.T) {
 						Fx:           env.fx,
 						FlowChecker:  env.flowChecker,
 						Rt:           &runtime.Runtime{},
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 					},
 					feeCalculator: feeCalculator,
 					tx:            env.tx,
@@ -2404,7 +2460,7 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 			nil, // validationIDs
 			nil, // chainIDs
 		)
-		flowChecker = utxo.NewVerifier(
+		flowChecker = utxo.NewVerifier(helpersTestPVMCodecs.Codec, 
 			vm.Clk,
 			fx,
 		)
@@ -2427,7 +2483,7 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 			FlowChecker:  flowChecker,
 			Rt:           ctx,
 		},
-		state.PickFeeCalculator(defaultConfig, baseState),
+		state.PickFeeCalculator(defaultConfig, helpersTestWarpCodec, baseState),
 		createNetTx,
 		diff,
 	)
@@ -2540,7 +2596,7 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 		{
 			name: "insufficient fee",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.feeCalculator = txfee.NewDynamicCalculator(
+				e.feeCalculator = txfee.NewDynamicCalculator(helpersTestWarpCodec, 
 					e.backend.Config.DynamicFeeConfig.Weights,
 					100*builder.LocalDynamicFeeConfig.MinPrice,
 				)
@@ -2616,8 +2672,12 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 					Fx:           fx,
 					FlowChecker:  flowChecker,
 					Rt:           ctx,
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 				},
-				feeCalculator: state.PickFeeCalculator(defaultConfig, baseState),
+				feeCalculator: state.PickFeeCalculator(defaultConfig, helpersTestWarpCodec, baseState),
 				tx:            convertNetToL1Tx,
 				state:         diff,
 			}
@@ -2643,7 +2703,7 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 				require.Equal(expectedUTXO, utxo)
 			}
 
-			expectedConversionID, err := message.ChainToL1ConversionID(message.ChainToL1ConversionData{
+			expectedConversionID, err := message.ChainToL1ConversionID(helpersTestMessageCodec, message.ChainToL1ConversionData{
 				ChainID:        chainID,
 				ManagerChainID: chainID,
 				ManagerAddress: address,
@@ -2672,10 +2732,10 @@ func TestStandardExecutorConvertNetworkToL1Tx(t *testing.T) {
 				validationID = chainID.Append(0)
 				pkBytes      = bls.PublicKeyToUncompressedBytes(sk.PublicKey())
 			)
-			remainingBalanceOwner, err := txs.Codec.Marshal(txs.CodecVersion, &validator.RemainingBalanceOwner)
+			remainingBalanceOwner, err := testCodec.Marshal(txs.CodecVersion, &validator.RemainingBalanceOwner)
 			require.NoError(err)
 
-			deactivationOwner, err := txs.Codec.Marshal(txs.CodecVersion, &validator.DeactivationOwner)
+			deactivationOwner, err := testCodec.Marshal(txs.CodecVersion, &validator.DeactivationOwner)
 			require.NoError(err)
 
 			l1Validator, err := diff.GetL1Validator(validationID)
@@ -2740,7 +2800,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 			nil, // validationIDs
 			nil, // chainIDs
 		)
-		flowChecker = utxo.NewVerifier(
+		flowChecker = utxo.NewVerifier(helpersTestPVMCodecs.Codec, 
 			vm.Clk,
 			fx,
 		)
@@ -2751,8 +2811,12 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 			Fx:           fx,
 			FlowChecker:  flowChecker,
 			Rt:           ctx,
+			TxCodec:      helpersTestPVMCodecs.Codec,
+			WarpCodec:    helpersTestWarpCodec,
+			WarpMsgCodec: helpersTestMessageCodec,
+			PayloadCodec: helpersTestPayloadCodec,
 		}
-		feeCalculator = state.PickFeeCalculator(defaultConfig, baseState)
+		feeCalculator = state.PickFeeCalculator(defaultConfig, helpersTestWarpCodec, baseState)
 	)
 
 	// Create the initial state
@@ -2836,14 +2900,14 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 	pkBytes := bls.PublicKeyToUncompressedBytes(pk)
 
 	remainingBalanceOwner := message.PChainOwner{}
-	remainingBalanceOwnerBytes, err := txs.Codec.Marshal(txs.CodecVersion, &remainingBalanceOwner)
+	remainingBalanceOwnerBytes, err := testCodec.Marshal(txs.CodecVersion, &remainingBalanceOwner)
 	require.NoError(t, err)
 
 	deactivationOwner := message.PChainOwner{}
-	deactivationOwnerBytes, err := txs.Codec.Marshal(txs.CodecVersion, &deactivationOwner)
+	deactivationOwnerBytes, err := testCodec.Marshal(txs.CodecVersion, &deactivationOwner)
 	require.NoError(t, err)
 
-	addressedCallPayload := must[*message.RegisterL1Validator](t)(message.NewRegisterL1Validator(
+	addressedCallPayload := must[*message.RegisterL1Validator](t)(message.NewRegisterL1Validator(helpersTestMessageCodec, 
 		chainID,
 		nodeID,
 		pop.PublicKey,
@@ -2852,10 +2916,10 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		deactivationOwner,
 		weight,
 	))
-	unsignedWarp := must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+	unsignedWarp := must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 		ctx.NetworkID,
 		chainID,
-		must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+		must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 			address,
 			addressedCallPayload.Bytes(),
 		)).Bytes(),
@@ -2866,7 +2930,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		Signers:   set.NewBits(0).Bytes(),
 		Signature: ([bls.SignatureLen]byte)(bls.SignatureToBytes(sig)),
 	}
-	warpMessage := must[*warp.Message](t)(warp.NewMessage(
+	warpMessage := must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
 		unsignedWarp,
 		warpSignature,
 	))
@@ -2916,7 +2980,7 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		{
 			name: "insufficient fee",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.feeCalculator = txfee.NewDynamicCalculator(
+				e.feeCalculator = txfee.NewDynamicCalculator(helpersTestWarpCodec, 
 					e.backend.Config.DynamicFeeConfig.Weights,
 					100*builder.LocalDynamicFeeConfig.MinPrice,
 				)
@@ -2927,15 +2991,15 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		{
 			name:        "invalid warp message",
 			message:     []byte{},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			name: "invalid warp payload",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.Hash](t)(payload.NewHash(ids.Empty)).Bytes(),
+					must[*payload.Hash](t)(payload.NewHash(helpersTestPayloadCodec, ids.Empty)).Bytes(),
 				)),
 				warpSignature,
 			)).Bytes(),
@@ -2943,13 +3007,13 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		},
 		{
 			name: "invalid addressed call",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+					must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 						address,
-						must[*message.ChainToL1Conversion](t)(message.NewChainToL1Conversion(ids.Empty)).Bytes(),
+						must[*message.ChainToL1Conversion](t)(message.NewChainToL1Conversion(helpersTestMessageCodec, ids.Empty)).Bytes(),
 					)).Bytes(),
 				)),
 				warpSignature,
@@ -2958,13 +3022,13 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		},
 		{
 			name: "invalid addressed call payload",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+					must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 						address,
-						must[*message.RegisterL1Validator](t)(message.NewRegisterL1Validator(
+						must[*message.RegisterL1Validator](t)(message.NewRegisterL1Validator(helpersTestMessageCodec, 
 							chainID,
 							nodeID,
 							pop.PublicKey,
@@ -2981,13 +3045,13 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		},
 		{
 			name: "chain conversion not found",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+					must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 						address,
-						must[*message.RegisterL1Validator](t)(message.NewRegisterL1Validator(
+						must[*message.RegisterL1Validator](t)(message.NewRegisterL1Validator(helpersTestMessageCodec, 
 							ids.GenerateTestID(), // invalid chainID
 							nodeID,
 							pop.PublicKey,
@@ -3030,13 +3094,13 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		},
 		{
 			name: "message expiry too far in the future",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+					must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 						address,
-						must[*message.RegisterL1Validator](t)(message.NewRegisterL1Validator(
+						must[*message.RegisterL1Validator](t)(message.NewRegisterL1Validator(helpersTestMessageCodec, 
 							chainID,
 							nodeID,
 							pop.PublicKey,
@@ -3065,13 +3129,13 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 		},
 		{
 			name: "invalid PoP",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+					must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 						address,
-						must[*message.RegisterL1Validator](t)(message.NewRegisterL1Validator(
+						must[*message.RegisterL1Validator](t)(message.NewRegisterL1Validator(helpersTestMessageCodec, 
 							chainID,
 							nodeID,
 							initialPoP.PublicKey, // Wrong public key
@@ -3175,8 +3239,12 @@ func TestStandardExecutorRegisterL1ValidatorTx(t *testing.T) {
 					Fx:           fx,
 					FlowChecker:  flowChecker,
 					Rt:           ctx,
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 				},
-				feeCalculator: state.PickFeeCalculator(defaultConfig, baseState),
+				feeCalculator: state.PickFeeCalculator(defaultConfig, helpersTestWarpCodec, baseState),
 				tx:            registerL1ValidatorTx,
 				state:         diff,
 			}
@@ -3276,7 +3344,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 			nil, // validationIDs
 			nil, // chainIDs
 		)
-		flowChecker = utxo.NewVerifier(
+		flowChecker = utxo.NewVerifier(helpersTestPVMCodecs.Codec, 
 			vm.Clk,
 			fx,
 		)
@@ -3287,8 +3355,12 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 			Fx:           fx,
 			FlowChecker:  flowChecker,
 			Rt:           ctx,
+			TxCodec:      helpersTestPVMCodecs.Codec,
+			WarpCodec:    helpersTestWarpCodec,
+			WarpMsgCodec: helpersTestMessageCodec,
+			PayloadCodec: helpersTestPayloadCodec,
 		}
-		feeCalculator = state.PickFeeCalculator(defaultConfig, baseState)
+		feeCalculator = state.PickFeeCalculator(defaultConfig, helpersTestWarpCodec, baseState)
 	)
 
 	// Create the initial state
@@ -3371,12 +3443,12 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		nonce  = 1
 		weight = initialWeight + 1
 	)
-	unsignedIncreaseWeightWarpMessage := must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+	unsignedIncreaseWeightWarpMessage := must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 		ctx.NetworkID,
 		chainID,
-		must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+		must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 			address,
-			must[*message.L1ValidatorWeight](t)(message.NewL1ValidatorWeight(
+			must[*message.L1ValidatorWeight](t)(message.NewL1ValidatorWeight(helpersTestMessageCodec, 
 				validationID,
 				nonce,
 				weight,
@@ -3391,17 +3463,17 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		Signers:   set.NewBits(0).Bytes(),
 		Signature: ([bls.SignatureLen]byte)(bls.SignatureToBytes(sig)),
 	}
-	increaseWeightWarpMessage := must[*warp.Message](t)(warp.NewMessage(
+	increaseWeightWarpMessage := must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
 		unsignedIncreaseWeightWarpMessage,
 		warpSignature,
 	))
-	removeValidatorWarpMessage := must[*warp.Message](t)(warp.NewMessage(
-		must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+	removeValidatorWarpMessage := must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+		must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 			ctx.NetworkID,
 			chainID,
-			must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+			must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 				address,
-				must[*message.L1ValidatorWeight](t)(message.NewL1ValidatorWeight(
+				must[*message.L1ValidatorWeight](t)(message.NewL1ValidatorWeight(helpersTestMessageCodec, 
 					validationID,
 					nonce,
 					0,
@@ -3459,7 +3531,7 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		{
 			name: "insufficient fee",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.feeCalculator = txfee.NewDynamicCalculator(
+				e.feeCalculator = txfee.NewDynamicCalculator(helpersTestWarpCodec, 
 					e.backend.Config.DynamicFeeConfig.Weights,
 					100*builder.LocalDynamicFeeConfig.MinPrice,
 				)
@@ -3470,15 +3542,15 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		{
 			name:        "invalid warp message",
 			message:     []byte{},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			name: "invalid warp payload",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.Hash](t)(payload.NewHash(ids.Empty)).Bytes(),
+					must[*payload.Hash](t)(payload.NewHash(helpersTestPayloadCodec, ids.Empty)).Bytes(),
 				)),
 				warpSignature,
 			)).Bytes(),
@@ -3486,13 +3558,13 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		},
 		{
 			name: "invalid addressed call",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+					must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 						address,
-						must[*message.ChainToL1Conversion](t)(message.NewChainToL1Conversion(ids.Empty)).Bytes(),
+						must[*message.ChainToL1Conversion](t)(message.NewChainToL1Conversion(helpersTestMessageCodec, ids.Empty)).Bytes(),
 					)).Bytes(),
 				)),
 				warpSignature,
@@ -3501,13 +3573,13 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		},
 		{
 			name: "invalid addressed call payload",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+					must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 						address,
-						must[*message.L1ValidatorWeight](t)(message.NewL1ValidatorWeight(
+						must[*message.L1ValidatorWeight](t)(message.NewL1ValidatorWeight(helpersTestMessageCodec, 
 							validationID,
 							math.MaxUint64,
 							1,
@@ -3520,13 +3592,13 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		},
 		{
 			name: "L1 validator not found",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+					must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 						address,
-						must[*message.L1ValidatorWeight](t)(message.NewL1ValidatorWeight(
+						must[*message.L1ValidatorWeight](t)(message.NewL1ValidatorWeight(helpersTestMessageCodec, 
 							ids.GenerateTestID(), // invalid initialValidationID
 							nonce,
 							weight,
@@ -3585,13 +3657,13 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 		},
 		{
 			name: "remove deactivated validator with nonce overflow",
-			message: must[*warp.Message](t)(warp.NewMessage(
-				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(
+			message: must[*warp.Message](t)(warp.NewMessage(helpersTestWarpCodec, 
+				must[*warp.UnsignedMessage](t)(warp.NewUnsignedMessage(helpersTestWarpCodec, 
 					ctx.NetworkID,
 					chainID,
-					must[*payload.AddressedCall](t)(payload.NewAddressedCall(
+					must[*payload.AddressedCall](t)(payload.NewAddressedCall(helpersTestPayloadCodec, 
 						address,
-						must[*message.L1ValidatorWeight](t)(message.NewL1ValidatorWeight(
+						must[*message.L1ValidatorWeight](t)(message.NewL1ValidatorWeight(helpersTestMessageCodec, 
 							validationID,
 							math.MaxUint64,
 							0,
@@ -3688,8 +3760,12 @@ func TestStandardExecutorSetL1ValidatorWeightTx(t *testing.T) {
 					Fx:           fx,
 					FlowChecker:  flowChecker,
 					Rt:           ctx,
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 				},
-				feeCalculator: state.PickFeeCalculator(defaultConfig, baseState),
+				feeCalculator: state.PickFeeCalculator(defaultConfig, helpersTestWarpCodec, baseState),
 				tx:            setL1ValidatorWeightTx,
 				state:         diff,
 			}
@@ -3787,7 +3863,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 			nil, // validationIDs
 			nil, // chainIDs
 		)
-		flowChecker = utxo.NewVerifier(
+		flowChecker = utxo.NewVerifier(helpersTestPVMCodecs.Codec, 
 			vm.Clk,
 			fx,
 		)
@@ -3798,8 +3874,12 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 			Fx:           fx,
 			FlowChecker:  flowChecker,
 			Rt:           ctx,
+			TxCodec:      helpersTestPVMCodecs.Codec,
+			WarpCodec:    helpersTestWarpCodec,
+			WarpMsgCodec: helpersTestMessageCodec,
+			PayloadCodec: helpersTestPayloadCodec,
 		}
-		feeCalculator = state.PickFeeCalculator(defaultConfig, baseState)
+		feeCalculator = state.PickFeeCalculator(defaultConfig, helpersTestWarpCodec, baseState)
 	)
 
 	// Create the initial state
@@ -3922,7 +4002,7 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 		{
 			name: "insufficient fee",
 			updateExecutor: func(e *standardTxExecutor) error {
-				e.feeCalculator = txfee.NewDynamicCalculator(
+				e.feeCalculator = txfee.NewDynamicCalculator(helpersTestWarpCodec, 
 					e.backend.Config.DynamicFeeConfig.Weights,
 					100*builder.LocalDynamicFeeConfig.MinPrice,
 				)
@@ -4009,8 +4089,12 @@ func TestStandardExecutorIncreaseL1ValidatorBalanceTx(t *testing.T) {
 					Fx:           fx,
 					FlowChecker:  flowChecker,
 					Rt:           ctx,
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 				},
-				feeCalculator: state.PickFeeCalculator(defaultConfig, baseState),
+				feeCalculator: state.PickFeeCalculator(defaultConfig, helpersTestWarpCodec, baseState),
 				tx:            increaseL1ValidatorBalanceTx,
 				state:         diff,
 			}
@@ -4089,7 +4173,7 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 			nil, // validationIDs
 			nil, // chainIDs
 		)
-		flowChecker = utxo.NewVerifier(
+		flowChecker = utxo.NewVerifier(helpersTestPVMCodecs.Codec, 
 			vm.Clk,
 			fx,
 		)
@@ -4100,8 +4184,12 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 			Fx:           fx,
 			FlowChecker:  flowChecker,
 			Rt:           ctx,
+			TxCodec:      helpersTestPVMCodecs.Codec,
+			WarpCodec:    helpersTestWarpCodec,
+			WarpMsgCodec: helpersTestMessageCodec,
+			PayloadCodec: helpersTestPayloadCodec,
 		}
-		feeCalculator = state.PickFeeCalculator(defaultConfig, baseState)
+		feeCalculator = state.PickFeeCalculator(defaultConfig, helpersTestWarpCodec, baseState)
 	)
 
 	// Create the initial state
@@ -4296,8 +4384,12 @@ func TestStandardExecutorDisableL1ValidatorTx(t *testing.T) {
 					Fx:           fx,
 					FlowChecker:  flowChecker,
 					Rt:           ctx,
+					TxCodec:      helpersTestPVMCodecs.Codec,
+					WarpCodec:    helpersTestWarpCodec,
+					WarpMsgCodec: helpersTestMessageCodec,
+					PayloadCodec: helpersTestPayloadCodec,
 				},
-				feeCalculator: state.PickFeeCalculator(defaultConfig, baseState),
+				feeCalculator: state.PickFeeCalculator(defaultConfig, helpersTestWarpCodec, baseState),
 				tx:            disableL1ValidatorTx,
 				state:         diff,
 			}

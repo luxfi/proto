@@ -18,6 +18,7 @@ import (
 	"github.com/luxfi/timer/mockable"
 	validators "github.com/luxfi/validators"
 
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/block"
 
 	"github.com/luxfi/proto/p/config"
@@ -27,6 +28,12 @@ import (
 	"github.com/luxfi/proto/p/state/statetest"
 	"github.com/luxfi/proto/p/txs"
 )
+
+// benchBlockCodec is the proto/p/block wire codec used by the
+// benchmark to construct sub-block fixtures. Constructed once at
+// package init so the per-call NewBanffStandardBlock invocations
+// don't re-register types on every iteration.
+var benchBlockCodec = pvmcodectest.NewPVMCodecs().Codec
 
 // BenchmarkGetValidatorSet generates 10k diffs and calculates the time to
 // generate the genesis validator set by applying them.
@@ -128,7 +135,7 @@ func addPrimaryValidator(
 		return ids.EmptyNodeID, err
 	}
 
-	blk, err := block.NewBanffStandardBlock(startTime, ids.GenerateTestID(), height, nil)
+	blk, err := block.NewBanffStandardBlock(benchBlockCodec, startTime, ids.GenerateTestID(), height, nil)
 	if err != nil {
 		return ids.EmptyNodeID, err
 	}
@@ -160,7 +167,7 @@ func addNetValidator(
 		return err
 	}
 
-	blk, err := block.NewBanffStandardBlock(startTime, ids.GenerateTestID(), height, nil)
+	blk, err := block.NewBanffStandardBlock(benchBlockCodec, startTime, ids.GenerateTestID(), height, nil)
 	if err != nil {
 		return err
 	}
@@ -192,7 +199,7 @@ func addNetDelegator(
 		Priority:        txs.NetPermissionlessDelegatorCurrentPriority,
 	})
 
-	blk, err := block.NewBanffStandardBlock(startTime, ids.GenerateTestID(), height, nil)
+	blk, err := block.NewBanffStandardBlock(benchBlockCodec, startTime, ids.GenerateTestID(), height, nil)
 	if err != nil {
 		return err
 	}

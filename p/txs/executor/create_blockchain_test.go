@@ -51,7 +51,7 @@ func TestCreateChainTxInsufficientControlSigs(t *testing.T) {
 	stateDiff, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, stateDiff)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, stateDiff)
 	_, _, _, err = StandardTx(
 		&env.backend,
 		feeCalculator,
@@ -96,7 +96,7 @@ func TestCreateChainTxWrongControlSig(t *testing.T) {
 	stateDiff, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, stateDiff)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, stateDiff)
 	_, _, _, err = StandardTx(
 		&env.backend,
 		feeCalculator,
@@ -136,7 +136,7 @@ func TestCreateChainTxNoSuchNet(t *testing.T) {
 	builderDiff, err := state.NewDiffOn(stateDiff)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, builderDiff)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, builderDiff)
 	_, _, _, err = StandardTx(
 		&env.backend,
 		feeCalculator,
@@ -173,7 +173,7 @@ func TestCreateChainTxValid(t *testing.T) {
 	builderDiff, err := state.NewDiffOn(stateDiff)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, builderDiff)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, builderDiff)
 	_, _, _, err = StandardTx(
 		&env.backend,
 		feeCalculator,
@@ -239,7 +239,7 @@ func TestCreateChainTxAP3FeeChange(t *testing.T) {
 
 			stateDiff.SetTimestamp(test.time)
 
-			feeCalculator := state.PickFeeCalculator(env.config, stateDiff)
+			feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, stateDiff)
 			_, _, _, err = StandardTx(
 				&env.backend,
 				feeCalculator,
@@ -286,7 +286,7 @@ func TestQuasarCreateChainTxInvalidWithManagedNet(t *testing.T) {
 		},
 	)
 
-	feeCalculator := state.PickFeeCalculator(env.config, builderDiff)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, builderDiff)
 	_, _, _, err = StandardTx(
 		&env.backend,
 		feeCalculator,

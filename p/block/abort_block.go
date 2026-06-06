@@ -30,7 +30,10 @@ func (b *BanffAbortBlock) Visit(v Visitor) error {
 	return v.BanffAbortBlock(b)
 }
 
+// NewBanffAbortBlock builds and initializes a BanffAbortBlock against
+// the supplied block Codec.
 func NewBanffAbortBlock(
+	c Codec,
 	timestamp time.Time,
 	parentID ids.ID,
 	height uint64,
@@ -44,14 +47,14 @@ func NewBanffAbortBlock(
 			},
 		},
 	}
-	return blk, initialize(blk, &blk.CommonBlock)
+	return blk, initialize(c, blk, &blk.CommonBlock)
 }
 
 type ApricotAbortBlock struct {
 	CommonBlock `serialize:"true"`
 }
 
-func (b *ApricotAbortBlock) initialize(bytes []byte) error {
+func (b *ApricotAbortBlock) initialize(bytes []byte, _ Codec) error {
 	b.CommonBlock.initialize(bytes)
 	return nil
 }
@@ -68,8 +71,10 @@ func (b *ApricotAbortBlock) Visit(v Visitor) error {
 
 // NewApricotAbortBlock is kept for testing purposes only.
 // Following Banff activation and subsequent code cleanup, Apricot Abort blocks
-// should be only verified (upon bootstrap), never created anymore
+// should be only verified (upon bootstrap), never created anymore.
+// It builds and initializes the block against the supplied block Codec.
 func NewApricotAbortBlock(
+	c Codec,
 	parentID ids.ID,
 	height uint64,
 ) (*ApricotAbortBlock, error) {
@@ -79,7 +84,7 @@ func NewApricotAbortBlock(
 			Hght:   height,
 		},
 	}
-	return blk, initialize(blk, &blk.CommonBlock)
+	return blk, initialize(c, blk, &blk.CommonBlock)
 }
 
 // InitializeWithContext initializes the block with consensus context

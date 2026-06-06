@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/proto/p/warp"
 	"github.com/luxfi/vm/components/gas"
 )
 
@@ -19,23 +20,31 @@ var (
 	ErrCalculatingCost       = errors.New("error calculating cost")
 )
 
+// NewDynamicCalculator returns a Calculator that prices txs against the
+// supplied weights and gas price. The warpCodec is the proto/p/warp
+// codec used by the L1-validator family (Register / SetWeight / etc.)
+// to parse the warp message embedded in those txs; pass nil if no L1
+// validator txs will be priced through this calculator.
 func NewDynamicCalculator(
+	warpCodec warp.Codec,
 	weights gas.Dimensions,
 	price gas.Price,
 ) Calculator {
 	return &dynamicCalculator{
-		weights: weights,
-		price:   price,
+		warpCodec: warpCodec,
+		weights:   weights,
+		price:     price,
 	}
 }
 
 type dynamicCalculator struct {
-	weights gas.Dimensions
-	price   gas.Price
+	warpCodec warp.Codec
+	weights   gas.Dimensions
+	price     gas.Price
 }
 
 func (c *dynamicCalculator) CalculateFee(tx txs.UnsignedTx) (uint64, error) {
-	complexity, err := TxComplexity(tx)
+	complexity, err := TxComplexity(c.warpCodec, tx)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %w", ErrCalculatingComplexity, err)
 	}

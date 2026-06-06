@@ -91,6 +91,7 @@ func New(t testing.TB, c Config) state.State {
 		c.Genesis,
 		codecs.GenesisCodec,
 		codecs.Codec,
+		pcodectest.NewMetadataCodec(),
 		c.Registerer,
 		c.Validators,
 		c.Upgrades,

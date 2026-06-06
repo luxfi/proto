@@ -10,19 +10,59 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pcodectest"
 	"github.com/luxfi/proto/p/fx"
 	"github.com/luxfi/proto/p/signer"
 	"github.com/luxfi/proto/p/stakeable"
 	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/proto/p/warp"
 	"github.com/luxfi/proto/p/warp/message"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/gas"
 	"github.com/luxfi/vm/components/verify"
 )
+
+// testTxCodec / testWarpCodec are constructed once per test package
+// (proto/p/txs/fee) so fee complexity tests can parse PVM tx wire bytes
+// and exercise TxComplexity / WarpComplexity through the warp codec
+// they thread through to L1-validator messages. Wave 2A rip — no
+// inline codec construction at the call sites.
+//
+// Constructed inline using only pcodectest (the codec-agnostic helper)
+// because proto/p/txs/fee tests are internal (`package fee`) and
+// pvmcodectest's helpers would close a test-time import cycle
+// (pvmcodectest → proto/p/txs → proto/p/txs/fee).
+var (
+	testTxCodec   = newTestTxCodec()
+	testWarpCodec = newTestWarpCodec()
+)
+
+func newTestTxCodec() txs.Codec {
+	c := pcodectest.NewLinearCodec()
+	cm := pcodectest.NewDefaultCodecManager()
+	if err := txs.RegisterTypes(c); err != nil {
+		panic(err)
+	}
+	if err := cm.RegisterCodec(txs.CodecVersion, c); err != nil {
+		panic(err)
+	}
+	return cm
+}
+
+func newTestWarpCodec() warp.Codec {
+	c := pcodectest.NewLinearCodec()
+	cm := pcodectest.MaxIntManager()
+	if err := warp.RegisterTypes(c); err != nil {
+		panic(err)
+	}
+	if err := cm.RegisterCodec(warp.CodecVersion, c); err != nil {
+		panic(err)
+	}
+	return cm
+}
 
 func TestTxComplexity_Individual(t *testing.T) {
 	for _, test := range txTests {
@@ -32,7 +72,7 @@ func TestTxComplexity_Individual(t *testing.T) {
 			txBytes, err := hex.DecodeString(test.tx)
 			require.NoError(err)
 
-			tx, err := txs.Parse(txs.Codec, txBytes)
+			tx, err := txs.Parse(testTxCodec, txBytes)
 			if err != nil {
 				t.Skipf("skipping invalid tx encoding: %v", err)
 			}
@@ -43,7 +83,7 @@ func TestTxComplexity_Individual(t *testing.T) {
 			require.NoError(err)
 			t.Log(string(txJSON))
 
-			actual, err := TxComplexity(tx.Unsigned)
+			actual, err := TxComplexity(testWarpCodec, tx.Unsigned)
 			require.Equal(test.expectedComplexity, actual)
 			require.ErrorIs(err, test.expectedComplexityErr)
 			if err != nil {
@@ -74,7 +114,7 @@ func TestTxComplexity_Batch(t *testing.T) {
 		txBytes, err := hex.DecodeString(test.tx)
 		require.NoError(err)
 
-		tx, err := txs.Parse(txs.Codec, txBytes)
+		tx, err := txs.Parse(testTxCodec, txBytes)
 		if err != nil {
 			t.Skipf("skipping invalid tx encoding: %v", err)
 		}
@@ -82,7 +122,7 @@ func TestTxComplexity_Batch(t *testing.T) {
 		unsignedTxs = append(unsignedTxs, tx.Unsigned)
 	}
 
-	complexity, err := TxComplexity(unsignedTxs...)
+	complexity, err := TxComplexity(testWarpCodec, unsignedTxs...)
 	require.NoError(err)
 	require.Equal(expectedComplexity, complexity)
 }
@@ -95,14 +135,14 @@ func BenchmarkTxComplexity_Individual(b *testing.B) {
 			txBytes, err := hex.DecodeString(test.tx)
 			require.NoError(err)
 
-			tx, err := txs.Parse(txs.Codec, txBytes)
+			tx, err := txs.Parse(testTxCodec, txBytes)
 			if err != nil {
 				b.Skipf("skipping invalid tx encoding: %v", err)
 			}
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				_, _ = TxComplexity(tx.Unsigned)
+				_, _ = TxComplexity(testWarpCodec, tx.Unsigned)
 			}
 		})
 	}
@@ -120,7 +160,7 @@ func BenchmarkTxComplexity_Batch(b *testing.B) {
 		txBytes, err := hex.DecodeString(test.tx)
 		require.NoError(err)
 
-		tx, err := txs.Parse(txs.Codec, txBytes)
+		tx, err := txs.Parse(testTxCodec, txBytes)
 		if err != nil {
 			b.Skipf("skipping invalid tx encoding: %v", err)
 		}
@@ -130,7 +170,7 @@ func BenchmarkTxComplexity_Batch(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = TxComplexity(unsignedTxs...)
+		_, _ = TxComplexity(testWarpCodec, unsignedTxs...)
 	}
 }
 
@@ -224,10 +264,10 @@ func TestOutputComplexity(t *testing.T) {
 				return
 			}
 
-			bytes, err := txs.Codec.Marshal(txs.CodecVersion, test.out)
+			bytes, err := testTxCodec.Marshal(txs.CodecVersion, test.out)
 			require.NoError(err)
 
-			numBytesWithoutCodecVersion := uint64(len(bytes) - codec.VersionSize)
+			numBytesWithoutCodecVersion := uint64(len(bytes) - pcodectest.VersionSize)
 			require.Equal(numBytesWithoutCodecVersion, actual[gas.Bandwidth])
 		})
 	}
@@ -344,14 +384,14 @@ func TestInputComplexity(t *testing.T) {
 				return
 			}
 
-			inputBytes, err := txs.Codec.Marshal(txs.CodecVersion, test.in)
+			inputBytes, err := testTxCodec.Marshal(txs.CodecVersion, test.in)
 			require.NoError(err)
 
 			cred := test.cred
-			credentialBytes, err := txs.Codec.Marshal(txs.CodecVersion, &cred)
+			credentialBytes, err := testTxCodec.Marshal(txs.CodecVersion, &cred)
 			require.NoError(err)
 
-			numBytesWithoutCodecVersion := uint64(len(inputBytes) + len(credentialBytes) - 2*codec.VersionSize)
+			numBytesWithoutCodecVersion := uint64(len(inputBytes) + len(credentialBytes) - 2*pcodectest.VersionSize)
 			require.Equal(numBytesWithoutCodecVersion, actual[gas.Bandwidth])
 		})
 	}
@@ -424,10 +464,10 @@ func TestConvertNetworkToL1ValidatorComplexity(t *testing.T) {
 			require.NoError(err)
 			require.Equal(test.expected, actual)
 
-			vdrBytes, err := txs.Codec.Marshal(txs.CodecVersion, test.vdr)
+			vdrBytes, err := testTxCodec.Marshal(txs.CodecVersion, test.vdr)
 			require.NoError(err)
 
-			numBytesWithoutCodecVersion := uint64(len(vdrBytes) - codec.VersionSize)
+			numBytesWithoutCodecVersion := uint64(len(vdrBytes) - pcodectest.VersionSize)
 			require.Equal(numBytesWithoutCodecVersion, actual[gas.Bandwidth])
 		})
 	}
@@ -489,10 +529,10 @@ func TestOwnerComplexity(t *testing.T) {
 				return
 			}
 
-			ownerBytes, err := txs.Codec.Marshal(txs.CodecVersion, test.owner)
+			ownerBytes, err := testTxCodec.Marshal(txs.CodecVersion, test.owner)
 			require.NoError(err)
 
-			numBytesWithoutCodecVersion := uint64(len(ownerBytes) - codec.VersionSize)
+			numBytesWithoutCodecVersion := uint64(len(ownerBytes) - pcodectest.VersionSize)
 			require.Equal(numBytesWithoutCodecVersion, actual[gas.Bandwidth])
 		})
 	}
@@ -567,13 +607,13 @@ func TestAuthComplexity(t *testing.T) {
 				return
 			}
 
-			authBytes, err := txs.Codec.Marshal(txs.CodecVersion, test.auth)
+			authBytes, err := testTxCodec.Marshal(txs.CodecVersion, test.auth)
 			require.NoError(err)
 
-			credentialBytes, err := txs.Codec.Marshal(txs.CodecVersion, test.cred)
+			credentialBytes, err := testTxCodec.Marshal(txs.CodecVersion, test.cred)
 			require.NoError(err)
 
-			numBytesWithoutCodecVersion := uint64(len(authBytes) + len(credentialBytes) - 2*codec.VersionSize)
+			numBytesWithoutCodecVersion := uint64(len(authBytes) + len(credentialBytes) - 2*pcodectest.VersionSize)
 			require.Equal(numBytesWithoutCodecVersion, actual[gas.Bandwidth])
 		})
 	}
@@ -620,10 +660,10 @@ func TestSignerComplexity(t *testing.T) {
 				return
 			}
 
-			signerBytes, err := txs.Codec.Marshal(txs.CodecVersion, test.signer)
+			signerBytes, err := testTxCodec.Marshal(txs.CodecVersion, test.signer)
 			require.NoError(err)
 
-			numBytesWithoutCodecVersion := uint64(len(signerBytes) - codec.VersionSize)
+			numBytesWithoutCodecVersion := uint64(len(signerBytes) - pcodectest.VersionSize)
 			require.Equal(numBytesWithoutCodecVersion, actual[gas.Bandwidth])
 		})
 	}

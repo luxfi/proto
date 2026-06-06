@@ -90,8 +90,10 @@ func NewTeleportMessage(
 	}
 }
 
-// NewPrivateTeleportMessage creates an encrypted Teleport message
+// NewPrivateTeleportMessage creates an encrypted Teleport message using
+// the supplied Codec to serialize the encrypted payload.
 func NewPrivateTeleportMessage(
+	c Codec,
 	sourceChainID ids.ID,
 	destChainID ids.ID,
 	nonce uint64,
@@ -106,7 +108,7 @@ func NewPrivateTeleportMessage(
 	}
 
 	// Serialize the encrypted payload
-	encryptedBytes, err := Codec.Marshal(CodecVersion, encrypted)
+	encryptedBytes, err := c.Marshal(CodecVersion, encrypted)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize encrypted payload: %w", err)
 	}
@@ -122,19 +124,20 @@ func NewPrivateTeleportMessage(
 	}, nil
 }
 
-// ToWarpMessage converts a TeleportMessage to an UnsignedMessage for signing
-func (t *TeleportMessage) ToWarpMessage(networkID uint32) (*UnsignedMessage, error) {
+// ToWarpMessage converts a TeleportMessage to an UnsignedMessage for
+// signing using the supplied Codec.
+func (t *TeleportMessage) ToWarpMessage(c Codec, networkID uint32) (*UnsignedMessage, error) {
 	if err := t.Validate(); err != nil {
 		return nil, err
 	}
 
 	// Serialize the TeleportMessage as the Warp payload
-	teleportPayload, err := Codec.Marshal(CodecVersion, t)
+	teleportPayload, err := c.Marshal(CodecVersion, t)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize teleport message: %w", err)
 	}
 
-	return NewUnsignedMessage(networkID, t.SourceChainID, teleportPayload)
+	return NewUnsignedMessage(c, networkID, t.SourceChainID, teleportPayload)
 }
 
 // Validate checks if the TeleportMessage is well-formed
@@ -154,15 +157,16 @@ func (t *TeleportMessage) Validate() error {
 	return nil
 }
 
-// DecryptPayload decrypts an encrypted TeleportMessage payload
-func (t *TeleportMessage) DecryptPayload(recipientPrivKey []byte) ([]byte, error) {
+// DecryptPayload decrypts an encrypted TeleportMessage payload using the
+// supplied Codec to deserialize the inner EncryptedWarpPayload.
+func (t *TeleportMessage) DecryptPayload(c Codec, recipientPrivKey []byte) ([]byte, error) {
 	if !t.Encrypted {
 		return t.Payload, nil
 	}
 
 	// Deserialize the encrypted payload
 	encrypted := &EncryptedWarpPayload{}
-	_, err := Codec.Unmarshal(t.Payload, encrypted)
+	_, err := c.Unmarshal(t.Payload, encrypted)
 	if err != nil {
 		return nil, fmt.Errorf("failed to deserialize encrypted payload: %w", err)
 	}
@@ -247,15 +251,16 @@ func NewTransferPayload(
 	}
 }
 
-// Bytes serializes the transfer payload
-func (p *TeleportTransferPayload) Bytes() ([]byte, error) {
-	return Codec.Marshal(CodecVersion, p)
+// Bytes serializes the transfer payload using the supplied Codec.
+func (p *TeleportTransferPayload) Bytes(c Codec) ([]byte, error) {
+	return c.Marshal(CodecVersion, p)
 }
 
-// ParseTransferPayload deserializes a transfer payload
-func ParseTransferPayload(data []byte) (*TeleportTransferPayload, error) {
+// ParseTransferPayload deserializes a transfer payload using the
+// supplied Codec.
+func ParseTransferPayload(c Codec, data []byte) (*TeleportTransferPayload, error) {
 	payload := &TeleportTransferPayload{}
-	_, err := Codec.Unmarshal(data, payload)
+	_, err := c.Unmarshal(data, payload)
 	if err != nil {
 		return nil, err
 	}

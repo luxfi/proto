@@ -175,6 +175,14 @@ func New(
 	}
 }
 
+// blockCodec returns the block wire codec for this builder, pulled from
+// the block executor manager. The builder no longer holds the codec as
+// a separate field — the Manager is the single source of truth so the
+// builder.New() signature stays stable across Wave 2 codec rip.
+func (b *builder) blockCodec() platformblock.Codec {
+	return b.blkManager.BlockCodec()
+}
+
 func (b *builder) Connected(ctx context.Context, nodeID ids.NodeID, version interface{}) error {
 	// No-op implementation for builder
 	return nil
@@ -431,12 +439,13 @@ func buildBlock(
 		return nil, fmt.Errorf("could not find next staker to reward: %w", err)
 	}
 	if shouldReward {
-		rewardValidatorTx, err := NewRewardValidatorTx(context.TODO(), stakerTxID)
+		rewardValidatorTx, err := NewRewardValidatorTx(context.TODO(), builder.blockCodec(), stakerTxID)
 		if err != nil {
 			return nil, fmt.Errorf("could not build tx to reward staker: %w", err)
 		}
 
 		return platformblock.NewBanffProposalBlock(
+			builder.blockCodec(),
 			timestamp,
 			parentID,
 			height,
@@ -453,6 +462,7 @@ func buildBlock(
 
 	// Issue a block with as many transactions as possible.
 	return platformblock.NewBanffStandardBlock(
+		builder.blockCodec(),
 		timestamp,
 		parentID,
 		height,
@@ -492,7 +502,7 @@ func packDurangoBlockTxs(
 	var (
 		blockTxs      []*txs.Tx
 		inputs        set.Set[ids.ID]
-		feeCalculator = state.PickFeeCalculator(backend.Config, stateDiff)
+		feeCalculator = state.PickFeeCalculator(backend.Config, backend.WarpCodec, stateDiff)
 	)
 	for {
 		tx, exists := mempool.Peek()
@@ -557,7 +567,7 @@ func packQuasarBlockTxs(
 		blockTxs        []*txs.Tx
 		inputs          set.Set[ids.ID]
 		blockComplexity gas.Dimensions
-		feeCalculator   = state.PickFeeCalculator(backend.Config, stateDiff)
+		feeCalculator   = state.PickFeeCalculator(backend.Config, backend.WarpCodec, stateDiff)
 	)
 
 	logger := backend.Rt.Log.(log.Logger)
@@ -583,7 +593,7 @@ func packQuasarBlockTxs(
 			break
 		}
 
-		txComplexity, err := fee.TxComplexity(tx.Unsigned)
+		txComplexity, err := fee.TxComplexity(backend.WarpCodec, tx.Unsigned)
 		if err != nil {
 			return nil, err
 		}
@@ -665,6 +675,7 @@ func executeTx(
 	err := txexecutor.VerifyWarpMessages(
 		ctx,
 		backend.Rt.NetworkID,
+		backend.WarpCodec,
 		stateAdapter,
 		pChainHeight,
 		tx.Unsigned,
@@ -765,9 +776,15 @@ func getNextStakerToReward(
 	return ids.Empty, false, nil
 }
 
-func NewRewardValidatorTx(ctx context.Context, txID ids.ID) (*txs.Tx, error) {
+// NewRewardValidatorTx builds and signs the well-known
+// RewardValidatorTx. The txCodec is the proto/p/txs wire codec used to
+// marshal the unsigned tx for signature; callers thread it in from
+// their PVM bundle (the codec sits on the block executor Manager via
+// BlockCodec() since the block codec instance also has every tx type
+// registered through txs.RegisterTypes).
+func NewRewardValidatorTx(ctx context.Context, txCodec txs.Codec, txID ids.ID) (*txs.Tx, error) {
 	utx := &txs.RewardValidatorTx{TxID: txID}
-	tx, err := txs.NewSigned(utx, txs.Codec, nil)
+	tx, err := txs.NewSigned(utx, txCodec, nil)
 	if err != nil {
 		return nil, err
 	}

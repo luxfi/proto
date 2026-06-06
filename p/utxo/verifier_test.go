@@ -13,6 +13,7 @@ import (
 
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/stakeable"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/timer/mockable"
@@ -41,10 +42,15 @@ func TestVerifySpendUTXOs(t *testing.T) {
 
 	luxAssetID := ids.GenerateTestID()
 
+	// Build a runtime PVM codec so handler.codec is non-nil; the codec
+	// is used to derive the deterministic owner-id bytes for stakeable
+	// locked-output matching. nil codec dereferences in handler.Marshal.
+	txCodec, _ := pvmcodectest.NewPVMRuntimeCodec()
 	h := &handler{
-		ctx: context.Background(),
-		clk: &mockable.Clock{},
-		fx:  fx,
+		ctx:   context.Background(),
+		codec: txCodec,
+		clk:   &mockable.Clock{},
+		fx:    fx,
 	}
 
 	// The handler time during a test, unless [chainTimestamp] is set

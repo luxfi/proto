@@ -3,14 +3,6 @@
 
 package state
 
-import (
-	"errors"
-	"math"
-
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
-)
-
 const (
 	CodecVersion0Tag        = "v0"
 	CodecVersion0    uint16 = 0
@@ -19,18 +11,20 @@ const (
 	CodecVersion1    uint16 = 1
 )
 
-var MetadataCodec codec.Manager
-
-func init() {
-	c0 := linearcodec.New([]string{CodecVersion0Tag})
-	c1 := linearcodec.New([]string{CodecVersion0Tag, CodecVersion1Tag})
-	MetadataCodec = codec.NewManager(math.MaxInt32)
-
-	err := errors.Join(
-		MetadataCodec.RegisterCodec(CodecVersion0, c0),
-		MetadataCodec.RegisterCodec(CodecVersion1, c1),
-	)
-	if err != nil {
-		panic(err)
-	}
+// MetadataCodec is the wire codec interface used by metadata_validator
+// and metadata_delegator to marshal validator/delegator state. It is
+// structurally identical to codec.Manager — proto/p carries no
+// github.com/luxfi/codec import after the Wave 2A rip (#101), so the
+// concrete codec is constructed externally (production: PVM wiring;
+// tests: proto/internal/pcodectest.NewMetadataCodec) and threaded into
+// state.New as a constructor parameter.
+//
+// The metadata codec is a SEPARATE codec from the block/txs codecs —
+// it has its own version-tagged registration sequence keyed off the
+// v0:"true" / v1:"true" struct tags on validatorMetadata /
+// delegatorMetadata. Do NOT pass the block.Codec here.
+type MetadataCodec interface {
+	Marshal(version uint16, source interface{}) ([]byte, error)
+	Unmarshal(bytes []byte, dest interface{}) (uint16, error)
+	Size(version uint16, value interface{}) (int, error)
 }

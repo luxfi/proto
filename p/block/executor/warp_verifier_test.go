@@ -9,8 +9,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/constants"
+	"github.com/luxfi/proto/internal/pcodectest"
 	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 )
@@ -48,7 +48,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 					Tx: validTx,
 				},
 			},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			name: "BanffProposalBlock with invalid proposal tx",
@@ -57,7 +57,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 					Tx: invalidTx,
 				},
 			},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			name: "BanffProposalBlock with valid proposal tx",
@@ -76,7 +76,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 					},
 				},
 			},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			name: "BanffStandardBlock with valid tx",
@@ -101,7 +101,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 			block: &block.ApricotProposalBlock{
 				Tx: invalidTx,
 			},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			name: "ApricotProposalBlock with valid proposal tx",
@@ -116,7 +116,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 					invalidTx,
 				},
 			},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			name: "ApricotStandardBlock with valid tx",
@@ -131,7 +131,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 			block: &block.ApricotAtomicBlock{
 				Tx: invalidTx,
 			},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			name: "ApricotAtomicBlock with valid proposal tx",
@@ -145,6 +145,7 @@ func TestVerifyWarpMessages(t *testing.T) {
 			err := VerifyWarpMessages(
 				context.Background(),
 				constants.UnitTestID,
+				blockExecutorTestWarpCodec,
 				nil,
 				0,
 				test.block,

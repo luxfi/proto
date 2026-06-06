@@ -21,7 +21,7 @@ func TestStaticCalculator(t *testing.T) {
 			txBytes, err := hex.DecodeString(test.tx)
 			require.NoError(err)
 
-			tx, err := txs.Parse(txs.Codec, txBytes)
+			tx, err := txs.Parse(testTxCodec, txBytes)
 			if err != nil {
 				t.Skipf("skipping invalid tx encoding: %v", err)
 			}

@@ -19,7 +19,6 @@ import (
 
 	"github.com/luxfi/metric"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/consensus/core/choices"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/container/iterator"
@@ -36,8 +35,8 @@ import (
 	"github.com/luxfi/upgrade/upgradetest"
 	validators "github.com/luxfi/validators"
 
-	"github.com/luxfi/codec/wrappers"
-
+	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/block"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/gas"
@@ -61,14 +60,41 @@ import (
 	safemath "github.com/luxfi/math"
 )
 
+// Test-only PVM codec set, constructed once per package to keep the
+// per-test newTestState / makeBlocks calls fast. Each codec instance
+// has the full Apricot/Banff/Durango/Quasar block + tx type set
+// registered via pvmcodectest.NewPVMCodecs. The genesis-side codec
+// additionally has stateBlk pre-registered (RegisterStateBlockType)
+// so legacy on-disk block bytes parse correctly through
+// parseStoredBlock.
+var (
+	testPVMCodecs         = newTestPVMCodecs()
+	testTxCodec           = testPVMCodecs.Codec
+	testGenesisBlockCodec = testPVMCodecs.GenesisCodec
+	testMetadataCodec     = pvmcodectest.NewMetadataCodec()
+)
+
+func newTestPVMCodecs() pvmcodectest.PVMCodecs {
+	codecs := pvmcodectest.NewPVMCodecs()
+	// Add stateBlk to the genesis registry so parseStoredBlock can
+	// fall back to the legacy on-disk format used pre v1.14.x.
+	if err := RegisterStateBlockType(codecs.GenesisRegistry); err != nil {
+		panic(err)
+	}
+	return codecs
+}
+
 var defaultValidatorNodeID = ids.GenerateTestNodeID()
 
 func newTestState(t testing.TB, db database.Database) *state {
 	s, err := New(
 		db,
-		genesistest.NewBytes(t, genesistest.Config{
+		genesistest.NewBytes(t, testGenesisBlockCodec, genesistest.Config{
 			NodeIDs: []ids.NodeID{defaultValidatorNodeID},
 		}),
+		testGenesisBlockCodec,
+		testTxCodec,
+		testMetadataCodec,
 		metric.NewRegistry(),
 		validators.NewManager(),
 		upgradetest.GetConfig(upgradetest.Latest),
@@ -171,7 +197,7 @@ func TestState_writeStakers(t *testing.T) {
 
 	unsignedAddPrimaryNetworkValidator := createPermissionlessValidatorTx(t, constants.PrimaryNetworkID, primaryValidatorData)
 	addPrimaryNetworkValidator := &txs.Tx{Unsigned: unsignedAddPrimaryNetworkValidator}
-	require.NoError(t, addPrimaryNetworkValidator.Initialize(txs.Codec))
+	require.NoError(t, addPrimaryNetworkValidator.Initialize(testTxCodec))
 
 	primaryNetworkPendingValidatorStaker, err := NewPendingStaker(
 		addPrimaryNetworkValidator.ID(),
@@ -189,7 +215,7 @@ func TestState_writeStakers(t *testing.T) {
 
 	unsignedAddPrimaryNetworkDelegator := createPermissionlessDelegatorTx(constants.PrimaryNetworkID, primaryDelegatorData)
 	addPrimaryNetworkDelegator := &txs.Tx{Unsigned: unsignedAddPrimaryNetworkDelegator}
-	require.NoError(t, addPrimaryNetworkDelegator.Initialize(txs.Codec))
+	require.NoError(t, addPrimaryNetworkDelegator.Initialize(testTxCodec))
 
 	primaryNetworkPendingDelegatorStaker, err := NewPendingStaker(
 		addPrimaryNetworkDelegator.ID(),
@@ -207,7 +233,7 @@ func TestState_writeStakers(t *testing.T) {
 
 	unsignedAddNetValidator := createPermissionlessValidatorTx(t, chainID, chainValidatorData)
 	addNetValidator := &txs.Tx{Unsigned: unsignedAddNetValidator}
-	require.NoError(t, addNetValidator.Initialize(txs.Codec))
+	require.NoError(t, addNetValidator.Initialize(testTxCodec))
 
 	chainCurrentValidatorStaker, err := NewCurrentStaker(
 		addNetValidator.ID(),
@@ -782,7 +808,7 @@ func TestValidatorWeightDiff(t *testing.T) {
 
 			var (
 				diff = &ValidatorWeightDiff{}
-				errs = wrappers.Errs{}
+				errs = pcodectest.Errs{}
 			)
 			for _, op := range tt.ops {
 				errs.Add(op.op(diff, op.amount))
@@ -1168,15 +1194,15 @@ func TestParsedStateBlock(t *testing.T) {
 			Status: uint32(choices.Accepted),
 		}
 
-		stBlkBytes, err := block.GenesisCodec.Marshal(block.CodecVersion, &stBlk)
+		stBlkBytes, err := testGenesisBlockCodec.Marshal(block.CodecVersion, &stBlk)
 		require.NoError(err)
 
-		gotBlk, isStateBlk, err := parseStoredBlock(stBlkBytes)
+		gotBlk, isStateBlk, err := parseStoredBlock(testGenesisBlockCodec, stBlkBytes)
 		require.NoError(err)
 		require.True(isStateBlk)
 		require.Equal(blk.ID(), gotBlk.ID())
 
-		gotBlk, isStateBlk, err = parseStoredBlock(blk.Bytes())
+		gotBlk, isStateBlk, err = parseStoredBlock(testGenesisBlockCodec, blk.Bytes())
 		require.NoError(err)
 		require.False(isStateBlk)
 		require.Equal(blk.ID(), gotBlk.ID())
@@ -1195,13 +1221,13 @@ func TestReindexBlocks(t *testing.T) {
 	require.NoError(s.singletonDB.Delete(BlocksReindexedKey))
 
 	// Populate the blocks using the legacy format.
-	// Use block.GenesisCodec which has stateBlk registered via init() in state.go
+	// Use testGenesisBlockCodec which has stateBlk registered via init() in state.go
 	for _, blk := range blks {
 		stBlk := stateBlk{
 			Bytes:  blk.Bytes(),
 			Status: uint32(choices.Accepted),
 		}
-		stBlkBytes, err := block.GenesisCodec.Marshal(block.CodecVersion, &stBlk)
+		stBlkBytes, err := testGenesisBlockCodec.Marshal(block.CodecVersion, &stBlk)
 		require.NoError(err)
 
 		blkID := blk.ID()
@@ -1217,7 +1243,7 @@ func TestReindexBlocks(t *testing.T) {
 		blkBytes, err := s.blockDB.Get(blkID[:])
 		require.NoError(err)
 
-		parsedBlk, err := block.Parse(block.GenesisCodec, blkBytes)
+		parsedBlk, err := block.Parse(testGenesisBlockCodec, blkBytes)
 		require.NoError(err)
 		require.Equal(blkID, parsedBlk.ID())
 	}
@@ -1313,13 +1339,13 @@ func TestStateNetToL1Conversion(t *testing.T) {
 func makeBlocks(require *require.Assertions) []block.Block {
 	var blks []block.Block
 	{
-		blk, err := block.NewApricotAbortBlock(ids.GenerateTestID(), 1000)
+		blk, err := block.NewApricotAbortBlock(testGenesisBlockCodec, ids.GenerateTestID(), 1000)
 		require.NoError(err)
 		blks = append(blks, blk)
 	}
 
 	{
-		blk, err := block.NewApricotAtomicBlock(ids.GenerateTestID(), 1000, &txs.Tx{
+		blk, err := block.NewApricotAtomicBlock(testGenesisBlockCodec, ids.GenerateTestID(), 1000, &txs.Tx{
 			Unsigned: &txs.AdvanceTimeTx{
 				Time: 1000,
 			},
@@ -1329,7 +1355,7 @@ func makeBlocks(require *require.Assertions) []block.Block {
 	}
 
 	{
-		blk, err := block.NewApricotCommitBlock(ids.GenerateTestID(), 1000)
+		blk, err := block.NewApricotCommitBlock(testGenesisBlockCodec, ids.GenerateTestID(), 1000)
 		require.NoError(err)
 		blks = append(blks, blk)
 	}
@@ -1340,8 +1366,8 @@ func makeBlocks(require *require.Assertions) []block.Block {
 				TxID: ids.GenerateTestID(),
 			},
 		}
-		require.NoError(tx.Initialize(txs.Codec))
-		blk, err := block.NewApricotProposalBlock(ids.GenerateTestID(), 1000, tx)
+		require.NoError(tx.Initialize(testTxCodec))
+		blk, err := block.NewApricotProposalBlock(testGenesisBlockCodec, ids.GenerateTestID(), 1000, tx)
 		require.NoError(err)
 		blks = append(blks, blk)
 	}
@@ -1352,33 +1378,20 @@ func makeBlocks(require *require.Assertions) []block.Block {
 				TxID: ids.GenerateTestID(),
 			},
 		}
-		require.NoError(tx.Initialize(txs.Codec))
-		blk, err := block.NewApricotStandardBlock(ids.GenerateTestID(), 1000, []*txs.Tx{tx})
+		require.NoError(tx.Initialize(testTxCodec))
+		blk, err := block.NewApricotStandardBlock(testGenesisBlockCodec, ids.GenerateTestID(), 1000, []*txs.Tx{tx})
 		require.NoError(err)
 		blks = append(blks, blk)
 	}
 
 	{
-		blk, err := block.NewBanffAbortBlock(time.Now(), ids.GenerateTestID(), 1000)
+		blk, err := block.NewBanffAbortBlock(testGenesisBlockCodec, time.Now(), ids.GenerateTestID(), 1000)
 		require.NoError(err)
 		blks = append(blks, blk)
 	}
 
 	{
-		blk, err := block.NewBanffCommitBlock(time.Now(), ids.GenerateTestID(), 1000)
-		require.NoError(err)
-		blks = append(blks, blk)
-	}
-
-	{
-		tx := &txs.Tx{
-			Unsigned: &txs.RewardValidatorTx{
-				TxID: ids.GenerateTestID(),
-			},
-		}
-		require.NoError(tx.Initialize(txs.Codec))
-
-		blk, err := block.NewBanffProposalBlock(time.Now(), ids.GenerateTestID(), 1000, tx, []*txs.Tx{})
+		blk, err := block.NewBanffCommitBlock(testGenesisBlockCodec, time.Now(), ids.GenerateTestID(), 1000)
 		require.NoError(err)
 		blks = append(blks, blk)
 	}
@@ -1389,9 +1402,22 @@ func makeBlocks(require *require.Assertions) []block.Block {
 				TxID: ids.GenerateTestID(),
 			},
 		}
-		require.NoError(tx.Initialize(txs.Codec))
+		require.NoError(tx.Initialize(testTxCodec))
 
-		blk, err := block.NewBanffStandardBlock(time.Now(), ids.GenerateTestID(), 1000, []*txs.Tx{tx})
+		blk, err := block.NewBanffProposalBlock(testGenesisBlockCodec, time.Now(), ids.GenerateTestID(), 1000, tx, []*txs.Tx{})
+		require.NoError(err)
+		blks = append(blks, blk)
+	}
+
+	{
+		tx := &txs.Tx{
+			Unsigned: &txs.RewardValidatorTx{
+				TxID: ids.GenerateTestID(),
+			},
+		}
+		require.NoError(tx.Initialize(testTxCodec))
+
+		blk, err := block.NewBanffStandardBlock(testGenesisBlockCodec, time.Now(), ids.GenerateTestID(), 1000, []*txs.Tx{tx})
 		require.NoError(err)
 		blks = append(blks, blk)
 	}
@@ -1471,7 +1497,7 @@ func TestPutAndGetFeeState(t *testing.T) {
 	require := require.New(t)
 
 	db := memdb.New()
-	defaultFeeState, err := getFeeState(db)
+	defaultFeeState, err := getFeeState(testGenesisBlockCodec, db)
 	require.NoError(err)
 	require.Equal(gas.State{}, defaultFeeState)
 
@@ -1480,9 +1506,9 @@ func TestPutAndGetFeeState(t *testing.T) {
 		Capacity: gas.Gas(rand.Uint64()),
 		Excess:   gas.Gas(rand.Uint64()),
 	}
-	require.NoError(putFeeState(db, expectedFeeState))
+	require.NoError(putFeeState(testGenesisBlockCodec, db, expectedFeeState))
 
-	actualFeeState, err := getFeeState(db)
+	actualFeeState, err := getFeeState(testGenesisBlockCodec, db)
 	require.NoError(err)
 	require.Equal(expectedFeeState, actualFeeState)
 }
@@ -1497,7 +1523,7 @@ func TestGetFeeStateErrors(t *testing.T) {
 				// truncated codec version
 				0x00,
 			},
-			expectedErr: codec.ErrCantUnpackVersion,
+			expectedErr: pcodectest.ErrCantUnpackVersion,
 		},
 		{
 			value: []byte{
@@ -1506,7 +1532,7 @@ func TestGetFeeStateErrors(t *testing.T) {
 				// truncated capacity
 				0x12, 0x34, 0x56, 0x78,
 			},
-			expectedErr: wrappers.ErrInsufficientLength,
+			expectedErr: pcodectest.ErrInsufficientLength,
 		},
 	}
 	for _, test := range tests {
@@ -1517,7 +1543,7 @@ func TestGetFeeStateErrors(t *testing.T) {
 			)
 			require.NoError(db.Put(FeeStateKey, test.value))
 
-			actualState, err := getFeeState(db)
+			actualState, err := getFeeState(testGenesisBlockCodec, db)
 			require.Equal(gas.State{}, actualState)
 			require.ErrorIs(err, test.expectedErr)
 		})
@@ -2094,7 +2120,7 @@ func TestLoadL1ValidatorAndLegacy(t *testing.T) {
 		},
 	)
 	addNetValidator := &txs.Tx{Unsigned: unsignedAddNetValidator}
-	require.NoError(addNetValidator.Initialize(txs.Codec))
+	require.NoError(addNetValidator.Initialize(testTxCodec))
 	state.AddTx(addNetValidator, status.Committed)
 
 	legacyStaker := &Staker{

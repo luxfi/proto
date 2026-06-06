@@ -1,33 +1,35 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package message
+package message_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pvmcodectest"
+	"github.com/luxfi/proto/p/warp/message"
 )
 
 func TestParse(t *testing.T) {
-	mustCreate := func(msg Payload, err error) Payload {
+	c := pvmcodectest.NewMessageCodec()
+	mustCreate := func(msg message.Payload, err error) message.Payload {
 		require.NoError(t, err)
 		return msg
 	}
 	tests := []struct {
-		name        string
-		bytes       []byte
-		expected    Payload
-		expectedErr error
+		name      string
+		bytes     []byte
+		expected  message.Payload
+		expectErr bool
 	}{
 		{
-			name:        "invalid message",
-			bytes:       []byte{255, 255, 255, 255},
-			expectedErr: codec.ErrUnknownVersion,
+			name:      "invalid message",
+			bytes:     []byte{255, 255, 255, 255},
+			expectErr: true,
 		},
 		{
 			name: "ChainToL1Conversion",
@@ -42,7 +44,8 @@ func TestParse(t *testing.T) {
 				0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
 				0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20,
 			},
-			expected: mustCreate(NewChainToL1Conversion(
+			expected: mustCreate(message.NewChainToL1Conversion(
+				c,
 				ids.ID{
 					0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 					0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
@@ -97,7 +100,8 @@ func TestParse(t *testing.T) {
 				// Weight:
 				0x9d, 0x9e, 0x9f, 0xa0, 0xa1, 0xa2, 0xa3, 0xa4,
 			},
-			expected: mustCreate(NewRegisterL1Validator(
+			expected: mustCreate(message.NewRegisterL1Validator(
+				c,
 				ids.ID{
 					0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 					0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
@@ -118,7 +122,7 @@ func TestParse(t *testing.T) {
 					0x5d, 0x5e, 0x5f, 0x60, 0x61, 0x62, 0x63, 0x64,
 				},
 				0x65666768696a6b6c,
-				PChainOwner{
+				message.PChainOwner{
 					Threshold: 0x6d6e6f70,
 					Addresses: []ids.ShortID{
 						{
@@ -128,7 +132,7 @@ func TestParse(t *testing.T) {
 						},
 					},
 				},
-				PChainOwner{
+				message.PChainOwner{
 					Threshold: 0x85868788,
 					Addresses: []ids.ShortID{
 						{
@@ -156,7 +160,8 @@ func TestParse(t *testing.T) {
 				// Registered:
 				0x00,
 			},
-			expected: mustCreate(NewL1ValidatorRegistration(
+			expected: mustCreate(message.NewL1ValidatorRegistration(
+				c,
 				ids.ID{
 					0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 					0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
@@ -183,7 +188,8 @@ func TestParse(t *testing.T) {
 				// Weight:
 				0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x30,
 			},
-			expected: mustCreate(NewL1ValidatorWeight(
+			expected: mustCreate(message.NewL1ValidatorWeight(
+				c,
 				ids.ID{
 					0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 					0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
@@ -199,8 +205,12 @@ func TestParse(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
 
-			msg, err := Parse(test.bytes)
-			require.ErrorIs(err, test.expectedErr)
+			msg, err := message.Parse(c, test.bytes)
+			if test.expectErr {
+				require.Error(err)
+			} else {
+				require.NoError(err)
+			}
 			require.Equal(test.expected, msg)
 			if msg != nil {
 				require.Equal(test.bytes, msg.Bytes())

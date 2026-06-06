@@ -152,7 +152,7 @@ func TestNewImportTx(t *testing.T) {
 
 			stateDiff.SetTimestamp(tt.timestamp)
 
-			feeCalculator := state.PickFeeCalculator(env.config, stateDiff)
+			feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, stateDiff)
 			_, _, _, err = StandardTx(
 				&env.backend,
 				feeCalculator,
@@ -196,7 +196,7 @@ func fundedSharedMemory(
 				},
 			},
 		}
-		utxoBytes, err := txs.Codec.Marshal(txs.CodecVersion, utxo)
+		utxoBytes, err := testCodec.Marshal(txs.CodecVersion, utxo)
 		require.NoError(t, err)
 
 		inputID := utxo.InputID()

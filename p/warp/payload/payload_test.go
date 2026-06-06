@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp/payload"
 )
 
@@ -17,14 +17,14 @@ var junkBytes = []byte{0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88}
 
 func TestParseJunk(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPayloadCodec()
+	c := pvmcodectest.NewPayloadCodec()
 	_, err := payload.Parse(c, junkBytes)
 	require.Error(err)
 }
 
 func TestParseWrongPayloadType(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPayloadCodec()
+	c := pvmcodectest.NewPayloadCodec()
 	hashPayload, err := payload.NewHash(c, ids.GenerateTestID())
 	require.NoError(err)
 
@@ -45,7 +45,7 @@ func TestParseWrongPayloadType(t *testing.T) {
 
 func TestParse(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPayloadCodec()
+	c := pvmcodectest.NewPayloadCodec()
 	hashPayload, err := payload.NewHash(c, ids.ID{4, 5, 6})
 	require.NoError(err)
 

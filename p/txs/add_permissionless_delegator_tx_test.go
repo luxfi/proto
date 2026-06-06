@@ -229,7 +229,7 @@ func TestAddPermissionlessPrimaryDelegatorSerialization(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77,
 	}
 	var unsignedSimpleAddPrimaryTx UnsignedTx = simpleAddPrimaryTx
-	unsignedSimpleAddPrimaryTxBytes, err := Codec.Marshal(CodecVersion, &unsignedSimpleAddPrimaryTx)
+	unsignedSimpleAddPrimaryTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedSimpleAddPrimaryTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedSimpleAddPrimaryTxBytes, unsignedSimpleAddPrimaryTxBytes)
 
@@ -614,7 +614,7 @@ func TestAddPermissionlessPrimaryDelegatorSerialization(t *testing.T) {
 		0x00, 0x00, 0x00, 0x00,
 	}
 	var unsignedComplexAddPrimaryTx UnsignedTx = complexAddPrimaryTx
-	unsignedComplexAddPrimaryTxBytes, err := Codec.Marshal(CodecVersion, &unsignedComplexAddPrimaryTx)
+	unsignedComplexAddPrimaryTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedComplexAddPrimaryTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedComplexAddPrimaryTxBytes, unsignedComplexAddPrimaryTxBytes)
 
@@ -997,7 +997,7 @@ func TestAddPermissionlessNetDelegatorSerialization(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77,
 	}
 	var unsignedSimpleAddNetTx UnsignedTx = simpleAddNetTx
-	unsignedSimpleAddNetTxBytes, err := Codec.Marshal(CodecVersion, &unsignedSimpleAddNetTx)
+	unsignedSimpleAddNetTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedSimpleAddNetTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedSimpleAddNetTxBytes, unsignedSimpleAddNetTxBytes)
 
@@ -1382,7 +1382,7 @@ func TestAddPermissionlessNetDelegatorSerialization(t *testing.T) {
 		0x00, 0x00, 0x00, 0x00,
 	}
 	var unsignedComplexAddNetTx UnsignedTx = complexAddNetTx
-	unsignedComplexAddNetTxBytes, err := Codec.Marshal(CodecVersion, &unsignedComplexAddNetTx)
+	unsignedComplexAddNetTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedComplexAddNetTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedComplexAddNetTxBytes, unsignedComplexAddNetTxBytes)
 

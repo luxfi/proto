@@ -49,7 +49,7 @@ func TestAtomicTxImports(t *testing.T) {
 			OutputOwners: *owner,
 		},
 	}
-	utxoBytes, err := txs.Codec.Marshal(txs.CodecVersion, utxo)
+	utxoBytes, err := blockBuilderTestPVMCodecs.Codec.Marshal(txs.CodecVersion, utxo)
 	require.NoError(err)
 
 	inputID := utxo.InputID()

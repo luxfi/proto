@@ -24,10 +24,10 @@ import (
 	"github.com/luxfi/validators/uptime"
 
 	"github.com/luxfi/atomic"
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/node/chains"
+	"github.com/luxfi/proto/internal/pvmcodectest"
+	platformblock "github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/config"
 	"github.com/luxfi/proto/p/fx"
 	"github.com/luxfi/proto/p/genesis/genesistest"
@@ -55,6 +55,18 @@ import (
 	txmempool "github.com/luxfi/proto/txs/mempool"
 
 	validators "github.com/luxfi/validators"
+)
+
+// blockBuilderTest* are the proto/p codec set shared by every
+// newEnvironment-backed test in proto/p/block/builder. Built once per
+// package run via pvmcodectest.
+var (
+	blockBuilderTestPVMCodecs    = pvmcodectest.NewPVMCodecs()
+	blockBuilderTestWarpCodec    = pvmcodectest.NewWarpCodec()
+	blockBuilderTestMessageCodec = pvmcodectest.NewMessageCodec()
+	blockBuilderTestPayloadCodec = pvmcodectest.NewPayloadCodec()
+
+	testBlockCodec platformblock.Codec = blockBuilderTestPVMCodecs.Codec
 )
 
 const (
@@ -140,14 +152,14 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 	}
 	res.state = statetest.New(t, statetest.Config{
 		DB:         res.baseDB,
-		Genesis:    genesistest.NewBytes(t, genesistest.Config{}),
+		Genesis:    genesistest.NewBytes(t, blockBuilderTestPVMCodecs.GenesisCodec, genesistest.Config{}),
 		Validators: res.config.Validators,
 		Context:    stateConsensusCtx,
 		Rewards:    rewardsCalc,
 	})
 
 	// Uptime calculator is set to NoOp in backend
-	res.utxosVerifier = utxo.NewVerifier(res.clk, res.fx)
+	res.utxosVerifier = utxo.NewVerifier(blockBuilderTestPVMCodecs.Codec, res.clk, res.fx)
 
 	genesisID := res.state.GetLastAccepted()
 	// Convert testcontext.Context to runtime.Runtime
@@ -171,6 +183,10 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 		FlowChecker:  res.utxosVerifier,
 		Uptimes:      &uptime.NoOpCalculator{},
 		Rewards:      rewardsCalc,
+		TxCodec:      blockBuilderTestPVMCodecs.Codec,
+		WarpCodec:    blockBuilderTestWarpCodec,
+		WarpMsgCodec: blockBuilderTestMessageCodec,
+		PayloadCodec: blockBuilderTestPayloadCodec,
 	}
 
 	registerer := metric.NewRegistry()
@@ -193,6 +209,7 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 		res.state,
 		&res.backend,
 		validatorstest.Manager,
+		testBlockCodec,
 	)
 
 	// Use validatorstest.Manager for validator state
@@ -208,6 +225,8 @@ func newEnvironment(t *testing.T, f upgradetest.Fork) *environment { //nolint:un
 
 	res.network, err = network.New(
 		res.ctx.Log,
+		blockBuilderTestPVMCodecs.Codec,
+		blockBuilderTestWarpCodec,
 		res.ctx.NodeID,
 		res.ctx.ChainID,
 		validatorstest.Manager,
@@ -309,7 +328,7 @@ func addNet(t *testing.T, env *environment) {
 	stateDiff, err := state.NewDiff(genesisID, env.blkManager)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, stateDiff)
+	feeCalculator := state.PickFeeCalculator(env.config, blockBuilderTestWarpCodec, stateDiff)
 	_, _, _, err = txexecutor.StandardTx(
 		&env.backend,
 		feeCalculator,
@@ -358,14 +377,11 @@ func defaultClock() *mockable.Clock {
 	return clk
 }
 
+// fxVMInt is the minimal secp256k1fx.VM stub. The historical
+// CodecRegistry method is gone — secp256k1fx is ZAP-native now.
 type fxVMInt struct {
-	registry codec.Registry
-	clk      *mockable.Clock
-	log      log.Logger
-}
-
-func (fvi *fxVMInt) CodecRegistry() codec.Registry {
-	return fvi.registry
+	clk *mockable.Clock
+	log log.Logger
 }
 
 func (fvi *fxVMInt) Clock() *mockable.Clock {
@@ -380,9 +396,8 @@ func defaultFx(t *testing.T, clk *mockable.Clock, log log.Logger, isBootstrapped
 	require := require.New(t)
 
 	fxVMInt := &fxVMInt{
-		registry: linearcodec.NewDefault(),
-		clk:      clk,
-		log:      log,
+		clk: clk,
+		log: log,
 	}
 	res := &secp256k1fx.Fx{}
 	require.NoError(res.Initialize(fxVMInt))

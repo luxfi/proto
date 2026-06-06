@@ -10,13 +10,13 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp/payload"
 )
 
 func TestAddressedCall(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPayloadCodec()
+	c := pvmcodectest.NewPayloadCodec()
 	shortID := ids.GenerateTestShortID()
 
 	addressedPayload, err := payload.NewAddressedCall(
@@ -33,14 +33,14 @@ func TestAddressedCall(t *testing.T) {
 }
 
 func TestParseAddressedCallJunk(t *testing.T) {
-	c := pcodectest.NewPayloadCodec()
+	c := pvmcodectest.NewPayloadCodec()
 	_, err := payload.ParseAddressedCall(c, junkBytes)
 	require.Error(t, err)
 }
 
 func TestAddressedCallBytes(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPayloadCodec()
+	c := pvmcodectest.NewPayloadCodec()
 	base64Payload := "AAAAAAABAAAAEAECAwAAAAAAAAAAAAAAAAAAAAADCgsM"
 	addressedPayload, err := payload.NewAddressedCall(
 		c,

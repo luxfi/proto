@@ -163,7 +163,7 @@ func TestRegisterL1ValidatorTxSerialization(t *testing.T) {
 		ProofOfPossession: pop.ProofOfPossession,
 		Message:           message,
 	}
-	txBytes, err := Codec.Marshal(CodecVersion, &unsignedTx)
+	txBytes, err := testCodec.Marshal(CodecVersion, &unsignedTx)
 	require.NoError(err)
 
 	expectedBytes := []byte{

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/proto/p/txs/txheap"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -18,7 +18,7 @@ import (
 
 func TestByEndTime(t *testing.T) {
 	require := require.New(t)
-	c, _ := pcodectest.NewPVMRuntimeCodec()
+	c, _ := pvmcodectest.NewPVMRuntimeCodec()
 
 	txHeap := txheap.NewByEndTime()
 

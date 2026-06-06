@@ -77,7 +77,7 @@ func TestCreateNetworkTxAP3FeeChange(t *testing.T) {
 			require.NoError(err)
 
 			// Use the proper fee calculator based on state timestamp
-			feeCalculator := state.PickFeeCalculator(env.config, stateDiff)
+			feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, stateDiff)
 			_, _, _, err = StandardTx(
 				&env.backend,
 				feeCalculator,

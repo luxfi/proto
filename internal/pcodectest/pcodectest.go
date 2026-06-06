@@ -10,169 +10,110 @@
 // Production callers (luxfi/node/vms/platformvm/...) construct their
 // codecs inline. This helper exists strictly so the in-tree test files
 // don't need to duplicate the wiring.
+//
+// This file holds the codec-agnostic helpers — generic linearcodec /
+// codec.Manager construction, sentinel error re-exports, and shared
+// type aliases. PVM-specific helpers (NewPVMCodecs, NewPVMRuntimeCodec,
+// NewMetadataCodec, NewWarpCodec, NewMessageCodec, NewPayloadCodec) live
+// in pvm.go and import proto/p/{block,txs,warp,...}. The split keeps
+// this file importable from tests in those same proto/p packages
+// without closing a test-time import cycle.
 package pcodectest
 
 import (
-	"errors"
 	"math"
 
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
-
-	"github.com/luxfi/proto/p/block"
-	"github.com/luxfi/proto/p/txs"
-	"github.com/luxfi/proto/p/warp"
-	warpmsg "github.com/luxfi/proto/p/warp/message"
-	"github.com/luxfi/proto/p/warp/payload"
+	"github.com/luxfi/codec/wrappers"
 )
 
-// Metadata codec version tags. These mirror state.CodecVersion0Tag and
-// state.CodecVersion1Tag — duplicated here to keep pcodectest free of
-// a state-package import (and the resulting test-time import cycle).
-const (
-	metadataCodecVersion0Tag        = "v0"
-	metadataCodecVersion0    uint16 = 0
+// ErrCantUnpackVersion is re-exported from luxfi/codec so test files
+// under proto/p can assert on the codec's "missing version byte"
+// sentinel without importing luxfi/codec themselves.
+var ErrCantUnpackVersion = codec.ErrCantUnpackVersion
 
-	metadataCodecVersion1Tag        = "v1"
-	metadataCodecVersion1    uint16 = 1
-)
+// VersionSize re-exports codec.VersionSize — the on-wire length of the
+// codec-version prefix (2 bytes). Tests that compute expected
+// Marshal-output sizes subtract this constant to isolate the payload
+// component; they reach for the re-export here to avoid importing
+// luxfi/codec directly.
+const VersionSize = codec.VersionSize
 
-// NewPayloadCodec returns a codec.Manager + linearcodec pair with the
-// canonical warp payload types (Hash, AddressedCall) registered. Used by
-// proto/p/warp/payload tests in lieu of the legacy package-level
-// payload.Codec singleton.
-func NewPayloadCodec() payload.Codec {
-	c := linearcodec.NewDefault()
-	cm := codec.NewManager(payload.MaxMessageSize)
-	if err := payload.RegisterTypes(c); err != nil {
-		panic(err)
-	}
-	if err := cm.RegisterCodec(payload.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	return cm
+// ErrInsufficientLength is re-exported from luxfi/codec/wrappers for
+// the same reason — proto/p test files can `require.ErrorIs(err,
+// pcodectest.ErrInsufficientLength)` without picking up the wrappers
+// import directly.
+var ErrInsufficientLength = wrappers.ErrInsufficientLength
+
+// LinearCodec re-exports linearcodec.Codec (the union of codec.Registry
+// + codec.Codec) so test files can hold a concrete linear codec without
+// importing luxfi/codec/linearcodec directly. Each call to
+// NewLinearCodec returns its own fresh codec — no global state.
+type LinearCodec = linearcodec.Codec
+
+// CodecManager re-exports codec.Manager so test files can hold a
+// concrete codec.Manager without importing luxfi/codec directly. Used
+// in test files that need to register a custom codec versions table.
+type CodecManager = codec.Manager
+
+// NewLinearCodec returns a fresh linearcodec-backed Codec instance.
+// Used by:
+//   - fx-style tests that need a `codec.Registry` parameter for
+//     `fx.Initialize(...)` but never exercise the wire codec.
+//   - fuzz tests that exercise MarshalInto / UnmarshalFrom directly
+//     against a Packer.
+//   - in-package _test.go files that need to build their own codec
+//     against package-internal RegisterTypes (the helper here can't
+//     import the package because that would close a test-time import
+//     cycle through proto/p/block / proto/p/txs).
+func NewLinearCodec() LinearCodec {
+	return linearcodec.NewDefault()
 }
 
-// NewMessageCodec returns a codec.Manager + linearcodec pair with the
-// canonical warp/message types registered.
-func NewMessageCodec() warpmsg.Codec {
-	c := linearcodec.NewDefault()
-	cm := codec.NewManager(math.MaxInt)
-	if err := warpmsg.RegisterTypes(c); err != nil {
-		panic(err)
-	}
-	if err := cm.RegisterCodec(warpmsg.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	return cm
+// NewLinearCodecWithTags returns a fresh linearcodec.Codec with the
+// supplied struct-tag names. Mirrors linearcodec.New([]string{tag...}).
+// Used by the metadata codec wiring where v0:"true" / v1:"true" tags
+// select per-version field sets.
+func NewLinearCodecWithTags(tags ...string) LinearCodec {
+	return linearcodec.New(tags)
 }
 
-// NewWarpCodec returns a codec.Manager + linearcodec pair with the
-// canonical proto/p/warp signature + teleport types registered.
-func NewWarpCodec() warp.Codec {
-	c := linearcodec.NewDefault()
-	cm := codec.NewManager(math.MaxInt)
-	if err := warp.RegisterTypes(c); err != nil {
-		panic(err)
-	}
-	if err := cm.RegisterCodec(warp.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	return cm
+// NewCodecManager returns a fresh codec.Manager with the supplied max
+// wire-payload size. Mirrors codec.NewManager(maxSize). Tests use this
+// to register their own codec versions against a Manager.
+func NewCodecManager(maxSize uint64) CodecManager {
+	return codec.NewManager(maxSize)
 }
 
-// PVMCodecs bundles the runtime and genesis PVM codecs with their
-// underlying linearcodec registries. Tests that exercise both the
-// regular and genesis codec paths (e.g. proto/p/block, proto/p/state)
-// pull a single bundle.
-type PVMCodecs struct {
-	Codec            txs.Codec
-	GenesisCodec     txs.Codec
-	Registry         txs.LinearRegistry
-	GenesisRegistry  txs.LinearRegistry
+// NewDefaultCodecManager returns a fresh codec.Manager with the
+// default max wire-payload size. Mirrors codec.NewDefaultManager().
+func NewDefaultCodecManager() CodecManager {
+	return codec.NewDefaultManager()
 }
 
-// NewPVMCodecs returns a PVMCodecs bundle backed by two fresh
-// linearcodec registries and two codec.Manager instances, one for
-// runtime txs and one for genesis txs (with the larger MaxInt32 size
-// budget). Each call produces independent codecs — safe to use per-test.
-// Both registries are pre-seeded with the full Apricot/Banff/Durango/
-// Quasar block + tx type set, including the historical SkipRegistrations
-// pre-amble.
-func NewPVMCodecs() PVMCodecs {
-	c := linearcodec.NewDefault()
-	gc := linearcodec.NewDefault()
-	cm := codec.NewDefaultManager()
-	gcm := codec.NewManager(math.MaxInt32)
-	if err := block.RegisterTypes(c); err != nil {
-		panic(err)
-	}
-	if err := block.RegisterTypes(gc); err != nil {
-		panic(err)
-	}
-	if err := cm.RegisterCodec(txs.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	if err := gcm.RegisterCodec(txs.CodecVersion, gc); err != nil {
-		panic(err)
-	}
-	return PVMCodecs{
-		Codec:           cm,
-		GenesisCodec:    gcm,
-		Registry:        c,
-		GenesisRegistry: gc,
-	}
+// MaxInt32Manager returns a fresh codec.Manager sized for genesis-style
+// blobs (math.MaxInt32 budget). Tests building genesis codecs reach for
+// this rather than re-deriving the budget at every call site.
+func MaxInt32Manager() CodecManager {
+	return codec.NewManager(math.MaxInt32)
 }
 
-// NewPVMRuntimeCodec returns a single linearcodec-backed codec.Manager
-// for runtime tx wire bytes. Used by tests that need a txs.Codec
-// directly without going through a Parser.
-func NewPVMRuntimeCodec() (txs.Codec, txs.LinearRegistry) {
-	c := linearcodec.NewDefault()
-	cm := codec.NewDefaultManager()
-	if err := block.RegisterTypes(c); err != nil {
-		panic(err)
-	}
-	if err := cm.RegisterCodec(txs.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	return cm, c
+// MaxIntManager returns a fresh codec.Manager sized for warp-style
+// payloads (math.MaxInt budget — effectively unbounded).
+func MaxIntManager() CodecManager {
+	return codec.NewManager(uint64(math.MaxInt))
 }
 
-// NewPVMGenesisCodec returns a single linearcodec-backed codec.Manager
-// for genesis tx wire bytes (MaxInt32 size budget).
-func NewPVMGenesisCodec() (txs.Codec, txs.LinearRegistry) {
-	c := linearcodec.NewDefault()
-	cm := codec.NewManager(math.MaxInt32)
-	if err := block.RegisterTypes(c); err != nil {
-		panic(err)
-	}
-	if err := cm.RegisterCodec(txs.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	return cm, c
-}
+// Errs re-exports wrappers.Errs (a multi-error accumulator the legacy
+// platformvm tests use to fold multiple ErrorIs targets into a single
+// require.NoError chain). proto/p test files use the type alias to
+// keep the codec/wrappers import out of their import block.
+type Errs = wrappers.Errs
 
-// NewMetadataCodec returns the validator/delegator metadata codec
-// registered with the v0:"true" and v1:"true" tag layouts. This is a
-// SEPARATE codec from the block/genesis codec — proto/p/state holds
-// it as a distinct field on *state.
-//
-// Return type is the codec.Manager concrete (which satisfies
-// state.MetadataCodec by shape) so this helper can stay independent of
-// the proto/p/state package and avoid an import cycle on the
-// state_test files that need this codec.
-func NewMetadataCodec() codec.Manager {
-	c0 := linearcodec.New([]string{metadataCodecVersion0Tag})
-	c1 := linearcodec.New([]string{metadataCodecVersion0Tag, metadataCodecVersion1Tag})
-	cm := codec.NewManager(math.MaxInt32)
-
-	err := errors.Join(
-		cm.RegisterCodec(metadataCodecVersion0, c0),
-		cm.RegisterCodec(metadataCodecVersion1, c1),
-	)
-	if err != nil {
-		panic(err)
-	}
-	return cm
-}
+// Packer re-exports wrappers.Packer so fuzz tests can build/read
+// MarshalInto / UnmarshalFrom byte streams without importing the
+// codec/wrappers subpackage directly. The fuzz tests need the raw
+// Packer because they're exercising codec.MarshalInto codepaths that
+// don't go through Manager.Marshal — pcodectest is the bridge.
+type Packer = wrappers.Packer

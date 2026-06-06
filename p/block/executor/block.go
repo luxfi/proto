@@ -104,6 +104,7 @@ func (b *Block) Options(context.Context) ([2]block.Block, error) {
 		primaryUptimePercentage: b.manager.txExecutorBackend.Config.UptimePercentage,
 		uptimes:                 b.manager.txExecutorBackend.Uptimes,
 		state:                   b.manager.backend.state,
+		codec:                   b.manager.blockCodec,
 	}
 	if err := b.Block.Visit(&options); err != nil {
 		return [2]block.Block{}, err

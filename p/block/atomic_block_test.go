@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
@@ -18,7 +18,7 @@ import (
 
 func TestNewApricotAtomicBlock(t *testing.T) {
 	require := require.New(t)
-	codecs := pcodectest.NewPVMCodecs()
+	codecs := pvmcodectest.NewPVMCodecs()
 	c := codecs.GenesisCodec
 
 	parentID := ids.GenerateTestID()

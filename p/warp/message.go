@@ -13,8 +13,10 @@ type Message struct {
 	bytes []byte
 }
 
-// NewMessage creates a new *Message and initializes it.
+// NewMessage creates a new *Message and initializes it against the
+// supplied Codec.
 func NewMessage(
+	c Codec,
 	unsignedMsg *UnsignedMessage,
 	signature Signature,
 ) (*Message, error) {
@@ -22,25 +24,26 @@ func NewMessage(
 		UnsignedMessage: *unsignedMsg,
 		Signature:       signature,
 	}
-	return msg, msg.Initialize()
+	return msg, msg.Initialize(c)
 }
 
-// ParseMessage converts a slice of bytes into an initialized *Message.
-func ParseMessage(b []byte) (*Message, error) {
+// ParseMessage converts a slice of bytes into an initialized *Message
+// using the supplied Codec.
+func ParseMessage(c Codec, b []byte) (*Message, error) {
 	msg := &Message{
 		bytes: b,
 	}
-	_, err := Codec.Unmarshal(b, msg)
+	_, err := c.Unmarshal(b, msg)
 	if err != nil {
 		return nil, err
 	}
-	return msg, msg.UnsignedMessage.Initialize()
+	return msg, msg.UnsignedMessage.Initialize(c)
 }
 
-// Initialize recalculates the result of Bytes(). It does not call Initialize()
-// on the UnsignedMessage.
-func (m *Message) Initialize() error {
-	bytes, err := Codec.Marshal(CodecVersion, m)
+// Initialize recalculates the result of Bytes() using the supplied
+// Codec. It does not call Initialize() on the UnsignedMessage.
+func (m *Message) Initialize(c Codec) error {
+	bytes, err := c.Marshal(CodecVersion, m)
 	m.bytes = bytes
 	return err
 }

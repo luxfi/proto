@@ -23,8 +23,10 @@ type L1ValidatorRegistration struct {
 	Registered bool `serialize:"true" json:"registered"`
 }
 
-// NewL1ValidatorRegistration creates a new initialized L1ValidatorRegistration.
+// NewL1ValidatorRegistration creates a new initialized
+// L1ValidatorRegistration using the supplied Codec.
 func NewL1ValidatorRegistration(
+	c Codec,
 	validationID ids.ID,
 	registered bool,
 ) (*L1ValidatorRegistration, error) {
@@ -32,13 +34,13 @@ func NewL1ValidatorRegistration(
 		ValidationID: validationID,
 		Registered:   registered,
 	}
-	return msg, Initialize(msg)
+	return msg, Initialize(c, msg)
 }
 
 // ParseL1ValidatorRegistration parses bytes into an initialized
-// L1ValidatorRegistration.
-func ParseL1ValidatorRegistration(b []byte) (*L1ValidatorRegistration, error) {
-	payloadIntf, err := Parse(b)
+// L1ValidatorRegistration using the supplied Codec.
+func ParseL1ValidatorRegistration(c Codec, b []byte) (*L1ValidatorRegistration, error) {
+	payloadIntf, err := Parse(c, b)
 	if err != nil {
 		return nil, err
 	}

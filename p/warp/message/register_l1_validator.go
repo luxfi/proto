@@ -80,8 +80,10 @@ func (r *RegisterL1Validator) ValidationID() ids.ID {
 	return hash.ComputeHash256Array(r.Bytes())
 }
 
-// NewRegisterL1Validator creates a new initialized RegisterL1Validator.
+// NewRegisterL1Validator creates a new initialized RegisterL1Validator
+// using the supplied Codec.
 func NewRegisterL1Validator(
+	c Codec,
 	chainID ids.ID,
 	nodeID ids.NodeID,
 	blsPublicKey [bls.PublicKeyLen]byte,
@@ -99,13 +101,13 @@ func NewRegisterL1Validator(
 		DisableOwner:          disableOwner,
 		Weight:                weight,
 	}
-	return msg, Initialize(msg)
+	return msg, Initialize(c, msg)
 }
 
 // ParseRegisterL1Validator parses bytes into an initialized
-// RegisterL1Validator.
-func ParseRegisterL1Validator(b []byte) (*RegisterL1Validator, error) {
-	payloadIntf, err := Parse(b)
+// RegisterL1Validator using the supplied Codec.
+func ParseRegisterL1Validator(c Codec, b []byte) (*RegisterL1Validator, error) {
+	payloadIntf, err := Parse(c, b)
 	if err != nil {
 		return nil, err
 	}

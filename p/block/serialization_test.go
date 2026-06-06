@@ -12,14 +12,14 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
 )
 
 func TestBanffBlockSerialization(t *testing.T) {
-	codecs := pcodectest.NewPVMCodecs()
+	codecs := pvmcodectest.NewPVMCodecs()
 
 	type test struct {
 		block block.BanffBlock

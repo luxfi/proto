@@ -10,12 +10,12 @@ import (
 
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp/message"
 )
 
 func TestParse(t *testing.T) {
-	c := pcodectest.NewMessageCodec()
+	c := pvmcodectest.NewMessageCodec()
 	mustCreate := func(msg message.Payload, err error) message.Payload {
 		require.NoError(t, err)
 		return msg

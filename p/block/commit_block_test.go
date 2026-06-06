@@ -10,13 +10,13 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/block"
 )
 
 func TestNewBanffCommitBlock(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPVMCodecs().GenesisCodec
+	c := pvmcodectest.NewPVMCodecs().GenesisCodec
 
 	timestamp := time.Now().Truncate(time.Second)
 	parentID := ids.GenerateTestID()
@@ -38,7 +38,7 @@ func TestNewBanffCommitBlock(t *testing.T) {
 
 func TestNewApricotCommitBlock(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPVMCodecs().GenesisCodec
+	c := pvmcodectest.NewPVMCodecs().GenesisCodec
 
 	parentID := ids.GenerateTestID()
 	height := uint64(1337)

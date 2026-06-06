@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/config"
 	"github.com/luxfi/proto/p/genesis/genesistest"
 	"github.com/luxfi/proto/p/metrics"
@@ -42,7 +42,7 @@ type Config struct {
 }
 
 func New(t testing.TB, c Config) state.State {
-	codecs := pcodectest.NewPVMCodecs()
+	codecs := pvmcodectest.NewPVMCodecs()
 	// state.RegisterStateBlockType must be wired before constructing the
 	// state — the legacy stateBlk type rides on the genesis registry.
 	require.NoError(t, state.RegisterStateBlockType(codecs.GenesisRegistry))
@@ -91,7 +91,7 @@ func New(t testing.TB, c Config) state.State {
 		c.Genesis,
 		codecs.GenesisCodec,
 		codecs.Codec,
-		pcodectest.NewMetadataCodec(),
+		pvmcodectest.NewMetadataCodec(),
 		c.Registerer,
 		c.Validators,
 		c.Upgrades,

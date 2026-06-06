@@ -11,14 +11,14 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp/message"
 	"github.com/luxfi/vm/types"
 )
 
 func TestChainToL1ConversionID(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewMessageCodec()
+	c := pvmcodectest.NewMessageCodec()
 
 	chainToL1ConversionDataBytes := []byte{
 		// Codec version:
@@ -98,7 +98,7 @@ func TestChainToL1ConversionID(t *testing.T) {
 
 func TestChainToL1Conversion(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewMessageCodec()
+	c := pvmcodectest.NewMessageCodec()
 
 	msg, err := message.NewChainToL1Conversion(c, ids.GenerateTestID())
 	require.NoError(err)

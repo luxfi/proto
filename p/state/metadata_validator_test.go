@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 )
 
 func TestValidatorUptimes(t *testing.T) {
@@ -114,14 +114,15 @@ func TestValidatorDelegateeRewards(t *testing.T) {
 func TestWriteValidatorMetadata(t *testing.T) {
 	require := require.New(t)
 	state := newValidatorState()
-	c := pcodectest.NewMetadataCodec()
+	c := pvmcodectest.NewMetadataCodec()
 
 	primaryDB := memdb.New()
 	netDB := memdb.New()
 	// write empty uptimes
 	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
 
-	// load uptime
+	// load metadata for a chain validator. Load alone does NOT mark the
+	// entry as updated — only Set* mutations trigger a subsequent write.
 	nodeID := ids.GenerateTestNodeID()
 	netID := ids.GenerateTestID()
 	testUptimeReward := &validatorMetadata{
@@ -132,11 +133,24 @@ func TestWriteValidatorMetadata(t *testing.T) {
 	}
 	state.LoadValidatorMetadata(nodeID, netID, testUptimeReward)
 
-	// write state, should reflect to DB
+	// Without a Set, WriteValidatorMetadata is a no-op for this txID.
 	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
-	require.True(netDB.Has(testUptimeReward.txID[:]))
+	netDBHas, err := netDB.Has(testUptimeReward.txID[:])
+	require.NoError(err)
+	require.False(netDBHas)
 
-	// load uptime
+	// Mark the entry as updated via SetUptime, then re-write — now the
+	// chain validator's row should land in netDB (not primaryDB).
+	require.NoError(state.SetUptime(nodeID, netID, testUptimeReward.UpDuration+1, testUptimeReward.lastUpdated))
+	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
+	netDBHas, err = netDB.Has(testUptimeReward.txID[:])
+	require.NoError(err)
+	require.True(netDBHas)
+	primaryDBHas, err := primaryDB.Has(testUptimeReward.txID[:])
+	require.NoError(err)
+	require.False(primaryDBHas)
+
+	// Same for a primary-network validator — Set then Write lands in primaryDB.
 	primaryNodeID := ids.GenerateTestNodeID()
 	primaryNetID := ids.Empty // primary network ID
 	testUptimeReward2 := &validatorMetadata{
@@ -146,14 +160,15 @@ func TestWriteValidatorMetadata(t *testing.T) {
 		txID:            ids.GenerateTestID(),
 	}
 	state.LoadValidatorMetadata(primaryNodeID, primaryNetID, testUptimeReward2)
-
-	// write state, should reflect to DB
+	require.NoError(state.SetUptime(primaryNodeID, primaryNetID, testUptimeReward2.UpDuration+1, testUptimeReward2.lastUpdated))
 	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
-	require.True(primaryDB.Has(testUptimeReward2.txID[:]))
+	primaryDBHas, err = primaryDB.Has(testUptimeReward2.txID[:])
+	require.NoError(err)
+	require.True(primaryDBHas)
 }
 
 func TestParseValidatorMetadata(t *testing.T) {
-	c := pcodectest.NewMetadataCodec()
+	c := pvmcodectest.NewMetadataCodec()
 	type test struct {
 		name        string
 		bytes       []byte

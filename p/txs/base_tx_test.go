@@ -120,7 +120,7 @@ func TestBaseTxSerialization(t *testing.T) {
 		0x00, 0x00, 0x00, 0x00,
 	}
 	var unsignedSimpleBaseTx UnsignedTx = simpleBaseTx
-	unsignedSimpleBaseTxBytes, err := Codec.Marshal(CodecVersion, &unsignedSimpleBaseTx)
+	unsignedSimpleBaseTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedSimpleBaseTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedSimpleBaseTxBytes, unsignedSimpleBaseTxBytes)
 
@@ -362,7 +362,7 @@ func TestBaseTxSerialization(t *testing.T) {
 		0x01, 0x23, 0x45, 0x21,
 	}
 	var unsignedComplexBaseTx UnsignedTx = complexBaseTx
-	unsignedComplexBaseTxBytes, err := Codec.Marshal(CodecVersion, &unsignedComplexBaseTx)
+	unsignedComplexBaseTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedComplexBaseTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedComplexBaseTxBytes, unsignedComplexBaseTxBytes)
 

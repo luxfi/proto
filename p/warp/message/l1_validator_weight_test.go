@@ -11,13 +11,13 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp/message"
 )
 
 func TestL1ValidatorWeight(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewMessageCodec()
+	c := pvmcodectest.NewMessageCodec()
 
 	msg, err := message.NewL1ValidatorWeight(
 		c,
@@ -33,7 +33,7 @@ func TestL1ValidatorWeight(t *testing.T) {
 }
 
 func TestL1ValidatorWeight_Verify(t *testing.T) {
-	c := pcodectest.NewMessageCodec()
+	c := pvmcodectest.NewMessageCodec()
 	mustCreate := func(msg *message.L1ValidatorWeight, err error) *message.L1ValidatorWeight {
 		require.NoError(t, err)
 		return msg

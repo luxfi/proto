@@ -11,13 +11,13 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp"
 )
 
 func TestMessage(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	payload := []byte("payload")
 
@@ -48,7 +48,7 @@ func TestMessage(t *testing.T) {
 
 func TestParseMessageJunk(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	bytes := []byte{0, 1, 2, 3, 4, 5, 6, 7}
 	_, err := warp.ParseMessage(c, bytes)

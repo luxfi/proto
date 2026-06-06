@@ -269,7 +269,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		0x00, 0x0f, 0x42, 0x40,
 	}
 	var unsignedSimpleAddPrimaryTx UnsignedTx = simpleAddPrimaryTx
-	unsignedSimpleAddPrimaryTxBytes, err := Codec.Marshal(CodecVersion, &unsignedSimpleAddPrimaryTx)
+	unsignedSimpleAddPrimaryTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedSimpleAddPrimaryTx)
 	require.NoError(err)
 	// BLS signatures include randomness, so we can't compare exact bytes
 	// Just verify it serializes without error and has reasonable length
@@ -702,7 +702,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		0x00, 0x0f, 0x42, 0x40,
 	}
 	var unsignedComplexAddPrimaryTx UnsignedTx = complexAddPrimaryTx
-	unsignedComplexAddPrimaryTxBytes, err := Codec.Marshal(CodecVersion, &unsignedComplexAddPrimaryTx)
+	unsignedComplexAddPrimaryTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedComplexAddPrimaryTx)
 	require.NoError(err)
 	// BLS signatures include randomness, so we can't compare exact bytes
 	// Just verify that serialization works and produces a reasonable size
@@ -965,7 +965,7 @@ func TestAddPermissionlessNetValidator(t *testing.T) {
 		0x00, 0x0f, 0x42, 0x40,
 	}
 	var unsignedSimpleAddNetTx UnsignedTx = simpleAddNetTx
-	unsignedSimpleAddNetTxBytes, err := Codec.Marshal(CodecVersion, &unsignedSimpleAddNetTx)
+	unsignedSimpleAddNetTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedSimpleAddNetTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedSimpleAddNetTxBytes, unsignedSimpleAddNetTxBytes)
 
@@ -1375,7 +1375,7 @@ func TestAddPermissionlessNetValidator(t *testing.T) {
 		0x00, 0x0f, 0x42, 0x40,
 	}
 	var unsignedComplexAddNetTx UnsignedTx = complexAddNetTx
-	unsignedComplexAddNetTxBytes, err := Codec.Marshal(CodecVersion, &unsignedComplexAddNetTx)
+	unsignedComplexAddNetTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedComplexAddNetTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedComplexAddNetTxBytes, unsignedComplexAddNetTxBytes)
 }

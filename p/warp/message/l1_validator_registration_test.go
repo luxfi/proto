@@ -10,12 +10,12 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp/message"
 )
 
 func TestL1ValidatorRegistration(t *testing.T) {
-	c := pcodectest.NewMessageCodec()
+	c := pvmcodectest.NewMessageCodec()
 	booleans := []bool{true, false}
 	for _, registered := range booleans {
 		t.Run(strconv.FormatBool(registered), func(t *testing.T) {

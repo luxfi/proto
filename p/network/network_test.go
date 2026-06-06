@@ -18,6 +18,7 @@ import (
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/config"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/proto/txs/mempool"
@@ -345,8 +346,12 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 					},
 				},
 			}
+			pvm := pvmcodectest.NewPVMCodecs()
+			warpCodec := pvmcodectest.NewWarpCodec()
 			n, err := New(
 				logger,
+				pvm.Codec,
+				warpCodec,
 				nodeID,
 				netID,
 				validatorState,

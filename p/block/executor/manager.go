@@ -49,6 +49,12 @@ type Manager interface {
 	// VerifyUniqueInputs verifies that the inputs are not duplicated in the
 	// provided blk or any of its ancestors pinned in memory.
 	VerifyUniqueInputs(blkID ids.ID, inputs set.Set[ids.ID]) error
+
+	// BlockCodec returns the proto/p/block wire codec used to materialize
+	// new blocks (proposal / standard / commit / abort). The block builder
+	// reads it from the Manager so callers don't thread the codec
+	// separately to both the manager and the builder.
+	BlockCodec() platformblock.Codec
 }
 
 func NewManager(
@@ -57,6 +63,7 @@ func NewManager(
 	s state.State,
 	txExecutorBackend *executor.Backend,
 	validatorManager validators.Manager,
+	blockCodec platformblock.Codec,
 ) Manager {
 	lastAccepted := s.GetLastAccepted()
 	backend := &backend{
@@ -81,6 +88,7 @@ func NewManager(
 		preferred:         lastAccepted,
 		txExecutorBackend: txExecutorBackend,
 		validatorManager:  validatorManager,
+		blockCodec:        blockCodec,
 		Log:               log.NoLog{},
 	}
 }
@@ -93,7 +101,18 @@ type manager struct {
 	preferred         ids.ID
 	txExecutorBackend *executor.Backend
 	validatorManager  validators.Manager
-	Log               log.Logger
+	// blockCodec is the proto/p/block wire codec used to materialize new
+	// option blocks (commit/abort) inside Block.Options() and is exposed
+	// to the block builder via BlockCodec().
+	blockCodec platformblock.Codec
+	Log        log.Logger
+}
+
+// BlockCodec returns the block wire codec wired into this Manager. The
+// block builder uses it to construct BanffProposalBlock /
+// BanffStandardBlock without re-deriving the codec at every call site.
+func (m *manager) BlockCodec() platformblock.Codec {
+	return m.blockCodec
 }
 
 func (m *manager) GetBlock(blkID ids.ID) (block.Block, error) {

@@ -165,7 +165,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77,
 	}
 	var unsignedSimpleTransferChainOwnershipTx UnsignedTx = simpleTransferChainOwnershipTx
-	unsignedSimpleTransferChainOwnershipTxBytes, err := Codec.Marshal(CodecVersion, &unsignedSimpleTransferChainOwnershipTx)
+	unsignedSimpleTransferChainOwnershipTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedSimpleTransferChainOwnershipTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedSimpleTransferChainOwnershipTxBytes, unsignedSimpleTransferChainOwnershipTxBytes)
 
@@ -441,7 +441,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77,
 	}
 	var unsignedComplexTransferChainOwnershipTx UnsignedTx = complexTransferChainOwnershipTx
-	unsignedComplexTransferChainOwnershipTxBytes, err := Codec.Marshal(CodecVersion, &unsignedComplexTransferChainOwnershipTx)
+	unsignedComplexTransferChainOwnershipTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedComplexTransferChainOwnershipTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedComplexTransferChainOwnershipTxBytes, unsignedComplexTransferChainOwnershipTxBytes)
 

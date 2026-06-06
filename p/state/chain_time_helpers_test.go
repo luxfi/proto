@@ -13,6 +13,7 @@ import (
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/genesis/builder"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/config"
 	"github.com/luxfi/proto/p/genesis/genesistest"
 	"github.com/luxfi/proto/p/txs"
@@ -23,6 +24,12 @@ import (
 	txfee "github.com/luxfi/proto/p/txs/fee"
 	validatorfee "github.com/luxfi/proto/p/validators/fee"
 )
+
+// chainTimeHelpersTestWarpCodec is the proto/p/warp wire codec used by
+// the dynamic-fee calculator in tests. Constructed once at package
+// init; subsequent invocations of NewDynamicCalculator + PickFeeCalculator
+// thread it through.
+var chainTimeHelpersTestWarpCodec = pvmcodectest.NewWarpCodec()
 
 func TestNextBlockTime(t *testing.T) {
 	tests := []struct {
@@ -226,6 +233,7 @@ func TestPickFeeCalculator(t *testing.T) {
 		{
 			fork: upgradetest.Quasar,
 			expected: txfee.NewDynamicCalculator(
+				chainTimeHelpersTestWarpCodec,
 				dynamicFeeConfig.Weights,
 				dynamicFeeConfig.MinPrice,
 			),
@@ -240,7 +248,7 @@ func TestPickFeeCalculator(t *testing.T) {
 				}
 				s = newTestState(t, memdb.New())
 			)
-			actual := PickFeeCalculator(config, s)
+			actual := PickFeeCalculator(config, chainTimeHelpersTestWarpCodec, s)
 			require.Equal(t, test.expected, actual)
 		})
 	}

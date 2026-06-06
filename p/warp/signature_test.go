@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/validators/validatorsmock"
@@ -113,7 +113,7 @@ func TestSignatureVerification(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	tests := []struct {
 		name         string

@@ -35,7 +35,7 @@ func TestRejectBlock(t *testing.T) {
 		{
 			name: "proposal block",
 			newBlockFunc: func() (block.Block, error) {
-				return block.NewBanffProposalBlock(
+				return block.NewBanffProposalBlock(testBlockCodec, 
 					time.Now(),
 					ids.GenerateTestID(),
 					1,
@@ -56,7 +56,7 @@ func TestRejectBlock(t *testing.T) {
 		{
 			name: "atomic block",
 			newBlockFunc: func() (block.Block, error) {
-				return block.NewApricotAtomicBlock(
+				return block.NewApricotAtomicBlock(testBlockCodec, 
 					ids.GenerateTestID(),
 					1,
 					&txs.Tx{
@@ -75,7 +75,7 @@ func TestRejectBlock(t *testing.T) {
 		{
 			name: "standard block",
 			newBlockFunc: func() (block.Block, error) {
-				return block.NewBanffStandardBlock(
+				return block.NewBanffStandardBlock(testBlockCodec, 
 					time.Now(),
 					ids.GenerateTestID(),
 					1,
@@ -97,7 +97,7 @@ func TestRejectBlock(t *testing.T) {
 		{
 			name: "commit",
 			newBlockFunc: func() (block.Block, error) {
-				return block.NewBanffCommitBlock(time.Now(), ids.GenerateTestID() /*parent*/, 1 /*height*/)
+				return block.NewBanffCommitBlock(testBlockCodec, time.Now(), ids.GenerateTestID() /*parent*/, 1 /*height*/)
 			},
 			rejectFunc: func(r *rejector, blk block.Block) error {
 				return r.BanffCommitBlock(blk.(*block.BanffCommitBlock))
@@ -106,7 +106,7 @@ func TestRejectBlock(t *testing.T) {
 		{
 			name: "abort",
 			newBlockFunc: func() (block.Block, error) {
-				return block.NewBanffAbortBlock(time.Now(), ids.GenerateTestID() /*parent*/, 1 /*height*/)
+				return block.NewBanffAbortBlock(testBlockCodec, time.Now(), ids.GenerateTestID() /*parent*/, 1 /*height*/)
 			},
 			rejectFunc: func(r *rejector, blk block.Block) error {
 				return r.BanffAbortBlock(blk.(*block.BanffAbortBlock))

@@ -267,7 +267,7 @@ func TestProposalTxExecuteAddDelegator(t *testing.T) {
 			onAbortState, err := state.NewDiff(lastAcceptedID, env)
 			require.NoError(err)
 
-			feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+			feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 			err = ProposalTx(
 				&env.backend,
 				feeCalculator,
@@ -314,7 +314,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -352,7 +352,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		require.NoError(ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -410,7 +410,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -463,7 +463,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -499,7 +499,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -535,7 +535,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		require.NoError(ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -573,7 +573,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -643,7 +643,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -689,7 +689,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -731,7 +731,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -781,7 +781,7 @@ func TestProposalTxExecuteAddNetValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -827,7 +827,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -861,7 +861,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -909,7 +909,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,
@@ -951,7 +951,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 		onAbortState, err := state.NewDiff(lastAcceptedID, env)
 		require.NoError(err)
 
-		feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+		feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 		err = ProposalTx(
 			&env.backend,
 			feeCalculator,

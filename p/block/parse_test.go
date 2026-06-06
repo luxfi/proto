@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
@@ -23,8 +23,8 @@ var preFundedKeys = secp256k1.TestKeys()
 // pvmCodecs lazy-constructs both runtime and genesis codecs once per
 // test process. Tests iterate over both to exercise the historical
 // double-roundtrip the legacy Codec / GenesisCodec singletons guarded.
-func pvmCodecs() pcodectest.PVMCodecs {
-	return pcodectest.NewPVMCodecs()
+func pvmCodecs() pvmcodectest.PVMCodecs {
+	return pvmcodectest.NewPVMCodecs()
 }
 
 func TestStandardBlocks(t *testing.T) {

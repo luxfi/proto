@@ -224,7 +224,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 		0x00, 0x00, 0x00, 0x03,
 	}
 	var unsignedSimpleTransformTx UnsignedTx = simpleTransformTx
-	unsignedSimpleTransformTxBytes, err := Codec.Marshal(CodecVersion, &unsignedSimpleTransformTx)
+	unsignedSimpleTransformTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedSimpleTransformTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedSimpleTransformTxBytes, unsignedSimpleTransformTxBytes)
 
@@ -523,7 +523,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 		0x00, 0x00, 0x00, 0x00,
 	}
 	var unsignedComplexTransformTx UnsignedTx = complexTransformTx
-	unsignedComplexTransformTxBytes, err := Codec.Marshal(CodecVersion, &unsignedComplexTransformTx)
+	unsignedComplexTransformTxBytes, err := testCodec.Marshal(CodecVersion, &unsignedComplexTransformTx)
 	require.NoError(err)
 	require.Equal(expectedUnsignedComplexTransformTxBytes, unsignedComplexTransformTxBytes)
 

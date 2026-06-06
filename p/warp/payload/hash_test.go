@@ -10,13 +10,13 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp/payload"
 )
 
 func TestHash(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPayloadCodec()
+	c := pvmcodectest.NewPayloadCodec()
 
 	hashPayload, err := payload.NewHash(c, ids.GenerateTestID())
 	require.NoError(err)
@@ -28,14 +28,14 @@ func TestHash(t *testing.T) {
 }
 
 func TestParseHashJunk(t *testing.T) {
-	c := pcodectest.NewPayloadCodec()
+	c := pvmcodectest.NewPayloadCodec()
 	_, err := payload.ParseHash(c, junkBytes)
 	require.Error(t, err)
 }
 
 func TestHashBytes(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPayloadCodec()
+	c := pvmcodectest.NewPayloadCodec()
 	base64Payload := "AAAAAAAABAUGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
 	hashPayload, err := payload.NewHash(c, ids.ID{4, 5, 6})
 	require.NoError(err)

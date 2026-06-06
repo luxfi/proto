@@ -20,8 +20,10 @@ type UnsignedMessage struct {
 	id    ids.ID
 }
 
-// NewUnsignedMessage creates a new *UnsignedMessage and initializes it.
+// NewUnsignedMessage creates a new *UnsignedMessage and initializes it
+// against the supplied Codec.
 func NewUnsignedMessage(
+	c Codec,
 	networkID uint32,
 	sourceChainID ids.ID,
 	payload []byte,
@@ -31,23 +33,24 @@ func NewUnsignedMessage(
 		SourceChainID: sourceChainID,
 		Payload:       payload,
 	}
-	return msg, msg.Initialize()
+	return msg, msg.Initialize(c)
 }
 
 // ParseUnsignedMessage converts a slice of bytes into an initialized
-// *UnsignedMessage.
-func ParseUnsignedMessage(b []byte) (*UnsignedMessage, error) {
+// *UnsignedMessage using the supplied Codec.
+func ParseUnsignedMessage(c Codec, b []byte) (*UnsignedMessage, error) {
 	msg := &UnsignedMessage{
 		bytes: b,
 		id:    hash.ComputeHash256Array(b),
 	}
-	_, err := Codec.Unmarshal(b, msg)
+	_, err := c.Unmarshal(b, msg)
 	return msg, err
 }
 
-// Initialize recalculates the result of Bytes().
-func (m *UnsignedMessage) Initialize() error {
-	bytes, err := Codec.Marshal(CodecVersion, m)
+// Initialize recalculates the result of Bytes() using the supplied
+// Codec.
+func (m *UnsignedMessage) Initialize(c Codec) error {
+	bytes, err := c.Marshal(CodecVersion, m)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal warp unsigned message: %w", err)
 	}

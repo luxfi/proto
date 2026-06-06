@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package warp
+package warp_test
 
 import (
 	"bytes"
@@ -11,6 +11,7 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/p/warp"
 )
 
 const pChainHeight uint64 = 1337
@@ -23,7 +24,7 @@ var (
 type testValidator struct {
 	nodeID ids.NodeID
 	sk     *localsigner.LocalSigner
-	vdr    *Validator
+	vdr    *warp.Validator
 }
 
 func (v *testValidator) Compare(other *testValidator) int {
@@ -41,7 +42,7 @@ func newTestValidator() *testValidator {
 	return &testValidator{
 		nodeID: nodeID,
 		sk:     sk,
-		vdr: &Validator{
+		vdr: &warp.Validator{
 			PublicKey:      pk,
 			PublicKeyBytes: bls.PublicKeyToUncompressedBytes(pk),
 			Weight:         3,

@@ -6,8 +6,8 @@ package zap_codec
 import (
 	"math"
 
-	"github.com/luxfi/codec/wrappers"
-	"github.com/luxfi/codec/zapcodec"
+	"github.com/luxfi/utils/wrappers"
+	"github.com/luxfi/zapcodec"
 )
 
 // Codec is the local wire-codec interface — Marshal/Unmarshal/Size on
@@ -67,10 +67,16 @@ type Packer = wrappers.Packer
 // calls under a single error tap.
 type Errs = wrappers.Errs
 
-// ErrInsufficientLength is re-exported from wrappers so callers can
-// assert on the codec's underflow sentinel without importing
-// luxfi/codec/wrappers themselves.
-var ErrInsufficientLength = wrappers.ErrInsufficientLength
+// ErrInsufficientLength is the zapcodec underflow sentinel. Callers
+// asserting on the codec's "read past buffer end" condition do so via
+// this re-export so they don't need to import the zapcodec subpackage.
+//
+// IMPORTANT: this points to zapcodec.ErrInsufficientLength, not
+// wrappers.ErrInsufficientLength. The zapcodec internal packer raises
+// its own sentinel which is propagated unchanged through
+// Manager.Unmarshal — assertions against wrappers.ErrInsufficientLength
+// would not match the chain.
+var ErrInsufficientLength = zapcodec.ErrInsufficientLength
 
 // Byte-length constants for the wire-size accounting code in node/vms.
 // Identical values to wrappers.{Byte,Short,Int,Long,Bool}Len — re-

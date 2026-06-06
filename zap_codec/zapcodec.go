@@ -58,8 +58,8 @@ import (
 	"errors"
 	"math"
 
-	"github.com/luxfi/codec/wrappers"
-	"github.com/luxfi/codec/zapcodec"
+	"github.com/luxfi/utils/wrappers"
+	"github.com/luxfi/zapcodec"
 )
 
 // MaxSize is the default maximum wire-payload size for runtime txs.

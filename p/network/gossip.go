@@ -56,14 +56,19 @@ func (t txGossipHandler) Request(
 	return t.appRequestHandler.Request(ctx, nodeID, deadline, requestBytes)
 }
 
-type txMarshaller struct{}
+// txMarshaller is the gossip [bytes]<->[*txs.Tx] encoder. It holds the
+// PVM runtime tx codec used to parse wire bytes; the codec is supplied
+// at construction time by newGossipMempool's caller (Network).
+type txMarshaller struct {
+	codec txs.Codec
+}
 
 func (txMarshaller) MarshalGossip(tx *txs.Tx) ([]byte, error) {
 	return tx.Bytes(), nil
 }
 
-func (txMarshaller) UnmarshalGossip(bytes []byte) (*txs.Tx, error) {
-	return txs.Parse(txs.Codec, bytes)
+func (m txMarshaller) UnmarshalGossip(bytes []byte) (*txs.Tx, error) {
+	return txs.Parse(m.codec, bytes)
 }
 
 func newGossipMempool(

@@ -51,6 +51,7 @@ func (b *Block) VerifyWithContext(ctx context.Context, blockContext *block.Conte
 		err := VerifyWarpMessages(
 			ctx,
 			b.manager.rt.NetworkID,
+			b.manager.txExecutorBackend.WarpCodec,
 			b.manager.validatorManager,
 			blockContext.PChainHeight,
 			b,

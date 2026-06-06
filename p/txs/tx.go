@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
@@ -41,14 +40,14 @@ type Tx struct {
 
 func NewSigned(
 	unsigned UnsignedTx,
-	c codec.Manager,
+	c Codec,
 	signers [][]*secp256k1.PrivateKey,
 ) (*Tx, error) {
 	res := &Tx{Unsigned: unsigned}
 	return res, res.Sign(c, signers)
 }
 
-func (tx *Tx) Initialize(c codec.Manager) error {
+func (tx *Tx) Initialize(c Codec) error {
 	signedBytes, err := c.Marshal(CodecVersion, tx)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal ProposalTx: %w", err)
@@ -73,7 +72,7 @@ func (tx *Tx) SetBytes(unsignedBytes, signedBytes []byte) {
 // Parse signed tx starting from its byte representation.
 // Note: We explicitly pass the codec in Parse since we may need to parse
 // P-Chain genesis txs whose length exceed the max length of txs.Codec.
-func Parse(c codec.Manager, signedBytes []byte) (*Tx, error) {
+func Parse(c Codec, signedBytes []byte) (*Tx, error) {
 	tx := &Tx{}
 	if _, err := c.Unmarshal(signedBytes, tx); err != nil {
 		return nil, fmt.Errorf("couldn't parse tx: %w", err)
@@ -141,7 +140,7 @@ func (tx *Tx) SyntacticVerify(rt *runtime.Runtime) error {
 // Sign this transaction with the provided signers
 // Note: We explicitly pass the codec in Sign since we may need to sign P-Chain
 // genesis txs whose length exceed the max length of txs.Codec.
-func (tx *Tx) Sign(c codec.Manager, signers [][]*secp256k1.PrivateKey) error {
+func (tx *Tx) Sign(c Codec, signers [][]*secp256k1.PrivateKey) error {
 	unsignedBytes, err := c.Marshal(CodecVersion, &tx.Unsigned)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal UnsignedTx: %w", err)

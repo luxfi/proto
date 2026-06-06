@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package block
+package block_test
 
 import (
 	"testing"
@@ -10,15 +10,18 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/p/block"
 )
 
 func TestNewBanffCommitBlock(t *testing.T) {
 	require := require.New(t)
+	c := pcodectest.NewPVMCodecs().GenesisCodec
 
 	timestamp := time.Now().Truncate(time.Second)
 	parentID := ids.GenerateTestID()
 	height := uint64(1337)
-	blk, err := NewBanffCommitBlock(
+	blk, err := block.NewBanffCommitBlock(c,
 		timestamp,
 		parentID,
 		height,
@@ -35,10 +38,11 @@ func TestNewBanffCommitBlock(t *testing.T) {
 
 func TestNewApricotCommitBlock(t *testing.T) {
 	require := require.New(t)
+	c := pcodectest.NewPVMCodecs().GenesisCodec
 
 	parentID := ids.GenerateTestID()
 	height := uint64(1337)
-	blk, err := NewApricotCommitBlock(
+	blk, err := block.NewApricotCommitBlock(c,
 		parentID,
 		height,
 	)

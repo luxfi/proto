@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package block
+package block_test
 
 import (
 	"encoding/json"
@@ -12,20 +12,24 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
 )
 
 func TestBanffBlockSerialization(t *testing.T) {
+	codecs := pcodectest.NewPVMCodecs()
+
 	type test struct {
-		block BanffBlock
+		block block.BanffBlock
 		bytes []byte
 	}
 
 	tests := []test{
 		{
-			block: &BanffProposalBlock{
-				ApricotProposalBlock: ApricotProposalBlock{
+			block: &block.BanffProposalBlock{
+				ApricotProposalBlock: block.ApricotProposalBlock{
 					Tx: &txs.Tx{
 						Unsigned: &txs.AdvanceTimeTx{},
 					},
@@ -49,8 +53,8 @@ func TestBanffBlockSerialization(t *testing.T) {
 			},
 		},
 		{
-			block: &BanffCommitBlock{
-				ApricotCommitBlock: ApricotCommitBlock{},
+			block: &block.BanffCommitBlock{
+				ApricotCommitBlock: block.ApricotCommitBlock{},
 			},
 			bytes: []byte{
 				// Codec version
@@ -67,8 +71,8 @@ func TestBanffBlockSerialization(t *testing.T) {
 			},
 		},
 		{
-			block: &BanffAbortBlock{
-				ApricotAbortBlock: ApricotAbortBlock{},
+			block: &block.BanffAbortBlock{
+				ApricotAbortBlock: block.ApricotAbortBlock{},
 			},
 			bytes: []byte{
 				// Codec version
@@ -85,8 +89,8 @@ func TestBanffBlockSerialization(t *testing.T) {
 			},
 		},
 		{
-			block: &BanffStandardBlock{
-				ApricotStandardBlock: ApricotStandardBlock{
+			block: &block.BanffStandardBlock{
+				ApricotStandardBlock: block.ApricotStandardBlock{
 					Transactions: []*txs.Tx{},
 				},
 			},
@@ -109,11 +113,11 @@ func TestBanffBlockSerialization(t *testing.T) {
 
 	for _, test := range tests {
 		testName := fmt.Sprintf("%T", test.block)
-		block := test.block
+		blk := test.block
 		t.Run(testName, func(t *testing.T) {
 			require := require.New(t)
 
-			got, err := Codec.Marshal(CodecVersion, &block)
+			got, err := codecs.GenesisCodec.Marshal(block.CodecVersion, &blk)
 			require.NoError(err)
 			require.Equal(test.bytes, got)
 		})
@@ -123,10 +127,10 @@ func TestBanffBlockSerialization(t *testing.T) {
 func TestBanffProposalBlockJSON(t *testing.T) {
 	require := require.New(t)
 
-	simpleBanffProposalBlock := &BanffProposalBlock{
+	simpleBanffProposalBlock := &block.BanffProposalBlock{
 		Time: 123456,
-		ApricotProposalBlock: ApricotProposalBlock{
-			CommonBlock: CommonBlock{
+		ApricotProposalBlock: block.ApricotProposalBlock{
+			CommonBlock: block.CommonBlock{
 				PrntID:  ids.ID{'p', 'a', 'r', 'e', 'n', 't', 'I', 'D'},
 				Hght:    1337,
 				BlockID: ids.ID{'b', 'l', 'o', 'c', 'k', 'I', 'D'},

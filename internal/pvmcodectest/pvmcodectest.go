@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Package pvmcodectest is the PVM-aware companion to
@@ -9,24 +9,25 @@
 // graph) reach for pcodectest without closing a test-time import
 // cycle.
 //
-// Use pcodectest when you just need a linearcodec + codec.Manager
-// pair. Use pvmcodectest when you need the PVM type set registered
-// against that codec — proto/p/{block,state,txs/executor,txs/fee} etc.
-// reach for the helpers here.
+// Use pcodectest when you just need a Codec + Manager pair. Use
+// pvmcodectest when you need the PVM type set registered against
+// that codec — proto/p/{block,state,txs/executor,txs/fee} etc. reach
+// for the helpers here.
+//
+// Wire format is ZAP-native (little-endian) — proto/zap_codec is the
+// single canonical construction site for the wire codec choice (LP-023).
 package pvmcodectest
 
 import (
 	"errors"
 	"math"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
-
 	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/proto/p/warp"
 	warpmsg "github.com/luxfi/proto/p/warp/message"
 	"github.com/luxfi/proto/p/warp/payload"
+	"github.com/luxfi/proto/zap_codec"
 )
 
 // Metadata codec version tags. These mirror state.CodecVersion0Tag and
@@ -40,8 +41,8 @@ const (
 	metadataCodecVersion1    uint16 = 1
 )
 
-// NewPayloadCodec returns a codec.Manager + linearcodec pair with the
-// canonical warp payload types (Hash, AddressedCall) registered. Used by
+// NewPayloadCodec returns a ZAP-native Manager with the canonical warp
+// payload types (Hash, AddressedCall) registered. Used by
 // proto/p/warp/payload tests in lieu of the legacy package-level
 // payload.Codec singleton.
 //
@@ -49,49 +50,39 @@ const (
 // tests that need their own codec must construct it inline rather than
 // reach for this helper (would close a test-time import cycle).
 func NewPayloadCodec() payload.Codec {
-	c := linearcodec.NewDefault()
-	cm := codec.NewManager(payload.MaxMessageSize)
-	if err := payload.RegisterTypes(c); err != nil {
+	mm := zap_codec.NewPayload(payload.CodecVersion, payload.MaxMessageSize)
+	if err := payload.RegisterTypes(mm); err != nil {
 		panic(err)
 	}
-	if err := cm.RegisterCodec(payload.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	return cm
+	return mm
 }
 
-// NewMessageCodec returns a codec.Manager + linearcodec pair with the
-// canonical warp/message types registered.
+// NewMessageCodec returns a ZAP-native Manager with the canonical
+// warp/message types registered.
 func NewMessageCodec() warpmsg.Codec {
-	c := linearcodec.NewDefault()
-	cm := codec.NewManager(math.MaxInt)
-	if err := warpmsg.RegisterTypes(c); err != nil {
+	mm := zap_codec.NewMessage(warpmsg.CodecVersion)
+	if err := warpmsg.RegisterTypes(mm); err != nil {
 		panic(err)
 	}
-	if err := cm.RegisterCodec(warpmsg.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	return cm
+	return mm
 }
 
-// NewWarpCodec returns a codec.Manager + linearcodec pair with the
-// canonical proto/p/warp signature + teleport types registered.
+// NewWarpCodec returns a ZAP-native Manager with the canonical
+// proto/p/warp signature + teleport types registered.
 func NewWarpCodec() warp.Codec {
-	c := linearcodec.NewDefault()
-	cm := codec.NewManager(math.MaxInt)
-	if err := warp.RegisterTypes(c); err != nil {
+	mm := zap_codec.NewWarp(warp.CodecVersion)
+	if err := warp.RegisterTypes(mm); err != nil {
 		panic(err)
 	}
-	if err := cm.RegisterCodec(warp.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	return cm
+	return mm
 }
 
 // PVMCodecs bundles the runtime and genesis PVM codecs with their
-// underlying linearcodec registries. Tests that exercise both the
-// regular and genesis codec paths (e.g. proto/p/block, proto/p/state)
-// pull a single bundle.
+// underlying registries. Tests that exercise both the regular and
+// genesis codec paths (e.g. proto/p/block, proto/p/state) pull a
+// single bundle. Codec and Registry slots reference the same
+// underlying *zap_codec.Manager per side — the Manager satisfies
+// both interfaces by shape.
 type PVMCodecs struct {
 	Codec           txs.Codec
 	GenesisCodec    txs.Codec
@@ -100,69 +91,56 @@ type PVMCodecs struct {
 }
 
 // NewPVMCodecs returns a PVMCodecs bundle backed by two fresh
-// linearcodec registries and two codec.Manager instances, one for
-// runtime txs and one for genesis txs (with the larger MaxInt32 size
-// budget). Each call produces independent codecs — safe to use per-test.
-// Both registries are pre-seeded with the full Apricot/Banff/Durango/
-// Quasar block + tx type set, including the historical SkipRegistrations
-// pre-amble.
+// ZAP-native Manager instances, one for runtime txs and one for
+// genesis txs (with the larger MaxInt32 size budget). Each call
+// produces independent codecs — safe to use per-test. Both managers
+// are pre-seeded with the full Apricot/Banff/Durango/Quasar block + tx
+// type set, including the historical SkipRegistrations pre-amble.
 //
 // NOTE: this helper imports proto/p/block (which imports proto/p/txs).
 // Tests inside proto/p/{block,txs} that need their own codec must
 // construct it inline rather than reach for this helper (would close a
 // test-time import cycle).
 func NewPVMCodecs() PVMCodecs {
-	c := linearcodec.NewDefault()
-	gc := linearcodec.NewDefault()
-	cm := codec.NewDefaultManager()
-	gcm := codec.NewManager(math.MaxInt32)
-	if err := block.RegisterTypes(c); err != nil {
+	runtime := zap_codec.NewPVMRuntime(txs.CodecVersion)
+	genesis := zap_codec.NewPVMGenesis(txs.CodecVersion)
+	if err := block.RegisterTypes(runtime); err != nil {
 		panic(err)
 	}
-	if err := block.RegisterTypes(gc); err != nil {
-		panic(err)
-	}
-	if err := cm.RegisterCodec(txs.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	if err := gcm.RegisterCodec(txs.CodecVersion, gc); err != nil {
+	if err := block.RegisterTypes(genesis); err != nil {
 		panic(err)
 	}
 	return PVMCodecs{
-		Codec:           cm,
-		GenesisCodec:    gcm,
-		Registry:        c,
-		GenesisRegistry: gc,
+		Codec:           runtime,
+		GenesisCodec:    genesis,
+		Registry:        runtime,
+		GenesisRegistry: genesis,
 	}
 }
 
-// NewPVMRuntimeCodec returns a single linearcodec-backed codec.Manager
-// for runtime tx wire bytes. Used by tests that need a txs.Codec
-// directly without going through a Parser.
+// NewPVMRuntimeCodec returns a single ZAP-native Manager seeded with
+// the full PVM tx type set. Used by tests that need a txs.Codec
+// directly without going through a Parser. The same Manager is
+// returned as both Codec and LinearRegistry — it satisfies both
+// interfaces by shape.
 func NewPVMRuntimeCodec() (txs.Codec, txs.LinearRegistry) {
-	c := linearcodec.NewDefault()
-	cm := codec.NewDefaultManager()
-	if err := block.RegisterTypes(c); err != nil {
+	mm := zap_codec.NewPVMRuntime(txs.CodecVersion)
+	if err := block.RegisterTypes(mm); err != nil {
 		panic(err)
 	}
-	if err := cm.RegisterCodec(txs.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	return cm, c
+	return mm, mm
 }
 
-// NewPVMGenesisCodec returns a single linearcodec-backed codec.Manager
-// for genesis tx wire bytes (MaxInt32 size budget).
+// NewPVMGenesisCodec returns a single ZAP-native Manager for genesis
+// tx wire bytes (MaxInt32 size budget). Same caveat as
+// NewPVMRuntimeCodec — the Manager is returned as both Codec and
+// LinearRegistry.
 func NewPVMGenesisCodec() (txs.Codec, txs.LinearRegistry) {
-	c := linearcodec.NewDefault()
-	cm := codec.NewManager(math.MaxInt32)
-	if err := block.RegisterTypes(c); err != nil {
+	mm := zap_codec.NewPVMGenesis(txs.CodecVersion)
+	if err := block.RegisterTypes(mm); err != nil {
 		panic(err)
 	}
-	if err := cm.RegisterCodec(txs.CodecVersion, c); err != nil {
-		panic(err)
-	}
-	return cm, c
+	return mm, mm
 }
 
 // NewMetadataCodec returns the validator/delegator metadata codec
@@ -170,21 +148,22 @@ func NewPVMGenesisCodec() (txs.Codec, txs.LinearRegistry) {
 // SEPARATE codec from the block/genesis codec — proto/p/state holds
 // it as a distinct field on *state.
 //
-// Return type is the codec.Manager concrete (which satisfies
-// state.MetadataCodec by shape) so this helper can stay independent of
-// the proto/p/state package and avoid an import cycle on the
-// state_test files that need this codec.
-func NewMetadataCodec() codec.Manager {
-	c0 := linearcodec.New([]string{metadataCodecVersion0Tag})
-	c1 := linearcodec.New([]string{metadataCodecVersion0Tag, metadataCodecVersion1Tag})
-	cm := codec.NewManager(math.MaxInt32)
+// Returns a multi-version Manager with two inner codec versions
+// registered: 0 (v0-only tag) and 1 (v0 + v1 tags). The Manager
+// satisfies state.MetadataCodec by shape so this helper can stay
+// independent of the proto/p/state package and avoid an import cycle
+// on the state_test files that need this codec.
+func NewMetadataCodec() zap_codec.MultiManager {
+	c0 := zap_codec.NewLinearCodecWithTags(metadataCodecVersion0Tag)
+	c1 := zap_codec.NewLinearCodecWithTags(metadataCodecVersion0Tag, metadataCodecVersion1Tag)
+	mm := zap_codec.NewManager(math.MaxInt32)
 
 	err := errors.Join(
-		cm.RegisterCodec(metadataCodecVersion0, c0),
-		cm.RegisterCodec(metadataCodecVersion1, c1),
+		mm.RegisterCodec(metadataCodecVersion0, c0),
+		mm.RegisterCodec(metadataCodecVersion1, c1),
 	)
 	if err != nil {
 		panic(err)
 	}
-	return cm
+	return mm
 }

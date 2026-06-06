@@ -368,6 +368,13 @@ type state struct {
 	// with the standard size budget). Used for parsing runtime UTXOs.
 	txCodec txs.Codec
 
+	// metadataCodec is a SEPARATE versioned codec keyed off the
+	// v0:"true" / v1:"true" struct tags on validatorMetadata /
+	// delegatorMetadata. It is constructed externally via
+	// proto/internal/pcodectest.NewMetadataCodec and threaded in via
+	// the state.New constructor.
+	metadataCodec MetadataCodec
+
 	validators validators.Manager
 	runtime    *runtime.Runtime
 	upgrades   upgrade.Config
@@ -574,13 +581,16 @@ func blockSize(_ ids.ID, blk block.Block) int {
 // proto/internal/pcodectest.NewPVMCodecs() in tests, or via the PVM's
 // own codec wiring in production). txCodec is the runtime tx codec
 // (codec.NewDefaultManager bound through the same RegisterTypes).
-// Both codecs MUST have stateBlk pre-registered on the genesisCodec
-// registry — see RegisterStateBlockType.
+// metadataCodec is the validator/delegator metadata codec (separate
+// from genesisCodec — has v0/v1 tag schema). Both block codecs MUST
+// have stateBlk pre-registered on the genesisCodec registry — see
+// RegisterStateBlockType.
 func New(
 	db database.Database,
 	genesisBytes []byte,
 	genesisCodec block.Codec,
 	txCodec txs.Codec,
+	metadataCodec MetadataCodec,
 	metricsReg metric.Registerer,
 	validators validators.Manager,
 	upgrades upgrade.Config,
@@ -783,8 +793,9 @@ func New(
 	s := &state{
 		validatorState: newValidatorState(),
 
-		genesisCodec: genesisCodec,
-		txCodec:      txCodec,
+		genesisCodec:  genesisCodec,
+		txCodec:       txCodec,
+		metadataCodec: metadataCodec,
 
 		validators: validators,
 		runtime:    rt,
@@ -1943,7 +1954,7 @@ func (s *state) loadCurrentValidators() error {
 			// always be present on disk.
 			metadata.StakerStartTime = uint64(scheduledStakerTx.StartTime().Unix())
 		}
-		if err := parseValidatorMetadata(s.genesisCodec, metadataBytes, metadata); err != nil {
+		if err := parseValidatorMetadata(s.metadataCodec, metadataBytes, metadata); err != nil {
 			return err
 		}
 
@@ -2002,7 +2013,7 @@ func (s *state) loadCurrentValidators() error {
 			metadata.StakerStartTime = startTime
 			metadata.LastUpdated = startTime
 		}
-		if err := parseValidatorMetadata(s.genesisCodec, metadataBytes, metadata); err != nil {
+		if err := parseValidatorMetadata(s.metadataCodec, metadataBytes, metadata); err != nil {
 			return err
 		}
 
@@ -2053,7 +2064,7 @@ func (s *state) loadCurrentValidators() error {
 				// database.
 				metadata.StakerStartTime = uint64(scheduledStakerTx.StartTime().Unix())
 			}
-			err = parseDelegatorMetadata(s.genesisCodec, metadataBytes, metadata)
+			err = parseDelegatorMetadata(s.metadataCodec, metadataBytes, metadata)
 			if err != nil {
 				return err
 			}
@@ -2290,7 +2301,7 @@ func (s *state) write(updateValidators bool, height uint64) error {
 		s.writeValidatorDiffs(height),
 		s.writeCurrentStakers(codecVersion),
 		s.writePendingStakers(),
-		s.WriteValidatorMetadata(s.genesisCodec, s.currentValidatorList, s.currentNetValidatorList, codecVersion), // Must be called after writeCurrentStakers
+		s.WriteValidatorMetadata(s.metadataCodec, s.currentValidatorList, s.currentNetValidatorList, codecVersion), // Must be called after writeCurrentStakers
 		s.writeL1Validators(),
 		s.writeTXs(),
 		s.writeRewardUTXOs(),
@@ -2893,7 +2904,7 @@ func (s *state) writeCurrentStakers(codecVersion uint16) error {
 					PotentialDelegateeReward: 0,
 				}
 
-				metadataBytes, err := s.genesisCodec.Marshal(codecVersion, metadata)
+				metadataBytes, err := s.metadataCodec.Marshal(codecVersion, metadata)
 				if err != nil {
 					return fmt.Errorf("failed to serialize current validator: %w", err)
 				}
@@ -2912,7 +2923,7 @@ func (s *state) writeCurrentStakers(codecVersion uint16) error {
 			}
 
 			err := writeCurrentDelegatorDiff(
-				s.genesisCodec,
+				s.metadataCodec,
 				delegatorDB,
 				validatorDiff,
 				codecVersion,

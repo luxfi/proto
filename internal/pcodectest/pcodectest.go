@@ -13,6 +13,7 @@
 package pcodectest
 
 import (
+	"errors"
 	"math"
 
 	"github.com/luxfi/codec"
@@ -23,6 +24,17 @@ import (
 	"github.com/luxfi/proto/p/warp"
 	warpmsg "github.com/luxfi/proto/p/warp/message"
 	"github.com/luxfi/proto/p/warp/payload"
+)
+
+// Metadata codec version tags. These mirror state.CodecVersion0Tag and
+// state.CodecVersion1Tag — duplicated here to keep pcodectest free of
+// a state-package import (and the resulting test-time import cycle).
+const (
+	metadataCodecVersion0Tag        = "v0"
+	metadataCodecVersion0    uint16 = 0
+
+	metadataCodecVersion1Tag        = "v1"
+	metadataCodecVersion1    uint16 = 1
 )
 
 // NewPayloadCodec returns a codec.Manager + linearcodec pair with the
@@ -139,4 +151,28 @@ func NewPVMGenesisCodec() (txs.Codec, txs.LinearRegistry) {
 		panic(err)
 	}
 	return cm, c
+}
+
+// NewMetadataCodec returns the validator/delegator metadata codec
+// registered with the v0:"true" and v1:"true" tag layouts. This is a
+// SEPARATE codec from the block/genesis codec — proto/p/state holds
+// it as a distinct field on *state.
+//
+// Return type is the codec.Manager concrete (which satisfies
+// state.MetadataCodec by shape) so this helper can stay independent of
+// the proto/p/state package and avoid an import cycle on the
+// state_test files that need this codec.
+func NewMetadataCodec() codec.Manager {
+	c0 := linearcodec.New([]string{metadataCodecVersion0Tag})
+	c1 := linearcodec.New([]string{metadataCodecVersion0Tag, metadataCodecVersion1Tag})
+	cm := codec.NewManager(math.MaxInt32)
+
+	err := errors.Join(
+		cm.RegisterCodec(metadataCodecVersion0, c0),
+		cm.RegisterCodec(metadataCodecVersion1, c1),
+	)
+	if err != nil {
+		panic(err)
+	}
+	return cm
 }

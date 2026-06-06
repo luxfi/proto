@@ -5,9 +5,6 @@ package zap_codec
 
 import (
 	"testing"
-
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
 )
 
 // walletTx mirrors the typical wallet-emitted transaction shape: a u32
@@ -15,6 +12,11 @@ import (
 // short memo blob. This is roughly the wire footprint of a PVM
 // AddPermissionlessValidator or an XVM BaseTx — the workload sdk/wallet
 // is built to marshal/unmarshal on every tx.
+//
+// Comparative benchmarks against the historical linearcodec baseline
+// live in the bench module at bench/modes/zap_vs_codec/. This file
+// carries the ZAP-native bench only so proto/zap_codec is testable
+// without re-importing the archived luxfi/codec module.
 type walletTx struct {
 	NetworkID    uint32   `serialize:"true"`
 	BlockchainID [32]byte `serialize:"true"`
@@ -43,32 +45,6 @@ func makeWalletTx() *walletTx {
 	return tx
 }
 
-// linear constructs a linearcodec-backed codec.Manager equivalent to
-// the pre-Wave-2G wallet wiring. Used only by the bench to measure the
-// baseline this PR replaces.
-func newLinearBaseline() codec.Manager {
-	c := linearcodec.NewDefault()
-	cm := codec.NewDefaultManager()
-	_ = cm.RegisterCodec(0, c)
-	return cm
-}
-
-// BenchmarkMarshal_LinearBaseline measures the pre-Wave-2G wallet
-// marshal cost — linearcodec big-endian, codec.Manager-wrapped.
-func BenchmarkMarshal_LinearBaseline(b *testing.B) {
-	cm := newLinearBaseline()
-	tx := makeWalletTx()
-	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		buf, err := cm.Marshal(0, tx)
-		if err != nil {
-			b.Fatal(err)
-		}
-		_ = buf
-	}
-}
-
 // BenchmarkMarshal_ZAPNative measures the post-Wave-2G wallet marshal
 // cost — zapcodec little-endian, proto/zap_codec.Manager-wrapped.
 func BenchmarkMarshal_ZAPNative(b *testing.B) {
@@ -82,27 +58,6 @@ func BenchmarkMarshal_ZAPNative(b *testing.B) {
 			b.Fatal(err)
 		}
 		_ = buf
-	}
-}
-
-// BenchmarkUnmarshal_LinearBaseline measures the pre-Wave-2G wallet
-// unmarshal cost. Buffer is pre-built so the bench measures parse
-// only.
-func BenchmarkUnmarshal_LinearBaseline(b *testing.B) {
-	cm := newLinearBaseline()
-	tx := makeWalletTx()
-	buf, err := cm.Marshal(0, tx)
-	if err != nil {
-		b.Fatal(err)
-	}
-	b.ReportAllocs()
-	b.SetBytes(int64(len(buf)))
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		out := &walletTx{}
-		if _, err := cm.Unmarshal(buf, out); err != nil {
-			b.Fatal(err)
-		}
 	}
 }
 

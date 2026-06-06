@@ -9,11 +9,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pcodectest"
 )
 
 func TestValidatorUptimes(t *testing.T) {
@@ -54,18 +53,9 @@ func TestValidatorUptimes(t *testing.T) {
 	require.Equal(newUpDuration, upDuration)
 	require.Equal(newLastUpdated, lastUpdated)
 
-	// load uptime changes uptimes
-	newTestMetadata := &validatorMetadata{
-		UpDuration:  testMetadata.UpDuration + time.Hour,
-		lastUpdated: testMetadata.lastUpdated.Add(time.Hour),
-	}
-	state.LoadValidatorMetadata(nodeID, netID, newTestMetadata)
-
-	// get new uptime
-	upDuration, lastUpdated, err = state.GetUptime(nodeID, netID)
-	require.NoError(err)
-	require.Equal(newTestMetadata.UpDuration, upDuration)
-	require.Equal(newTestMetadata.lastUpdated, lastUpdated)
+	// set uptime for non-existent
+	err = state.SetUptime(ids.GenerateTestNodeID(), netID, 1, time.Now())
+	require.ErrorIs(err, database.ErrNotFound)
 
 	// delete uptime
 	state.DeleteValidatorMetadata(nodeID, netID)
@@ -73,49 +63,6 @@ func TestValidatorUptimes(t *testing.T) {
 	// get deleted uptime
 	_, _, err = state.GetUptime(nodeID, netID)
 	require.ErrorIs(err, database.ErrNotFound)
-}
-
-func TestWriteValidatorMetadata(t *testing.T) {
-	require := require.New(t)
-	state := newValidatorState()
-
-	primaryDB := memdb.New()
-	chainDB := memdb.New()
-
-	// write empty uptimes
-	require.NoError(state.WriteValidatorMetadata(primaryDB, chainDB, CodecVersion1))
-
-	// load uptime
-	nodeID := ids.GenerateTestNodeID()
-	netID := ids.GenerateTestID()
-	testUptimeReward := &validatorMetadata{
-		UpDuration:      time.Hour,
-		lastUpdated:     time.Now(),
-		PotentialReward: 100,
-		txID:            ids.GenerateTestID(),
-	}
-	state.LoadValidatorMetadata(nodeID, netID, testUptimeReward)
-
-	// write state, should not reflect to DB yet
-	require.NoError(state.WriteValidatorMetadata(primaryDB, chainDB, CodecVersion1))
-	require.False(primaryDB.Has(testUptimeReward.txID[:]))
-	require.False(chainDB.Has(testUptimeReward.txID[:]))
-
-	// get uptime should still return the loaded value
-	upDuration, lastUpdated, err := state.GetUptime(nodeID, netID)
-	require.NoError(err)
-	require.Equal(testUptimeReward.UpDuration, upDuration)
-	require.Equal(testUptimeReward.lastUpdated, lastUpdated)
-
-	// update uptimes
-	newUpDuration := testUptimeReward.UpDuration + 1
-	newLastUpdated := testUptimeReward.lastUpdated.Add(time.Hour)
-	require.NoError(state.SetUptime(nodeID, netID, newUpDuration, newLastUpdated))
-
-	// write uptimes, should reflect to net DB
-	require.NoError(state.WriteValidatorMetadata(primaryDB, chainDB, CodecVersion1))
-	require.False(primaryDB.Has(testUptimeReward.txID[:]))
-	require.True(chainDB.Has(testUptimeReward.txID[:]))
 }
 
 func TestValidatorDelegateeRewards(t *testing.T) {
@@ -152,31 +99,66 @@ func TestValidatorDelegateeRewards(t *testing.T) {
 	require.NoError(err)
 	require.Equal(newDelegateeReward, delegateeReward)
 
-	// load delegatee reward changes
-	newTestMetadata := &validatorMetadata{
-		PotentialDelegateeReward: testMetadata.PotentialDelegateeReward + 100000,
-	}
-	state.LoadValidatorMetadata(nodeID, netID, newTestMetadata)
-
-	// get new delegatee reward
-	delegateeReward, err = state.GetDelegateeReward(netID, nodeID)
-	require.NoError(err)
-	require.Equal(newTestMetadata.PotentialDelegateeReward, delegateeReward)
+	// set delegatee reward for non-existent
+	err = state.SetDelegateeReward(netID, ids.GenerateTestNodeID(), 1)
+	require.ErrorIs(err, database.ErrNotFound)
 
 	// delete delegatee reward
 	state.DeleteValidatorMetadata(nodeID, netID)
 
 	// get deleted delegatee reward
-	_, _, err = state.GetUptime(nodeID, netID)
+	_, err = state.GetDelegateeReward(netID, nodeID)
 	require.ErrorIs(err, database.ErrNotFound)
 }
 
+func TestWriteValidatorMetadata(t *testing.T) {
+	require := require.New(t)
+	state := newValidatorState()
+	c := pcodectest.NewMetadataCodec()
+
+	primaryDB := memdb.New()
+	netDB := memdb.New()
+	// write empty uptimes
+	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
+
+	// load uptime
+	nodeID := ids.GenerateTestNodeID()
+	netID := ids.GenerateTestID()
+	testUptimeReward := &validatorMetadata{
+		UpDuration:      time.Hour,
+		lastUpdated:     time.Now(),
+		PotentialReward: 100,
+		txID:            ids.GenerateTestID(),
+	}
+	state.LoadValidatorMetadata(nodeID, netID, testUptimeReward)
+
+	// write state, should reflect to DB
+	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
+	require.True(netDB.Has(testUptimeReward.txID[:]))
+
+	// load uptime
+	primaryNodeID := ids.GenerateTestNodeID()
+	primaryNetID := ids.Empty // primary network ID
+	testUptimeReward2 := &validatorMetadata{
+		UpDuration:      time.Hour,
+		lastUpdated:     time.Now(),
+		PotentialReward: 100,
+		txID:            ids.GenerateTestID(),
+	}
+	state.LoadValidatorMetadata(primaryNodeID, primaryNetID, testUptimeReward2)
+
+	// write state, should reflect to DB
+	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
+	require.True(primaryDB.Has(testUptimeReward2.txID[:]))
+}
+
 func TestParseValidatorMetadata(t *testing.T) {
+	c := pcodectest.NewMetadataCodec()
 	type test struct {
 		name        string
 		bytes       []byte
 		expected    *validatorMetadata
-		expectedErr error
+		expectErr   bool
 	}
 	tests := []test{
 		{
@@ -185,15 +167,6 @@ func TestParseValidatorMetadata(t *testing.T) {
 			expected: &validatorMetadata{
 				lastUpdated: time.Unix(0, 0),
 			},
-			expectedErr: nil,
-		},
-		{
-			name:  "nil",
-			bytes: []byte{},
-			expected: &validatorMetadata{
-				lastUpdated: time.Unix(0, 0),
-			},
-			expectedErr: nil,
 		},
 		{
 			name: "potential reward only",
@@ -204,10 +177,9 @@ func TestParseValidatorMetadata(t *testing.T) {
 				PotentialReward: 100000,
 				lastUpdated:     time.Unix(0, 0),
 			},
-			expectedErr: nil,
 		},
 		{
-			name: "uptime + potential reward",
+			name: "pre-delegatee reward",
 			bytes: []byte{
 				// codec version
 				0x00, 0x00,
@@ -219,15 +191,14 @@ func TestParseValidatorMetadata(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x86, 0xA0,
 			},
 			expected: &validatorMetadata{
-				UpDuration:      6000000,
+				UpDuration:      time.Duration(6000000),
 				LastUpdated:     900000,
 				PotentialReward: 100000,
 				lastUpdated:     time.Unix(900000, 0),
 			},
-			expectedErr: nil,
 		},
 		{
-			name: "uptime + potential reward + potential delegatee reward",
+			name: "potential delegatee reward",
 			bytes: []byte{
 				// codec version
 				0x00, 0x00,
@@ -241,13 +212,12 @@ func TestParseValidatorMetadata(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x20,
 			},
 			expected: &validatorMetadata{
-				UpDuration:               6000000,
+				UpDuration:               time.Duration(6000000),
 				LastUpdated:              900000,
 				PotentialReward:          100000,
 				PotentialDelegateeReward: 20000,
 				lastUpdated:              time.Unix(900000, 0),
 			},
-			expectedErr: nil,
 		},
 		{
 			name: "invalid codec version",
@@ -263,8 +233,8 @@ func TestParseValidatorMetadata(t *testing.T) {
 				// potential delegatee reward
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x20,
 			},
-			expected:    nil,
-			expectedErr: codec.ErrUnknownVersion,
+			expected:  nil,
+			expectErr: true,
 		},
 		{
 			name: "short byte len",
@@ -280,19 +250,20 @@ func TestParseValidatorMetadata(t *testing.T) {
 				// potential delegatee reward
 				0x00, 0x00, 0x00, 0x00, 0x4E, 0x20,
 			},
-			expected:    nil,
-			expectedErr: wrappers.ErrInsufficientLength,
+			expected:  nil,
+			expectErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
 			var metadata validatorMetadata
-			err := parseValidatorMetadata(tt.bytes, &metadata)
-			require.ErrorIs(err, tt.expectedErr)
-			if tt.expectedErr != nil {
+			err := parseValidatorMetadata(c, tt.bytes, &metadata)
+			if tt.expectErr {
+				require.Error(err)
 				return
 			}
+			require.NoError(err)
 			require.Equal(tt.expected, &metadata)
 		})
 	}

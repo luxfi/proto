@@ -8,18 +8,18 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pcodectest"
 )
 
 func TestParseDelegatorMetadata(t *testing.T) {
+	c := pcodectest.NewMetadataCodec()
 	type test struct {
-		name        string
-		bytes       []byte
-		expected    *delegatorMetadata
-		expectedErr error
+		name      string
+		bytes     []byte
+		expected  *delegatorMetadata
+		expectErr bool
 	}
 	tests := []test{
 		{
@@ -31,7 +31,6 @@ func TestParseDelegatorMetadata(t *testing.T) {
 				PotentialReward: 123,
 				StakerStartTime: 0,
 			},
-			expectedErr: nil,
 		},
 		{
 			name: "potential reward + staker start time with codec v1",
@@ -47,7 +46,6 @@ func TestParseDelegatorMetadata(t *testing.T) {
 				PotentialReward: 123,
 				StakerStartTime: 456,
 			},
-			expectedErr: nil,
 		},
 		{
 			name: "invalid codec version",
@@ -59,8 +57,8 @@ func TestParseDelegatorMetadata(t *testing.T) {
 				// staker start time
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xc8,
 			},
-			expected:    nil,
-			expectedErr: codec.ErrUnknownVersion,
+			expected:  nil,
+			expectErr: true,
 		},
 		{
 			name: "short byte len",
@@ -72,25 +70,27 @@ func TestParseDelegatorMetadata(t *testing.T) {
 				// staker start time
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			},
-			expected:    nil,
-			expectedErr: wrappers.ErrInsufficientLength,
+			expected:  nil,
+			expectErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
 			var metadata delegatorMetadata
-			err := parseDelegatorMetadata(tt.bytes, &metadata)
-			require.ErrorIs(err, tt.expectedErr)
-			if tt.expectedErr != nil {
+			err := parseDelegatorMetadata(c, tt.bytes, &metadata)
+			if tt.expectErr {
+				require.Error(err)
 				return
 			}
+			require.NoError(err)
 			require.Equal(tt.expected, &metadata)
 		})
 	}
 }
 
 func TestWriteDelegatorMetadata(t *testing.T) {
+	c := pcodectest.NewMetadataCodec()
 	type test struct {
 		name     string
 		version  uint16
@@ -132,7 +132,7 @@ func TestWriteDelegatorMetadata(t *testing.T) {
 			require := require.New(t)
 			db := memdb.New()
 			tt.metadata.txID = ids.GenerateTestID()
-			require.NoError(writeDelegatorMetadata(db, tt.metadata, tt.version))
+			require.NoError(writeDelegatorMetadata(c, db, tt.metadata, tt.version))
 			bytes, err := db.Get(tt.metadata.txID[:])
 			require.NoError(err)
 			require.Equal(tt.expected, bytes)

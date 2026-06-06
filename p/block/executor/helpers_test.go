@@ -15,8 +15,6 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/luxfi/atomic"
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
 	consensustest "github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
@@ -27,6 +25,8 @@ import (
 	log "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/chains"
+	"github.com/luxfi/proto/internal/pvmcodectest"
+	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/config"
 	"github.com/luxfi/proto/p/fx"
 	"github.com/luxfi/proto/p/genesis/genesistest"
@@ -61,6 +61,23 @@ const (
 	defaultMaxStakingDuration = 365 * 24 * time.Hour
 
 	defaultTxFee = 100 * constants.MicroLux
+)
+
+// blockExecutorTest* are the proto/p codec set shared by every
+// newEnvironment-backed test in proto/p/block/executor. Built once per
+// package run via pvmcodectest. The block executor Manager threads the
+// block codec through Block.Options() / options.go so all derived
+// blocks get the right codec injected.
+var (
+	blockExecutorTestPVMCodecs     = pvmcodectest.NewPVMCodecs()
+	blockExecutorTestWarpCodec     = pvmcodectest.NewWarpCodec()
+	blockExecutorTestMessageCodec  = pvmcodectest.NewMessageCodec()
+	blockExecutorTestPayloadCodec  = pvmcodectest.NewPayloadCodec()
+
+	testBlockCodec block.Codec = blockExecutorTestPVMCodecs.Codec
+	// testCodec aliases the runtime PVM codec for tests that previously
+	// reached for the global txs.Codec singleton.
+	testCodec txs.Codec = blockExecutorTestPVMCodecs.Codec
 )
 
 var testNet1 *txs.Tx
@@ -153,18 +170,18 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 	if ctrl == nil {
 		res.state = statetest.New(t, statetest.Config{
 			DB:         res.baseDB,
-			Genesis:    genesistest.NewBytes(t, genesistest.Config{}),
+			Genesis:    genesistest.NewBytes(t, blockExecutorTestPVMCodecs.GenesisCodec, genesistest.Config{}),
 			Validators: res.config.Validators,
 			Context:    rt,
 			Rewards:    rewardsCalc,
 		})
 
 		res.uptimes = &uptime.NoOpCalculator{}
-		res.utxosVerifier = utxo.NewVerifier(res.clk, res.fx)
+		res.utxosVerifier = utxo.NewVerifier(blockExecutorTestPVMCodecs.Codec, res.clk, res.fx)
 	} else {
 		res.mockedState = state.NewMockState(ctrl)
 		res.uptimes = &uptime.NoOpCalculator{}
-		res.utxosVerifier = utxo.NewVerifier(res.clk, res.fx)
+		res.utxosVerifier = utxo.NewVerifier(blockExecutorTestPVMCodecs.Codec, res.clk, res.fx)
 
 		// setup expectations strictly needed for environment creation
 		res.mockedState.EXPECT().GetLastAccepted().Return(ids.GenerateTestID()).Times(1)
@@ -179,6 +196,10 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 		FlowChecker:  res.utxosVerifier,
 		Uptimes:      &uptime.NoOpCalculator{},
 		Rewards:      rewardsCalc,
+		TxCodec:      blockExecutorTestPVMCodecs.Codec,
+		WarpCodec:    blockExecutorTestWarpCodec,
+		WarpMsgCodec: blockExecutorTestMessageCodec,
+		PayloadCodec: blockExecutorTestPayloadCodec,
 	}
 
 	registerer := metric.NewRegistry()
@@ -198,6 +219,7 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 			res.state,
 			res.backend,
 			validatorstest.Manager,
+			testBlockCodec,
 		)
 		addNet(t, res)
 	} else {
@@ -207,6 +229,7 @@ func newEnvironment(t *testing.T, ctrl *gomock.Controller, f upgradetest.Fork) *
 			res.mockedState,
 			res.backend,
 			validatorstest.Manager,
+			testBlockCodec,
 		)
 		// we do not add any chain to state, since we can mock
 		// whatever we need
@@ -288,7 +311,7 @@ func addNet(t testing.TB, env *environment) {
 	stateDiff, err := state.NewDiff(genesisID, env.blkManager)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, stateDiff)
+	feeCalculator := state.PickFeeCalculator(env.config, blockExecutorTestWarpCodec, stateDiff)
 	_, _, _, err = executor.StandardTx(
 		env.backend,
 		feeCalculator,
@@ -337,14 +360,11 @@ func defaultClock() *mockable.Clock {
 	return clk
 }
 
+// fxVMInt is the minimal secp256k1fx.VM stub. The historical
+// CodecRegistry method is gone — secp256k1fx is ZAP-native now.
 type fxVMInt struct {
-	registry codec.Registry
-	clk      *mockable.Clock
-	log      log.Logger
-}
-
-func (fvi *fxVMInt) CodecRegistry() codec.Registry {
-	return fvi.registry
+	clk *mockable.Clock
+	log log.Logger
 }
 
 func (fvi *fxVMInt) Clock() *mockable.Clock {
@@ -357,9 +377,8 @@ func (fvi *fxVMInt) Logger() log.Logger {
 
 func defaultFx(clk *mockable.Clock, log log.Logger, isBootstrapped bool) fx.Fx {
 	fxVMInt := &fxVMInt{
-		registry: linearcodec.NewDefault(),
-		clk:      clk,
-		log:      log,
+		clk: clk,
+		log: log,
 	}
 	res := &secp256k1fx.Fx{}
 	if err := res.Initialize(fxVMInt); err != nil {

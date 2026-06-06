@@ -51,6 +51,7 @@ func TestBlockOptions(t *testing.T) {
 						Uptimes: &uptime.NoOpCalculator{},
 					},
 					Log: log.NoLog{},
+					blockCodec: testBlockCodec,
 				}
 
 				return &Block{
@@ -77,6 +78,7 @@ func TestBlockOptions(t *testing.T) {
 						Uptimes: &uptime.NoOpCalculator{},
 					},
 					Log: log.NoLog{},
+					blockCodec: testBlockCodec,
 				}
 
 				return &Block{
@@ -112,6 +114,7 @@ func TestBlockOptions(t *testing.T) {
 						Uptimes: &uptime.NoOpCalculator{},
 					},
 					Log: log.NoLog{},
+					blockCodec: testBlockCodec,
 				}
 
 				return &Block{
@@ -149,6 +152,7 @@ func TestBlockOptions(t *testing.T) {
 						Uptimes: &uptime.NoOpCalculator{},
 					},
 					Log: log.NoLog{},
+					blockCodec: testBlockCodec,
 				}
 
 				return &Block{
@@ -189,6 +193,7 @@ func TestBlockOptions(t *testing.T) {
 						Uptimes: &uptime.NoOpCalculator{},
 					},
 					Log: log.NoLog{},
+					blockCodec: testBlockCodec,
 				}
 
 				return &Block{
@@ -239,6 +244,7 @@ func TestBlockOptions(t *testing.T) {
 						Uptimes: &uptime.NoOpCalculator{},
 					},
 					Log: log.NoLog{},
+					blockCodec: testBlockCodec,
 				}
 
 				return &Block{
@@ -295,6 +301,7 @@ func TestBlockOptions(t *testing.T) {
 						Uptimes: &uptime.NoOpCalculator{},
 					},
 					Log: log.NoLog{},
+					blockCodec: testBlockCodec,
 				}
 
 				return &Block{
@@ -350,6 +357,7 @@ func TestBlockOptions(t *testing.T) {
 						Uptimes: &uptime.NoOpCalculator{},
 					},
 					Log: log.NoLog{},
+					blockCodec: testBlockCodec,
 				}
 
 				return &Block{
@@ -412,6 +420,7 @@ func TestBlockOptions(t *testing.T) {
 						Uptimes: &uptime.NoOpCalculator{},
 					},
 					Log: log.NoLog{},
+					blockCodec: testBlockCodec,
 				}
 
 				return &Block{
@@ -474,6 +483,7 @@ func TestBlockOptions(t *testing.T) {
 						Uptimes: &uptime.NoOpCalculator{},
 					},
 					Log: log.NoLog{},
+					blockCodec: testBlockCodec,
 				}
 
 				return &Block{

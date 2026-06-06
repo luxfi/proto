@@ -10,11 +10,11 @@ import (
 
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 )
 
 func TestParseDelegatorMetadata(t *testing.T) {
-	c := pcodectest.NewMetadataCodec()
+	c := pvmcodectest.NewMetadataCodec()
 	type test struct {
 		name      string
 		bytes     []byte
@@ -90,7 +90,7 @@ func TestParseDelegatorMetadata(t *testing.T) {
 }
 
 func TestWriteDelegatorMetadata(t *testing.T) {
-	c := pcodectest.NewMetadataCodec()
+	c := pvmcodectest.NewMetadataCodec()
 	type test struct {
 		name     string
 		version  uint16

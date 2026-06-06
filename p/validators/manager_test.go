@@ -14,6 +14,7 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/config"
 	"github.com/luxfi/proto/p/genesis/genesistest"
@@ -26,6 +27,10 @@ import (
 
 	. "github.com/luxfi/proto/p/validators"
 )
+
+// testBlockCodec is the proto/p/block wire codec used by validators_test
+// to construct sub-block fixtures. Constructed once at package init.
+var testBlockCodec = pvmcodectest.NewPVMCodecs().Codec
 
 func TestGetValidatorSet_AfterQuasar(t *testing.T) {
 	require := require.New(t)
@@ -69,7 +74,7 @@ func TestGetValidatorSet_AfterQuasar(t *testing.T) {
 
 	// Add a chain staker during the Quasar Edition upgrade
 	{
-		blk, err := block.NewBanffStandardBlock(upgradeTime, s.GetLastAccepted(), 1, nil)
+		blk, err := block.NewBanffStandardBlock(testBlockCodec, upgradeTime, s.GetLastAccepted(), 1, nil)
 		require.NoError(err)
 
 		s.SetHeight(blk.Height())
@@ -85,7 +90,7 @@ func TestGetValidatorSet_AfterQuasar(t *testing.T) {
 
 	// Remove a chain staker
 	{
-		blk, err := block.NewBanffStandardBlock(s.GetTimestamp(), s.GetLastAccepted(), 2, nil)
+		blk, err := block.NewBanffStandardBlock(testBlockCodec, s.GetTimestamp(), s.GetLastAccepted(), 2, nil)
 		require.NoError(err)
 
 		s.SetHeight(blk.Height())

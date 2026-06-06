@@ -25,7 +25,7 @@ import (
 
 func newRewardValidatorTx(t testing.TB, txID ids.ID) (*txs.Tx, error) {
 	utx := &txs.RewardValidatorTx{TxID: txID}
-	tx, err := txs.NewSigned(utx, txs.Codec, nil)
+	tx, err := txs.NewSigned(utx, testCodec, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func TestRewardValidatorTxExecuteOnCommit(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onAbortState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAbortState)
 	err = ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -159,7 +159,7 @@ func TestRewardValidatorTxExecuteOnAbort(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onAbortState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onAbortState)
 	err = ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -313,7 +313,7 @@ func TestRewardDelegatorTxExecuteOnCommitPreDelegateeDeferral(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 	require.NoError(ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -454,7 +454,7 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 	require.NoError(ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -675,7 +675,7 @@ func TestRewardDelegatorTxAndValidatorTxExecuteOnCommitPostDelegateeDeferral(t *
 	delOnAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, delOnCommitState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, delOnCommitState)
 	require.NoError(ProposalTx(
 		&env.backend,
 		feeCalculator,
@@ -835,7 +835,7 @@ func TestRewardDelegatorTxExecuteOnAbort(t *testing.T) {
 	onAbortState, err := state.NewDiff(lastAcceptedID, env)
 	require.NoError(err)
 
-	feeCalculator := state.PickFeeCalculator(env.config, onCommitState)
+	feeCalculator := state.PickFeeCalculator(env.config, helpersTestWarpCodec, onCommitState)
 	require.NoError(ProposalTx(
 		&env.backend,
 		feeCalculator,

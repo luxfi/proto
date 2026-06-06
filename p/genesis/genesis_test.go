@@ -11,14 +11,14 @@ import (
 	"github.com/luxfi/address"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/genesis"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 func newTestCodec() genesis.Codec {
-	return pcodectest.NewPVMCodecs().GenesisCodec
+	return pvmcodectest.NewPVMCodecs().GenesisCodec
 }
 
 func createTestGenesis(t *testing.T) *genesis.Genesis {

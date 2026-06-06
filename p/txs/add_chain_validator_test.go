@@ -94,14 +94,14 @@ func TestAddChainValidatorTxSyntacticVerify(t *testing.T) {
 	}
 
 	// Case: valid tx
-	stx, err = NewSigned(addNetValidatorTx, Codec, signers)
+	stx, err = NewSigned(addNetValidatorTx, testCodec, signers)
 	require.NoError(err)
 	require.NoError(stx.SyntacticVerify(rt))
 
 	// Case: Wrong network ID
 	addNetValidatorTx.SyntacticallyVerified = false
 	addNetValidatorTx.NetworkID++
-	stx, err = NewSigned(addNetValidatorTx, Codec, signers)
+	stx, err = NewSigned(addNetValidatorTx, testCodec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, lux.ErrWrongNetworkID)
@@ -110,7 +110,7 @@ func TestAddChainValidatorTxSyntacticVerify(t *testing.T) {
 	// Case: Specifies primary network NetID
 	addNetValidatorTx.SyntacticallyVerified = false
 	addNetValidatorTx.Chain = ids.Empty
-	stx, err = NewSigned(addNetValidatorTx, Codec, signers)
+	stx, err = NewSigned(addNetValidatorTx, testCodec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, errAddPrimaryNetworkValidator)
@@ -119,7 +119,7 @@ func TestAddChainValidatorTxSyntacticVerify(t *testing.T) {
 	// Case: No weight
 	addNetValidatorTx.SyntacticallyVerified = false
 	addNetValidatorTx.Wght = 0
-	stx, err = NewSigned(addNetValidatorTx, Codec, signers)
+	stx, err = NewSigned(addNetValidatorTx, testCodec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, ErrWeightTooSmall)
@@ -130,7 +130,7 @@ func TestAddChainValidatorTxSyntacticVerify(t *testing.T) {
 	input := addNetValidatorTx.ChainAuth.(*secp256k1fx.Input)
 	oldInput := *input
 	input.SigIndices[0] = input.SigIndices[1]
-	stx, err = NewSigned(addNetValidatorTx, Codec, signers)
+	stx, err = NewSigned(addNetValidatorTx, testCodec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, secp256k1fx.ErrInputIndicesNotSortedUnique)
@@ -139,7 +139,7 @@ func TestAddChainValidatorTxSyntacticVerify(t *testing.T) {
 	// Case: adding to Primary Network
 	addNetValidatorTx.SyntacticallyVerified = false
 	addNetValidatorTx.Chain = constants.PrimaryNetworkID
-	stx, err = NewSigned(addNetValidatorTx, Codec, signers)
+	stx, err = NewSigned(addNetValidatorTx, testCodec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(rt)
 	require.ErrorIs(err, errAddPrimaryNetworkValidator)
@@ -212,14 +212,14 @@ func TestAddNetValidatorMarshal(t *testing.T) {
 	}
 
 	// Case: valid tx
-	stx, err = NewSigned(addNetValidatorTx, Codec, signers)
+	stx, err = NewSigned(addNetValidatorTx, testCodec, signers)
 	require.NoError(err)
 	require.NoError(stx.SyntacticVerify(rt))
 
-	txBytes, err := Codec.Marshal(CodecVersion, stx)
+	txBytes, err := testCodec.Marshal(CodecVersion, stx)
 	require.NoError(err)
 
-	parsedTx, err := Parse(Codec, txBytes)
+	parsedTx, err := Parse(testCodec, txBytes)
 	require.NoError(err)
 
 	require.NoError(parsedTx.SyntacticVerify(rt))

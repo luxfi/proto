@@ -112,7 +112,7 @@ func NewWalletWithOptions(
 
 			for _, utxoBytes := range atomicUTXOs {
 				var utxo lux.UTXO
-				_, err := txs.Codec.Unmarshal(utxoBytes, &utxo)
+				_, err := signer.Codec.Unmarshal(utxoBytes, &utxo)
 				if err != nil {
 					continue // Skip malformed UTXOs
 				}
@@ -138,7 +138,7 @@ func NewWalletWithOptions(
 		require.NoError(err)
 
 		var owner message.PChainOwner
-		_, err = txs.Codec.Unmarshal(l1Validator.DeactivationOwner, &owner)
+		_, err = signer.Codec.Unmarshal(l1Validator.DeactivationOwner, &owner)
 		require.NoError(err)
 		owners[validationID] = &secp256k1fx.OutputOwners{
 			Threshold: owner.Threshold,

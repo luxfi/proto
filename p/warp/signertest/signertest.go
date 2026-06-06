@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp"
 )
 
@@ -25,7 +25,7 @@ var SignerTests = map[string]func(t *testing.T, s warp.Signer, sk bls.Signer, ne
 // Test that using a random SourceChainID results in an error
 func TestWrongChainID(t *testing.T, s warp.Signer, _ bls.Signer, _ uint32, _ ids.ID) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	msg, err := warp.NewUnsignedMessage(
 		c,
@@ -43,7 +43,7 @@ func TestWrongChainID(t *testing.T, s warp.Signer, _ bls.Signer, _ uint32, _ ids
 // Test that using a different networkID results in an error
 func TestWrongNetworkID(t *testing.T, s warp.Signer, _ bls.Signer, networkID uint32, blockchainID ids.ID) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	msg, err := warp.NewUnsignedMessage(
 		c,
@@ -61,7 +61,7 @@ func TestWrongNetworkID(t *testing.T, s warp.Signer, _ bls.Signer, networkID uin
 // Test that a signature generated with the signer verifies correctly
 func TestVerifies(t *testing.T, s warp.Signer, sk bls.Signer, networkID uint32, chainID ids.ID) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	msg, err := warp.NewUnsignedMessage(
 		c,

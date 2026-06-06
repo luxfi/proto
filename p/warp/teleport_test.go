@@ -8,7 +8,7 @@ import (
 
 	"github.com/cloudflare/circl/kem/mlkem/mlkem768"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp"
 	"github.com/stretchr/testify/require"
 )
@@ -107,7 +107,7 @@ func TestTeleportMessageValidate(t *testing.T) {
 // TestTeleportMessageToWarpMessage tests conversion to Warp message
 func TestTeleportMessageToWarpMessage(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	sourceChain := ids.GenerateTestID()
 	destChain := ids.GenerateTestID()
@@ -127,7 +127,7 @@ func TestTeleportMessageToWarpMessage(t *testing.T) {
 // TestNewPrivateTeleportMessage tests encrypted message creation
 func TestNewPrivateTeleportMessage(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	sourceChain := ids.GenerateTestID()
 	destChain := ids.GenerateTestID()
@@ -156,7 +156,7 @@ func TestNewPrivateTeleportMessage(t *testing.T) {
 // TestPrivateTeleportMessageDecrypt tests decryption of private messages
 func TestPrivateTeleportMessageDecrypt(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	sourceChain := ids.GenerateTestID()
 	destChain := ids.GenerateTestID()
@@ -205,7 +205,7 @@ func TestTeleportMessageString(t *testing.T) {
 // TestTeleportMessageCodecRoundTrip tests serialization
 func TestTeleportMessageCodecRoundTrip(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	original := &warp.TeleportMessage{
 		Version:       warp.TeleportVersion,
@@ -239,7 +239,7 @@ func TestTeleportMessageCodecRoundTrip(t *testing.T) {
 // TestTeleportTransferPayload tests transfer payload handling
 func TestTeleportTransferPayload(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	assetID := ids.GenerateTestID()
 	amount := uint64(1000000)
@@ -275,7 +275,7 @@ func TestTeleportTransferPayload(t *testing.T) {
 // TestTeleportAttestPayload tests attestation payload handling
 func TestTeleportAttestPayload(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewWarpCodec()
+	c := pvmcodectest.NewWarpCodec()
 
 	payload := &warp.TeleportAttestPayload{
 		AttestationType: 1,

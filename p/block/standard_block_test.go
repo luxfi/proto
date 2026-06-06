@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 	lux "github.com/luxfi/utxo"
@@ -20,7 +20,7 @@ import (
 
 func TestNewBanffStandardBlock(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPVMCodecs().GenesisCodec
+	c := pvmcodectest.NewPVMCodecs().GenesisCodec
 
 	timestamp := time.Now().Truncate(time.Second)
 	parentID := ids.GenerateTestID()
@@ -64,7 +64,7 @@ func TestNewBanffStandardBlock(t *testing.T) {
 
 func TestNewApricotStandardBlock(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewPVMCodecs().GenesisCodec
+	c := pvmcodectest.NewPVMCodecs().GenesisCodec
 
 	parentID := ids.GenerateTestID()
 	height := uint64(1337)

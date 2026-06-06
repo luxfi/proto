@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pcodectest"
+	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp/message"
 )
 
@@ -29,7 +29,7 @@ func newBLSPublicKey(t *testing.T) [bls.PublicKeyLen]byte {
 
 func TestRegisterL1Validator(t *testing.T) {
 	require := require.New(t)
-	c := pcodectest.NewMessageCodec()
+	c := pvmcodectest.NewMessageCodec()
 
 	msg, err := message.NewRegisterL1Validator(
 		c,
@@ -63,7 +63,7 @@ func TestRegisterL1Validator(t *testing.T) {
 }
 
 func TestRegisterL1Validator_Verify(t *testing.T) {
-	c := pcodectest.NewMessageCodec()
+	c := pvmcodectest.NewMessageCodec()
 	mustCreate := func(msg *message.RegisterL1Validator, err error) *message.RegisterL1Validator {
 		require.NoError(t, err)
 		return msg

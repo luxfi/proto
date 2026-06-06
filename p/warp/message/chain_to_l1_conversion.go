@@ -26,9 +26,9 @@ type ChainToL1ConversionData struct {
 }
 
 // ChainToL1ConversionID creates a chain conversion ID from the provided
-// chain conversion data.
-func ChainToL1ConversionID(data ChainToL1ConversionData) (ids.ID, error) {
-	bytes, err := Codec.Marshal(CodecVersion, &data)
+// chain conversion data using the supplied Codec.
+func ChainToL1ConversionID(c Codec, data ChainToL1ConversionData) (ids.ID, error) {
+	bytes, err := c.Marshal(CodecVersion, &data)
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -45,18 +45,19 @@ type ChainToL1Conversion struct {
 	ID ids.ID `serialize:"true" json:"id"`
 }
 
-// NewChainToL1Conversion creates a new initialized ChainToL1Conversion.
-func NewChainToL1Conversion(id ids.ID) (*ChainToL1Conversion, error) {
+// NewChainToL1Conversion creates a new initialized ChainToL1Conversion
+// using the supplied Codec.
+func NewChainToL1Conversion(c Codec, id ids.ID) (*ChainToL1Conversion, error) {
 	msg := &ChainToL1Conversion{
 		ID: id,
 	}
-	return msg, Initialize(msg)
+	return msg, Initialize(c, msg)
 }
 
 // ParseChainToL1Conversion parses bytes into an initialized
-// ChainToL1Conversion.
-func ParseChainToL1Conversion(b []byte) (*ChainToL1Conversion, error) {
-	payloadIntf, err := Parse(b)
+// ChainToL1Conversion using the supplied Codec.
+func ParseChainToL1Conversion(c Codec, b []byte) (*ChainToL1Conversion, error) {
+	payloadIntf, err := Parse(c, b)
 	if err != nil {
 		return nil, err
 	}

@@ -4,11 +4,7 @@
 package state
 
 import (
-	"errors"
-	"math"
-
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
+	"github.com/luxfi/proto/p/block"
 )
 
 const (
@@ -19,18 +15,13 @@ const (
 	CodecVersion1    uint16 = 1
 )
 
-var MetadataCodec codec.Manager
-
-func init() {
-	c0 := linearcodec.New([]string{CodecVersion0Tag})
-	c1 := linearcodec.New([]string{CodecVersion0Tag, CodecVersion1Tag})
-	MetadataCodec = codec.NewManager(math.MaxInt32)
-
-	err := errors.Join(
-		MetadataCodec.RegisterCodec(CodecVersion0, c0),
-		MetadataCodec.RegisterCodec(CodecVersion1, c1),
-	)
-	if err != nil {
-		panic(err)
-	}
-}
+// MetadataCodec is the codec interface used by metadata_validator and
+// metadata_delegator to marshal validator/delegator state. It mirrors
+// block.Codec — the wire codec.Manager surface — and is set on the
+// state struct at construction so that callers can inject the
+// versioned-tag codec (v0 + v1) that the legacy state layout requires.
+//
+// Wave 2A of the codec rip (#101). After the rip, proto/p no longer
+// holds a package-level MetadataCodec singleton; the field on *state
+// is supplied by the constructor.
+type MetadataCodec = block.Codec

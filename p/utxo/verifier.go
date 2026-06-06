@@ -19,17 +19,22 @@ import (
 
 var _ Verifier = (*verifier)(nil)
 
-// NewVerifier creates a new UTXO verifier
-func NewVerifier(clk *mockable.Clock, fx fx.Fx) *verifier {
+// NewVerifier creates a new UTXO verifier. c is the PVM runtime tx
+// codec used to compute deterministic owner-id bytes for stakeable-lock
+// matching — callers thread the same codec through Handler /
+// NewHandler.
+func NewVerifier(c txs.Codec, clk *mockable.Clock, fx fx.Fx) *verifier {
 	return &verifier{
-		clk: clk,
-		fx:  fx,
+		codec: c,
+		clk:   clk,
+		fx:    fx,
 	}
 }
 
 type verifier struct {
-	clk *mockable.Clock
-	fx  fx.Fx
+	codec txs.Codec
+	clk   *mockable.Clock
+	fx    fx.Fx
 }
 
 func (h *verifier) VerifySpend(
@@ -160,7 +165,7 @@ func (h *verifier) VerifySpendUTXOs(
 			return fmt.Errorf("expected fx.Owned but got %T", out)
 		}
 		owner := owned.Owners()
-		ownerBytes, err := txs.Codec.Marshal(txs.CodecVersion, owner)
+		ownerBytes, err := h.codec.Marshal(txs.CodecVersion, owner)
 		if err != nil {
 			return fmt.Errorf("couldn't marshal owner: %w", err)
 		}
@@ -209,7 +214,7 @@ func (h *verifier) VerifySpendUTXOs(
 			return fmt.Errorf("expected fx.Owned but got %T", out)
 		}
 		owner := owned.Owners()
-		ownerBytes, err := txs.Codec.Marshal(txs.CodecVersion, owner)
+		ownerBytes, err := h.codec.Marshal(txs.CodecVersion, owner)
 		if err != nil {
 			return fmt.Errorf("couldn't marshal owner: %w", err)
 		}

@@ -5,65 +5,44 @@ package block
 
 import (
 	"errors"
-	"math"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
-	"github.com/luxfi/codec/wrappers"
 	"github.com/luxfi/proto/p/txs"
 )
 
 const CodecVersion = txs.CodecVersion
 
-var (
-	// GenesisCodec allows blocks of larger than usual size to be parsed.
-	// While this gives flexibility in accommodating large genesis blocks
-	// it must not be used to parse new, unverified blocks which instead
-	// must be processed by Codec
-	GenesisCodec codec.Manager
-
-	Codec codec.Manager
-
-	// genesisLinearCodec is the underlying codec for GenesisCodec.
-	// This is exposed for registering additional types from other packages.
-	genesisLinearCodec linearcodec.Codec
-)
-
-func init() {
-	c := linearcodec.NewDefault()
-	gc := linearcodec.NewDefault()
-
-	errs := wrappers.Errs{}
-	for _, lc := range []linearcodec.Codec{c, gc} {
-		errs.Add(
-			RegisterApricotTypes(lc),
-			RegisterBanffTypes(lc),
-			RegisterDurangoTypes(lc),
-			RegisterQuasarTypes(lc),
-		)
-	}
-
-	Codec = codec.NewDefaultManager()
-	GenesisCodec = codec.NewManager(math.MaxInt32)
-	errs.Add(
-		Codec.RegisterCodec(CodecVersion, c),
-		GenesisCodec.RegisterCodec(CodecVersion, gc),
-	)
-	if errs.Errored() {
-		panic(errs.Err)
-	}
-	genesisLinearCodec = gc
+// Codec is the proto/p/block-local wire codec interface. It is
+// structurally identical to the legacy codec.Manager surface that lived
+// in `github.com/luxfi/codec`, but defined locally so proto/p carries
+// no import of that package. Block consumers (state, executor, parser,
+// builder) thread their concrete codec instance through this interface.
+//
+// Wave 2A of the codec rip (#101). Stays byte-compatible with
+// codec.Manager so existing wire bytes continue to roundtrip during
+// the multi-wave migration.
+type Codec interface {
+	Marshal(version uint16, source interface{}) ([]byte, error)
+	Unmarshal(bytes []byte, dest interface{}) (uint16, error)
+	Size(version uint16, value interface{}) (int, error)
 }
 
-// RegisterGenesisType registers a type with the GenesisCodec.
-// This is used by other packages (like state) to register backward-compatibility types.
-func RegisterGenesisType(val interface{}) error {
-	return genesisLinearCodec.RegisterType(val)
+// Registry mirrors the legacy codec.Registry / linearcodec.Codec
+// surface needed by the block-type registrar.
+type Registry interface {
+	RegisterType(interface{}) error
+}
+
+// LinearRegistry extends Registry with SkipRegistrations so the
+// txs.RegisterTypes pre-amble (which reserves head slots for blocks)
+// can fan in.
+type LinearRegistry interface {
+	Registry
+	SkipRegistrations(int)
 }
 
 // RegisterApricotTypes registers the type information for blocks that were
 // valid during the Apricot series of upgrades.
-func RegisterApricotTypes(targetCodec linearcodec.Codec) error {
+func RegisterApricotTypes(targetCodec LinearRegistry) error {
 	return errors.Join(
 		targetCodec.RegisterType(&ApricotProposalBlock{}),
 		targetCodec.RegisterType(&ApricotAbortBlock{}),
@@ -76,7 +55,7 @@ func RegisterApricotTypes(targetCodec linearcodec.Codec) error {
 
 // RegisterBanffTypes registers the type information for blocks that were valid
 // during the Banff series of upgrades.
-func RegisterBanffTypes(targetCodec linearcodec.Codec) error {
+func RegisterBanffTypes(targetCodec LinearRegistry) error {
 	return errors.Join(
 		txs.RegisterBanffTypes(targetCodec),
 		targetCodec.RegisterType(&BanffProposalBlock{}),
@@ -88,12 +67,28 @@ func RegisterBanffTypes(targetCodec linearcodec.Codec) error {
 
 // RegisterDurangoTypes registers the type information for blocks that were
 // valid during the Durango series of upgrades.
-func RegisterDurangoTypes(targetCodec linearcodec.Codec) error {
+func RegisterDurangoTypes(targetCodec LinearRegistry) error {
 	return txs.RegisterDurangoTypes(targetCodec)
 }
 
 // RegisterQuasarTypes registers the type information for blocks that were valid
 // during the Quasar Edition series of upgrades.
-func RegisterQuasarTypes(targetCodec linearcodec.Codec) error {
+func RegisterQuasarTypes(targetCodec LinearRegistry) error {
 	return txs.RegisterQuasarTypes(targetCodec)
+}
+
+// RegisterTypes is the canonical full-history block-and-tx registrar.
+// It seeds Apricot, Banff, Durango, and Quasar block + tx types in the
+// order required by the historical PVM layout. Callers that need a
+// codec capable of decoding any historic PVM block invoke this. The
+// caller is responsible for additionally registering any state-only
+// types (e.g. state.stateBlk for legacy block storage) on the genesis
+// codec via RegisterGenesisStateBlockType.
+func RegisterTypes(targetCodec LinearRegistry) error {
+	return errors.Join(
+		RegisterApricotTypes(targetCodec),
+		RegisterBanffTypes(targetCodec),
+		RegisterDurangoTypes(targetCodec),
+		RegisterQuasarTypes(targetCodec),
+	)
 }

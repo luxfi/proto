@@ -145,6 +145,7 @@ func (m *manager) VerifyTx(tx *txs.Tx) error {
 	err = executor.VerifyWarpMessages(
 		context.TODO(),
 		m.rt.NetworkID,
+		m.txExecutorBackend.WarpCodec,
 		m.validatorManager,
 		recommendedPChainHeight,
 		tx.Unsigned,
@@ -173,7 +174,7 @@ func (m *manager) VerifyTx(tx *txs.Tx) error {
 	}
 
 	if timestamp := stateDiff.GetTimestamp(); m.txExecutorBackend.Config.UpgradeConfig.IsQuasarActivated(timestamp) {
-		complexity, err := fee.TxComplexity(tx.Unsigned)
+		complexity, err := fee.TxComplexity(m.txExecutorBackend.WarpCodec, tx.Unsigned)
 		if err != nil {
 			return fmt.Errorf("failed to calculate tx complexity: %w", err)
 		}
@@ -190,7 +191,7 @@ func (m *manager) VerifyTx(tx *txs.Tx) error {
 		}
 	}
 
-	feeCalculator := state.PickFeeCalculator(m.txExecutorBackend.Config, stateDiff)
+	feeCalculator := state.PickFeeCalculator(m.txExecutorBackend.Config, m.txExecutorBackend.WarpCodec, stateDiff)
 	_, _, _, err = executor.StandardTx(
 		m.txExecutorBackend,
 		feeCalculator,

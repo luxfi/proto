@@ -155,7 +155,7 @@ func bech32ToID(addrStr string) (ids.ShortID, error) {
 }
 
 // New builds the genesis state of the P-Chain (and thereby the Lux network.)
-// [luxAssetID] is the ID of the LUX asset
+// [utxoAssetID] is the ID of the LUX asset
 // [networkID] is the ID of the network
 // [allocations] are the UTXOs on the Platform Chain that exist at genesis.
 // [validators] are the validators of the primary network at genesis.
@@ -169,7 +169,7 @@ func bech32ToID(addrStr string) (ids.ShortID, error) {
 // codec.NewManager(math.MaxInt32)) here.
 func New(
 	c block.Codec,
-	luxAssetID ids.ID,
+	utxoAssetID ids.ID,
 	networkID uint32,
 	allocations []Allocation,
 	validators []PermissionlessValidator,
@@ -194,7 +194,7 @@ func New(
 				TxID:        ids.Empty,
 				OutputIndex: uint32(i),
 			},
-			Asset: lux.Asset{ID: luxAssetID},
+			Asset: lux.Asset{ID: utxoAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: allocation.Amount,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -232,7 +232,7 @@ func New(
 			}
 
 			utxo := &lux.TransferableOutput{
-				Asset: lux.Asset{ID: luxAssetID},
+				Asset: lux.Asset{ID: utxoAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: allocation.Amount,
 					OutputOwners: secp256k1fx.OutputOwners{

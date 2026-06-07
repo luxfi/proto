@@ -31,7 +31,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77,
 	}
 
-	luxAssetID, err := ids.FromString("d1Rdokz7Vq8H5aczkwgkiPCCa6JME7yT2xpqgWTfFKWYVsGbG")
+	utxoAssetID, err := ids.FromString("d1Rdokz7Vq8H5aczkwgkiPCCa6JME7yT2xpqgWTfFKWYVsGbG")
 	require.NoError(err)
 
 	customAssetID := ids.ID{
@@ -67,7 +67,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 							OutputIndex: 1,
 						},
 						Asset: lux.Asset{
-							ID: luxAssetID,
+							ID: utxoAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
 							Amt: 10 * constants.Lux,
@@ -118,7 +118,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:     testChainID,
-		UTXOAssetID: luxAssetID,
+		UTXOAssetID: utxoAssetID,
 	}
 	require.NoError(simpleTransformTx.SyntacticVerify(rt))
 
@@ -161,7 +161,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 				Outs: []*lux.TransferableOutput{
 					{
 						Asset: lux.Asset{
-							ID: luxAssetID,
+							ID: utxoAssetID,
 						},
 						Out: &stakeable.LockOut{
 							Locktime: 87654321,
@@ -201,7 +201,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 							OutputIndex: 1,
 						},
 						Asset: lux.Asset{
-							ID: luxAssetID,
+							ID: utxoAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
 							Amt: constants.KiloLux,
@@ -271,7 +271,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:     testChainID,
-		UTXOAssetID: luxAssetID,
+		UTXOAssetID: utxoAssetID,
 	}
 	require.NoError(complexTransformTx.SyntacticVerify(ctx2))
 
@@ -331,7 +331,7 @@ func TestTransformChainTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:     testChainID,
-		UTXOAssetID: luxAssetID,
+		UTXOAssetID: utxoAssetID,
 	}
 	unsignedComplexTransformTx.InitRuntime(ctx3)
 
@@ -439,16 +439,16 @@ func TestTransformChainTxSyntacticVerify(t *testing.T) {
 	}
 
 	var (
-		networkID  = uint32(1337)
-		chainID    = ids.GenerateTestID()
-		luxAssetID = ids.GenerateTestID()
+		networkID   = uint32(1337)
+		chainID     = ids.GenerateTestID()
+		utxoAssetID = ids.GenerateTestID()
 	)
 
 	rt := &runtime.Runtime{
 		NetworkID: networkID, // Must match tx.NetworkID
 
 		ChainID:     chainID,
-		UTXOAssetID: luxAssetID,
+		UTXOAssetID: utxoAssetID,
 	}
 
 	// A BaseTx that already passed syntactic verification.
@@ -511,7 +511,7 @@ func TestTransformChainTxSyntacticVerify(t *testing.T) {
 				return &TransformChainTx{
 					BaseTx:        validBaseTx,
 					Chain:         ids.GenerateTestID(),
-					AssetID:       luxAssetID,
+					AssetID:       utxoAssetID,
 					InitialSupply: 1, // Non-zero to hit LUX assetID error first
 					MaximumSupply: 1,
 				}

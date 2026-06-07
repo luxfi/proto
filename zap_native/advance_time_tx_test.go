@@ -78,44 +78,16 @@ func TestIsZAPBytes(t *testing.T) {
 }
 
 func TestShouldUseZAPForWrite(t *testing.T) {
-	// Default: native ZAP for every timestamp. Legacy is opt-in via
-	// LUXD_ENABLE_LEGACY_CODEC. The package-level LegacyEnabled is read
-	// once at init from the env var; tests assert the default-false path
-	// and the explicitly-toggled path.
-	defer func(prev bool) { LegacyEnabled = prev }(LegacyEnabled)
-
-	t.Run("default (legacy disabled): ZAP always", func(t *testing.T) {
-		LegacyEnabled = false
-		for _, ts := range []uint64{0, 1, 1782604800 - 1, 1782604800, 1782604800 + 86400} {
-			if !ShouldUseZAPForWrite(ts) {
-				t.Fatalf("ShouldUseZAPForWrite(%d) = false, want true (ZAP default)", ts)
-			}
+	for _, ts := range []uint64{0, 1, ZAPActivationUnix - 1, ZAPActivationUnix, ZAPActivationUnix + 86400} {
+		if !ShouldUseZAPForWrite(ts) {
+			t.Fatalf("ShouldUseZAPForWrite(%d) = false, want true (ZAP unconditional)", ts)
 		}
-	})
-
-	t.Run("legacy enabled: timestamp-gated", func(t *testing.T) {
-		// ZAPActivationUnix is now 0 (always-on). With activation=0, the
-		// "pre-activation" window is empty — every block timestamp satisfies
-		// blockTimestamp >= 0, so writes are always ZAP even when
-		// LegacyEnabled. LegacyEnabled remains meaningful only on the READ
-		// path (decoding pre-2026-06-02 archival linearcodec bytes); it has
-		// no semantic effect on writes once activation = 0.
-		LegacyEnabled = true
-		for _, ts := range []uint64{0, 1, 1782604800 - 1, 1782604800, 1782604800 + 86400} {
-			if !ShouldUseZAPForWrite(ts) {
-				t.Fatalf("ShouldUseZAPForWrite(%d) = false, want true (ZAP always-on regardless of LegacyEnabled when activation=0)", ts)
-			}
-		}
-	})
+	}
 }
 
-// TestZAPActivationUnixIsAlwaysOn pins the activation constant to 0 so any
-// regression that re-introduces a forward-date guard fails this gate. Once
-// LP-023 ZAP-native activation shipped (2026-06-02 cutover), the legacy
-// timestamp gate is dead — the only legacy path is the explicit read-only
-// LUXD_ENABLE_LEGACY_CODEC opt-in for archival linearcodec bytes.
-func TestZAPActivationUnixIsAlwaysOn(t *testing.T) {
-	if ZAPActivationUnix != 0 {
-		t.Fatalf("ZAPActivationUnix = %d, want 0 (always-on per LP-023 cutover)", ZAPActivationUnix)
+func TestZAPActivationUnix(t *testing.T) {
+	const want uint64 = 1766708400 // Dec 25 2025 16:20 PST — Quasar activation
+	if ZAPActivationUnix != want {
+		t.Fatalf("ZAPActivationUnix = %d, want %d", ZAPActivationUnix, want)
 	}
 }

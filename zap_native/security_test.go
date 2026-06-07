@@ -705,31 +705,16 @@ func TestRed_V14_CrossTypeConfusion(t *testing.T) {
 // The owning layer is block/executor. Document the requirement.
 
 func TestRed_V15_PreActivationZAPTxRejection(t *testing.T) {
-	// LP-023 cutover (2026-06-02): ZAPActivationUnix is now 0 — there is no
-	// pre-activation window. V15's threat model only applies in the legacy
-	// cutover-window scenario, which is closed. We pin the always-on
-	// invariant: regardless of LegacyEnabled, the write rule says ZAP for
-	// every timestamp.
-	atx := NewAdvanceTimeTx(0) // any timestamp; activation gate is dead
+	// Legacy linearcodec is gone. Every tx is ZAP. Pin the invariant.
+	atx := NewAdvanceTimeTx(0)
 	if !IsZAPBytes(atx.Bytes()) {
-		t.Fatal("V15: AdvanceTimeTx must be ZAP-encoded (wire layer is timestamp-agnostic post-LP-023)")
+		t.Fatal("V15: AdvanceTimeTx must be ZAP-encoded")
 	}
-
-	defer func(prev bool) { LegacyEnabled = prev }(LegacyEnabled)
-
-	LegacyEnabled = false
-	for _, ts := range []uint64{0, 1, 1782604800, 1782604800 + 86400} {
+	for _, ts := range []uint64{0, 1, ZAPActivationUnix, ZAPActivationUnix + 86400} {
 		if !ShouldUseZAPForWrite(ts) {
-			t.Fatalf("V15: legacy-disabled should write ZAP for ts=%d", ts)
+			t.Fatalf("V15: write rule must be ZAP for ts=%d", ts)
 		}
 	}
-	LegacyEnabled = true
-	for _, ts := range []uint64{0, 1, 1782604800, 1782604800 + 86400} {
-		if !ShouldUseZAPForWrite(ts) {
-			t.Fatalf("V15: legacy-enabled with activation=0 should still write ZAP for ts=%d (no pre-activation window exists)", ts)
-		}
-	}
-	t.Logf("V15 closed: LP-023 cutover (2026-06-02) makes ZAP unconditional on the write path. The legacy cutover-window threat model is no longer applicable; LegacyEnabled is now read-only-relevant.")
 }
 
 // -----------------------------------------------------------------------------

@@ -186,18 +186,6 @@ func (m *Manager) Unmarshal(bytes []byte, dest interface{}) (uint16, error) {
 		return 0, err
 	}
 	if version != m.version {
-		// LP-023 cutover compat: pre-Dec-25-2025 writers used BE for
-		// the version prefix. Retry as BE before erroring.
-		if peekVersionBE(bytes) == m.version {
-			p.Offset = VersionSize
-			if err := m.inner.UnmarshalFrom(p, dest); err != nil {
-				return m.version, err
-			}
-			if p.Offset != len(bytes) {
-				return m.version, ErrExtraSpace
-			}
-			return m.version, nil
-		}
 		return version, ErrUnknownVersion
 	}
 	if err := m.inner.UnmarshalFrom(p, dest); err != nil {
@@ -316,21 +304,3 @@ func readVersionLE(p *wrappers.Packer) (uint16, error) {
 	return uint16(lo) | uint16(hi)<<8, nil
 }
 
-// peekVersionBE reads the codec version as big-endian WITHOUT consuming
-// any packer offset (caller is responsible for advancing on success).
-// Returns the BE-decoded version. Used by the dual-read fallback to
-// support reading P-chain DB state written by pre-LP-023 (v1.28.x and
-// earlier) luxd binaries which used wrappers.PackShort (big-endian)
-// for the version prefix.
-//
-// LP-023 cutover is Dec 25 2025 16:20 PST (unix 1766708400). Bytes
-// written before activation use BE; bytes after use LE. The version
-// number is small (0–N for the few registered codec versions), so we
-// disambiguate by trying LE first and falling back to BE only if the
-// LE-decoded version is not registered.
-func peekVersionBE(bytes []byte) uint16 {
-	if len(bytes) < VersionSize {
-		return 0
-	}
-	return uint16(bytes[0])<<8 | uint16(bytes[1])
-}

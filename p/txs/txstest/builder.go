@@ -33,12 +33,12 @@ func NewWalletFactoryWithAssets(
 	rt *runtime.Runtime,
 	cfg *config.Config,
 	state state.State,
-	luxAssetID ids.ID,
+	utxoAssetID ids.ID,
 ) *WalletFactory {
 	if rt == nil {
 		rt = &runtime.Runtime{}
 	}
-	rt.UTXOAssetID = luxAssetID
+	rt.UTXOAssetID = utxoAssetID
 	return &WalletFactory{
 		rt:    rt,
 		cfg:   cfg,
@@ -75,11 +75,11 @@ func (w *WalletFactory) NewWallet(keys ...*secp256k1.PrivateKey) (builder.Builde
 		addrSet = kc.AddressSet()
 		backend = newBackend(addrSet, w.state)
 		// Extract networkID and LUXAssetID from context
-		networkID  = w.rt.NetworkID
-		luxAssetID = w.rt.UTXOAssetID
+		networkID   = w.rt.NetworkID
+		utxoAssetID = w.rt.UTXOAssetID
 	)
 
-	context := newContext(w.rt, networkID, luxAssetID, w.cfg, nil, w.state.GetTimestamp())
+	context := newContext(w.rt, networkID, utxoAssetID, w.cfg, nil, w.state.GetTimestamp())
 	kcAdapter := &keychainAdapter{kc: kc}
 
 	return builder.New(addrSet, context, backend), signer.New(kcAdapter, backend)

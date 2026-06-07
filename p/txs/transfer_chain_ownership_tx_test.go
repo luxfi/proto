@@ -31,7 +31,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77,
 	}
 
-	luxAssetID, err := ids.FromString("d1Rdokz7Vq8H5aczkwgkiPCCa6JME7yT2xpqgWTfFKWYVsGbG")
+	utxoAssetID, err := ids.FromString("d1Rdokz7Vq8H5aczkwgkiPCCa6JME7yT2xpqgWTfFKWYVsGbG")
 	require.NoError(err)
 
 	customAssetID := ids.ID{
@@ -67,7 +67,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 							OutputIndex: 1,
 						},
 						Asset: lux.Asset{
-							ID: luxAssetID,
+							ID: utxoAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
 							Amt: constants.MilliLux,
@@ -97,7 +97,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID
 
 		ChainID:     testChainID,
-		UTXOAssetID: luxAssetID,
+		UTXOAssetID: utxoAssetID,
 	}
 	require.NoError(simpleTransferChainOwnershipTx.SyntacticVerify(rt))
 
@@ -131,7 +131,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 				Outs: []*lux.TransferableOutput{
 					{
 						Asset: lux.Asset{
-							ID: luxAssetID,
+							ID: utxoAssetID,
 						},
 						Out: &stakeable.LockOut{
 							Locktime: 87654321,
@@ -171,7 +171,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 							OutputIndex: 1,
 						},
 						Asset: lux.Asset{
-							ID: luxAssetID,
+							ID: utxoAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
 							Amt: constants.Lux,
@@ -235,7 +235,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID,
 
 		ChainID:     testChainID,
-		UTXOAssetID: luxAssetID,
+		UTXOAssetID: utxoAssetID,
 	}
 	require.NoError(complexTransferChainOwnershipTx.SyntacticVerify(ctx2))
 
@@ -291,7 +291,7 @@ func TestTransferChainOwnershipTxSerialization(t *testing.T) {
 		NetworkID: constants.MainnetID, // Must match tx.NetworkID for "P-lux1..." address encoding
 
 		ChainID:     testChainID,
-		UTXOAssetID: luxAssetID,
+		UTXOAssetID: utxoAssetID,
 	}
 	unsignedComplexTransferChainOwnershipTx.InitRuntime(ctx3)
 

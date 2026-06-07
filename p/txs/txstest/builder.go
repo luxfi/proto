@@ -74,7 +74,7 @@ func (w *WalletFactory) NewWallet(keys ...*secp256k1.PrivateKey) (builder.Builde
 		kc      = secp256k1fx.NewKeychain(keys...)
 		addrSet = kc.AddressSet()
 		backend = newBackend(addrSet, w.state)
-		// Extract networkID and LUXAssetID from context
+		// Extract networkID and UTXOAssetID from context
 		networkID   = w.rt.NetworkID
 		utxoAssetID = w.rt.UTXOAssetID
 	)

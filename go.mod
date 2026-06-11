@@ -12,7 +12,7 @@ require (
 	github.com/luxfi/cache v1.2.1
 	github.com/luxfi/concurrent v0.0.3
 	github.com/luxfi/consensus v1.25.15
-	github.com/luxfi/constants v1.5.8-0.20260603055356-93c2c2ceb9ca
+	github.com/luxfi/constants v1.5.8
 	github.com/luxfi/container v0.0.4
 	github.com/luxfi/crypto v1.19.17
 	github.com/luxfi/database v1.19.2
@@ -30,7 +30,7 @@ require (
 	github.com/luxfi/runtime v1.1.1
 	github.com/luxfi/sdk v1.17.8
 	github.com/luxfi/timer v1.0.2
-	github.com/luxfi/upgrade v1.0.1-0.20260603055252-f51810805436
+	github.com/luxfi/upgrade v1.0.1
 	github.com/luxfi/utils v1.2.0
 	github.com/luxfi/utxo v0.3.7
 	github.com/luxfi/validators v1.2.0
@@ -68,6 +68,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/getsentry/sentry-go v0.44.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
+	github.com/go-json-experiment/json v0.0.0-20260601182631-00ed12fed2a6 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect

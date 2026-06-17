@@ -1,4 +1,4 @@
-# LLM.md - Hanzo Protocol
+# Hanzo Protocol
 
 ## Overview
 Go module: github.com/luxfi/protocol

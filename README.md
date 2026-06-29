@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="proto" width="880"></p>
+
 # luxfi/proto
 
 Canonical schema definitions for the Lux platform. **Module path is

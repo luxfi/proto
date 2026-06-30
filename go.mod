@@ -20,7 +20,7 @@ require (
 	github.com/luxfi/genesis/builder v0.0.0-20260607050918-bf8751181b9c
 	github.com/luxfi/ids v1.2.15
 	github.com/luxfi/keychain v1.0.2
-	github.com/luxfi/log v1.4.1
+	github.com/luxfi/log v1.4.3
 	github.com/luxfi/math v1.4.1
 	github.com/luxfi/metric v1.5.8
 	github.com/luxfi/mock v0.1.1
@@ -35,7 +35,7 @@ require (
 	github.com/luxfi/utxo v0.3.7
 	github.com/luxfi/validators v1.2.0
 	github.com/luxfi/vm v1.2.0
-	github.com/luxfi/warp v1.19.3
+	github.com/luxfi/warp v1.24.0
 	github.com/luxfi/zap v0.7.2
 	github.com/luxfi/zapcodec v1.0.1
 	github.com/stretchr/testify v1.11.1
@@ -107,7 +107,7 @@ require (
 	github.com/luxfi/zapdb v1.10.0 // indirect
 	github.com/luxfi/zwing v0.5.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-isatty v0.0.21 // indirect
 	github.com/miekg/dns v1.1.72 // indirect
 	github.com/minio/crc64nvme v1.1.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect

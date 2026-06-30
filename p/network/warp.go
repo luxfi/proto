@@ -41,7 +41,7 @@ type signatureRequestVerifier struct {
 // implementation lives in a separate file under -tags grpc.
 func (s signatureRequestVerifier) Verify(
 	_ context.Context,
-	_ *warp.UnsignedMessage,
+	_ *warp.Message,
 	_ []byte,
 ) error {
 	return ErrWarpVerificationNotImplemented

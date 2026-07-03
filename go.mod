@@ -102,6 +102,7 @@ require (
 	github.com/luxfi/rpc v1.1.0 // indirect
 	github.com/luxfi/sampler v1.1.0 // indirect
 	github.com/luxfi/staking v1.5.0 // indirect
+	github.com/luxfi/threshold v1.12.1
 	github.com/luxfi/tls v1.0.3 // indirect
 	github.com/luxfi/version v1.0.1 // indirect
 	github.com/luxfi/zapdb v1.10.0 // indirect

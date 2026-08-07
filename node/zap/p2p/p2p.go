@@ -303,7 +303,39 @@ type Handshake struct {
 	// under a strict-PQ profile. New strict-PQ producers MUST populate
 	// it; otherwise their gossip is rejected by strict-PQ verifiers.
 	IpMldsaSig []byte
+	// Chains states which blockchain this peer is running, one entry per
+	// blockchain, and which one — not merely its id, but the genesis it
+	// was created from. NetworkId above says the peers are on the same
+	// network and TrackedNets says which validator sets they share;
+	// neither says the two nodes agree about any chain's history, and two
+	// nodes created from different genesis documents agree on everything
+	// here and still fork on the first block either builds.
+	//
+	// Append-only, like IpMldsaSig: a peer that predates the field sends
+	// nothing and the receiver reads an empty list.
+	Chains []*ChainIdentity
 }
+
+// ChainIdentity is what a node must agree with a peer about before the two can
+// run a blockchain together.
+//
+// NetworkId, ChainId, VmId and GenesisDigest are the chain's identity: any
+// difference means the two are not running the same chain, whatever their ids
+// say. RulesId is a claim about the rule generation the peer's VM implements,
+// which the receiver has no way to verify, so it is reported and never acted on.
+type ChainIdentity struct {
+	NetworkId     uint32
+	ChainId       []byte // 32B blockchain id
+	VmId          []byte // 32B VM id
+	GenesisDigest []byte // 32B digest of the chain-creation document
+	RulesId       []byte // 32B rule generation, empty when the chain declares none
+}
+
+func (m *ChainIdentity) GetNetworkId() uint32     { return m.NetworkId }
+func (m *ChainIdentity) GetChainId() []byte       { return m.ChainId }
+func (m *ChainIdentity) GetVmId() []byte          { return m.VmId }
+func (m *ChainIdentity) GetGenesisDigest() []byte { return m.GenesisDigest }
+func (m *ChainIdentity) GetRulesId() []byte       { return m.RulesId }
 
 func (m *Handshake) GetNetworkId() uint32        { return m.NetworkId }
 func (m *Handshake) GetMyTime() uint64           { return m.MyTime }
@@ -319,6 +351,7 @@ func (m *Handshake) GetKnownPeers() *BloomFilter { return m.KnownPeers }
 func (m *Handshake) GetIpBlsSig() []byte         { return m.IpBlsSig }
 func (m *Handshake) GetAllChains() bool          { return m.AllChains }
 func (m *Handshake) GetIpMldsaSig() []byte       { return m.IpMldsaSig }
+func (m *Handshake) GetChains() []*ChainIdentity { return m.Chains }
 func (m *Handshake) Reset()                      { *m = Handshake{} }
 func (m *Handshake) String() string              { return fmt.Sprintf("Handshake{NetworkId:%d}", m.NetworkId) }
 

@@ -504,6 +504,18 @@ func marshalHandshake(b *Buffer, m *Handshake) {
 	// bytes before reading IpMldsaSig, so emitting an empty slice
 	// (4 zero length-prefix bytes) is a safe extension.
 	b.WriteBytes(m.IpMldsaSig)
+	// Chains is append-only on the same terms as IpMldsaSig above. The count
+	// is always written, so a peer running no chains is distinguishable on the
+	// wire from a peer too old to say — the first sends a zero count, the
+	// second sends nothing and the frame simply ends.
+	b.WriteUint32(uint32(len(m.Chains)))
+	for _, c := range m.Chains {
+		b.WriteUint32(c.NetworkId)
+		b.WriteBytes(c.ChainId)
+		b.WriteBytes(c.VmId)
+		b.WriteBytes(c.GenesisDigest)
+		b.WriteBytes(c.RulesId)
+	}
 }
 
 func marshalGetPeerList(b *Buffer, m *GetPeerList) {
@@ -827,6 +839,37 @@ func unmarshalHandshake(r *Reader) (*Handshake, error) {
 		m.IpMldsaSig, err = r.ReadBytes()
 		if err != nil {
 			return nil, err
+		}
+	}
+	// Chains, append-only on the same terms. A frame that ends here is a peer
+	// too old to state its chains; a zero count is a peer stating it runs none.
+	//
+	// The count is attacker controlled, so entries are appended as they are read
+	// rather than preallocated: a frame claiming four billion chains then costs
+	// what its actual bytes cost and fails on the first short read.
+	if r.HasMore() {
+		count, err := r.ReadUint32()
+		if err != nil {
+			return nil, err
+		}
+		for i := uint32(0); i < count; i++ {
+			c := &ChainIdentity{}
+			if c.NetworkId, err = r.ReadUint32(); err != nil {
+				return nil, err
+			}
+			if c.ChainId, err = r.ReadBytes(); err != nil {
+				return nil, err
+			}
+			if c.VmId, err = r.ReadBytes(); err != nil {
+				return nil, err
+			}
+			if c.GenesisDigest, err = r.ReadBytes(); err != nil {
+				return nil, err
+			}
+			if c.RulesId, err = r.ReadBytes(); err != nil {
+				return nil, err
+			}
+			m.Chains = append(m.Chains, c)
 		}
 	}
 	return m, nil

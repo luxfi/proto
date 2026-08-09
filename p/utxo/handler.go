@@ -141,13 +141,11 @@ type Handler interface {
 // same codec instance everywhere a locked owner is encoded.
 func NewHandler(
 	ctx context.Context,
-	c txs.Codec,
 	clk *mockable.Clock,
 	fx fx.Fx,
 ) Handler {
 	return &handler{
 		ctx:   ctx,
-		codec: c,
 		clk:   clk,
 		fx:    fx,
 	}
@@ -155,7 +153,6 @@ func NewHandler(
 
 type handler struct {
 	ctx   context.Context
-	codec txs.Codec
 	clk   *mockable.Clock
 	fx    fx.Fx
 }
@@ -579,7 +576,7 @@ func (h *handler) VerifySpendUTXOs(
 			return fmt.Errorf("expected fx.Owned but got %T", out)
 		}
 		owner := owned.Owners()
-		ownerBytes, err := h.codec.Marshal(txs.CodecVersion, owner)
+		ownerBytes, err := txs.MarshalOwner(owner)
 		if err != nil {
 			return fmt.Errorf("couldn't marshal owner: %w", err)
 		}
@@ -628,7 +625,7 @@ func (h *handler) VerifySpendUTXOs(
 			return fmt.Errorf("expected fx.Owned but got %T", out)
 		}
 		owner := owned.Owners()
-		ownerBytes, err := h.codec.Marshal(txs.CodecVersion, owner)
+		ownerBytes, err := txs.MarshalOwner(owner)
 		if err != nil {
 			return fmt.Errorf("couldn't marshal owner: %w", err)
 		}

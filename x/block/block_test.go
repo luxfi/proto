@@ -1,10 +1,9 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
 
 import (
-	"errors"
 	"testing"
 	"time"
 
@@ -13,17 +12,11 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/xcodectest"
 	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
-
-// errCantUnpackVersion is the proto/x-local sentinel matching the
-// upstream codec.ErrCantUnpackVersion. We assert via error string
-// because we deliberately don't import the codec package — Wave 1A.
-var errCantUnpackVersion = errors.New("couldn't unpack codec version")
 
 var (
 	chainID = ids.GenerateTestID()
@@ -35,7 +28,6 @@ func TestInvalidBlock(t *testing.T) {
 	require := require.New(t)
 
 	parser, err := NewParser(
-		xcodectest.New(),
 		[]fxs.Fx{
 			&secp256k1fx.Fx{},
 		},
@@ -43,10 +35,7 @@ func TestInvalidBlock(t *testing.T) {
 	require.NoError(err)
 
 	_, err = parser.ParseBlock(nil)
-	// The codec error sentinel lives in luxfi/codec — proto/x is
-	// codec-free post Wave 1A — so we assert via the error's message.
 	require.Error(err)
-	require.Contains(err.Error(), errCantUnpackVersion.Error())
 }
 
 func TestStandardBlocks(t *testing.T) {
@@ -54,7 +43,6 @@ func TestStandardBlocks(t *testing.T) {
 	require := require.New(t)
 
 	parser, err := NewParser(
-		xcodectest.New(),
 		[]fxs.Fx{
 			&secp256k1fx.Fx{},
 		},
@@ -64,11 +52,10 @@ func TestStandardBlocks(t *testing.T) {
 	blkTimestamp := time.Now()
 	parentID := ids.GenerateTestID()
 	height := uint64(2022)
-	cm := parser.Codec()
-	txs, err := createTestTxs(cm)
+	txs, err := createTestTxs()
 	require.NoError(err)
 
-	standardBlk, err := NewStandardBlock(parentID, height, blkTimestamp, txs, cm)
+	standardBlk, err := NewStandardBlock(parentID, height, blkTimestamp, txs)
 	require.NoError(err)
 
 	// parse block
@@ -89,7 +76,7 @@ func TestStandardBlocks(t *testing.T) {
 	require.Equal(parsed.Txs(), parsedStandardBlk.Txs())
 }
 
-func createTestTxs(cm txs.Codec) ([]*txs.Tx, error) {
+func createTestTxs() ([]*txs.Tx, error) {
 	countTxs := 1
 	testTxs := make([]*txs.Tx, 0, countTxs)
 	for i := 0; i < countTxs; i++ {
@@ -122,7 +109,7 @@ func createTestTxs(cm txs.Codec) ([]*txs.Tx, error) {
 			}},
 			Memo: []byte{1, 2, 3, 4, 5, 6, 7, 8},
 		}}}
-		if err := tx.SignSECP256K1Fx(cm, [][]*secp256k1.PrivateKey{{keys[0]}}); err != nil {
+		if err := tx.SignSECP256K1Fx([][]*secp256k1.PrivateKey{{keys[0]}}); err != nil {
 			return nil, err
 		}
 		testTxs = append(testTxs, tx)

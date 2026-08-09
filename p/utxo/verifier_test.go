@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utxo
@@ -13,13 +13,13 @@ import (
 
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pvmcodectest"
+	"github.com/luxfi/log"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/proto/p/stakeable"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/timer/mockable"
-	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
-	"github.com/luxfi/vm/components/verify"
 
 	safemath "github.com/luxfi/math"
 )
@@ -37,20 +37,18 @@ func (*dummyUnsignedTx) Visit(txs.Visitor) error {
 func TestVerifySpendUTXOs(t *testing.T) {
 	fx := &secp256k1fx.Fx{}
 
-	require.NoError(t, fx.Initialize(&secp256k1fx.TestVM{Clk: &mockable.Clock{}}))
+	require.NoError(t, fx.Initialize(&secp256k1fx.TestVM{
+		Clk: &mockable.Clock{},
+		Log: log.Noop(),
+	}))
 	require.NoError(t, fx.Bootstrapped())
 
 	utxoAssetID := ids.GenerateTestID()
 
-	// Build a runtime PVM codec so handler.codec is non-nil; the codec
-	// is used to derive the deterministic owner-id bytes for stakeable
-	// locked-output matching. nil codec dereferences in handler.Marshal.
-	txCodec, _ := pvmcodectest.NewPVMRuntimeCodec()
 	h := &handler{
-		ctx:   context.Background(),
-		codec: txCodec,
-		clk:   &mockable.Clock{},
-		fx:    fx,
+		ctx: context.Background(),
+		clk: &mockable.Clock{},
+		fx:  fx,
 	}
 
 	// The handler time during a test, unless [chainTimestamp] is set
@@ -1051,7 +1049,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				utxoAssetID:   1,
+				utxoAssetID:    1,
 				customAssetID: 1,
 			},
 			expectedErr: nil,

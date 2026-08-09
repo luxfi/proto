@@ -17,9 +17,7 @@ require (
 	github.com/luxfi/crypto v1.20.2
 	github.com/luxfi/database v1.21.1
 	github.com/luxfi/formatting v1.1.1
-	github.com/luxfi/genesis/builder v0.1.0
 	github.com/luxfi/ids v1.3.2
-	github.com/luxfi/keychain v1.1.1
 	github.com/luxfi/log v1.4.3
 	github.com/luxfi/math v1.5.1
 	github.com/luxfi/metric v1.8.1
@@ -28,7 +26,6 @@ require (
 	github.com/luxfi/ordering v0.0.1
 	github.com/luxfi/p2p v1.22.1
 	github.com/luxfi/runtime v1.3.1
-	github.com/luxfi/sdk v1.18.3
 	github.com/luxfi/timer v1.1.1
 	github.com/luxfi/upgrade v1.0.3
 	github.com/luxfi/utils v1.3.1
@@ -37,7 +34,6 @@ require (
 	github.com/luxfi/vm v1.3.1
 	github.com/luxfi/warp v1.24.1
 	github.com/luxfi/zap v1.2.6
-	github.com/luxfi/zapcodec v1.1.1
 	github.com/stretchr/testify v1.11.1
 	github.com/thepudds/fzgen v0.4.3
 	go.uber.org/goleak v1.3.0
@@ -79,6 +75,7 @@ require (
 	github.com/hanzos3/go-sdk v1.0.2 // indirect
 	github.com/luxfi/corona v0.10.4 // indirect
 	github.com/luxfi/dkg v0.3.5 // indirect
+	github.com/luxfi/keychain v1.1.1 // indirect
 	github.com/luxfi/lattice/v7 v7.1.4 // indirect
 	github.com/luxfi/lens v0.2.1 // indirect
 	github.com/luxfi/magnetar v1.2.3 // indirect

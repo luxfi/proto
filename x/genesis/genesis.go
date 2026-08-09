@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package genesis
@@ -9,8 +9,8 @@ import (
 
 	"github.com/luxfi/address"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/ordering"
 	"github.com/luxfi/proto/x/txs"
+	"github.com/luxfi/ordering"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
@@ -58,26 +58,11 @@ type GenesisOwners struct {
 	Minters   []string
 }
 
-// NewGenesis creates a new Genesis from genesis data.
-//
-// The genesisCodec is the wire codec used to compute deterministic
-// per-fx output bytes for the InitialState.Sort canonicalization step.
-// It must already be wired through a Parser (see
-// luxfi/proto/x/txs.NewParser) so that fx-owned output types
-// (secp256k1fx.TransferOutput, secp256k1fx.MintOutput) are
-// register-resolvable before Marshal is called.
-//
-// Wave 1A of the codec rip (#101): the codec is now an injected
-// dependency rather than constructed inline — proto/x/genesis no
-// longer carries any github.com/luxfi/codec import.
+// NewGenesis creates a new Genesis from genesis data
 func NewGenesis(
 	networkID uint32,
 	genesisData map[string]GenesisAssetDefinition,
-	genesisCodec txs.Codec,
 ) (*Genesis, error) {
-	if genesisCodec == nil {
-		return nil, fmt.Errorf("genesis: genesisCodec must be non-nil")
-	}
 	g := &Genesis{}
 	for assetAlias, assetDefinition := range genesisData {
 		asset := GenesisAsset{
@@ -137,7 +122,7 @@ func NewGenesis(
 		}
 
 		if len(initialState.Outs) > 0 {
-			initialState.Sort(genesisCodec)
+			initialState.Sort()
 			asset.States = append(asset.States, initialState)
 		}
 
@@ -149,15 +134,57 @@ func NewGenesis(
 	return g, nil
 }
 
-// Bytes serializes the Genesis to bytes using the supplied genesis
-// codec. The codec must accept Genesis and all its transitively
-// referenced fx-owned types (see NewGenesis godoc).
+// Bytes serializes the Genesis to its canonical native-ZAP bytes.
+func (g *Genesis) Bytes() ([]byte, error) {
+	return marshalGenesis(g)
+}
+
+// ParseGenesisBytes decodes the canonical XVM genesis bytes produced by
+// (*Genesis).Bytes() back into a *Genesis with each GenesisAsset's
+// embedded CreateAssetTx initialised against the genesis codec. After
+// Initialize, each tx's deterministic ID (tx.ID()) is the runtime asset
+// ID of that genesis-minted asset — i.e. the same value vm.initGenesis
+// computes when bootstrapping the X-Chain.
 //
-// Wave 1A: the genesisCodec is now an injected dependency, supplied
-// by the caller's Parser.GenesisCodec().
-func (g *Genesis) Bytes(genesisCodec txs.Codec) ([]byte, error) {
-	if genesisCodec == nil {
-		return nil, fmt.Errorf("genesis: genesisCodec must be non-nil")
+// Callers (genesis/builder, config/getGenesisData) use this to derive
+// the X-Chain native asset ID from genesis content rather than the
+// network-id-keyed constants.UTXOAssetIDFor(networkID). On sovereign
+// L1s those two values DIFFER — the wallet
+// builder context's UTXOAssetID must be the genesis-derived one or every
+// fee-paying tx fails with "insufficient funds, needs N more nLUX".
+func ParseGenesisBytes(genesisBytes []byte) (*Genesis, error) {
+	g, err := parseGenesis(genesisBytes)
+	if err != nil {
+		return nil, err
 	}
-	return genesisCodec.Marshal(txs.CodecVersion, g)
+	for i := range g.Txs {
+		tx := &txs.Tx{Unsigned: &g.Txs[i].CreateAssetTx}
+		if err := tx.Initialize(); err != nil {
+			return nil, fmt.Errorf("initialize genesis asset %d (%s): %w", i, g.Txs[i].Alias, err)
+		}
+	}
+	return g, nil
+}
+
+// AssetIDFromGenesisBytes returns the first genesis asset's runtime
+// asset ID — the ID vm.initGenesis assigns to genesis.Txs[0]. This is
+// the X-Chain native fee asset by convention (the same asset the
+// platform-vm reports via platform.getStakingAssetID and the wallet
+// builder context's UTXOAssetID).
+//
+// Returns an error when genesisBytes is malformed or contains zero
+// assets — both are unrecoverable on a primary-network bootstrap.
+func AssetIDFromGenesisBytes(genesisBytes []byte) (ids.ID, error) {
+	g, err := ParseGenesisBytes(genesisBytes)
+	if err != nil {
+		return ids.Empty, err
+	}
+	if len(g.Txs) == 0 {
+		return ids.Empty, fmt.Errorf("xvm genesis has zero asset txs")
+	}
+	tx := &txs.Tx{Unsigned: &g.Txs[0].CreateAssetTx}
+	if err := tx.Initialize(); err != nil {
+		return ids.Empty, fmt.Errorf("initialize first genesis asset (%s): %w", g.Txs[0].Alias, err)
+	}
+	return tx.ID(), nil
 }

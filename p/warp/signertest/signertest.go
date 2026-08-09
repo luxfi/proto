@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package signertest
@@ -11,7 +11,6 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp"
 )
 
@@ -25,10 +24,8 @@ var SignerTests = map[string]func(t *testing.T, s warp.Signer, sk bls.Signer, ne
 // Test that using a random SourceChainID results in an error
 func TestWrongChainID(t *testing.T, s warp.Signer, _ bls.Signer, _ uint32, _ ids.ID) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
 	msg, err := warp.NewUnsignedMessage(
-		c,
 		constants.UnitTestID,
 		ids.GenerateTestID(),
 		[]byte("payload"),
@@ -36,17 +33,15 @@ func TestWrongChainID(t *testing.T, s warp.Signer, _ bls.Signer, _ uint32, _ ids
 	require.NoError(err)
 
 	_, err = s.Sign(msg)
-	// TODO: require error to be ErrWrongSourceChainID
+	// Error type varies between local and gRPC signers; checking Error() suffices.
 	require.Error(err) //nolint:forbidigo // currently returns grpc errors too
 }
 
 // Test that using a different networkID results in an error
 func TestWrongNetworkID(t *testing.T, s warp.Signer, _ bls.Signer, networkID uint32, blockchainID ids.ID) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
 	msg, err := warp.NewUnsignedMessage(
-		c,
 		networkID+1,
 		blockchainID,
 		[]byte("payload"),
@@ -54,17 +49,15 @@ func TestWrongNetworkID(t *testing.T, s warp.Signer, _ bls.Signer, networkID uin
 	require.NoError(err)
 
 	_, err = s.Sign(msg)
-	// TODO: require error to be ErrWrongNetworkID
+	// Error type varies between local and gRPC signers; checking Error() suffices.
 	require.Error(err) //nolint:forbidigo // currently returns grpc errors too
 }
 
 // Test that a signature generated with the signer verifies correctly
 func TestVerifies(t *testing.T, s warp.Signer, sk bls.Signer, networkID uint32, chainID ids.ID) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
 	msg, err := warp.NewUnsignedMessage(
-		c,
 		networkID,
 		chainID,
 		[]byte("payload"),

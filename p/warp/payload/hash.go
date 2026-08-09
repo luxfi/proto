@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package payload
@@ -7,29 +7,41 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/zap"
 )
 
 var _ Payload = (*Hash)(nil)
 
+// Hash wire: pkind u8 @0, Hash 32B @1 = 33 bytes.
+const (
+	hashOffKind = offPKind
+	hashOffHash = 1
+	hashSize    = 33
+)
+
 type Hash struct {
-	Hash ids.ID `serialize:"true"`
+	Hash ids.ID `json:"hash"`
 
 	bytes []byte
 }
 
-// NewHash creates a new *Hash and initializes it against the supplied
-// Codec.
-func NewHash(c Codec, hash ids.ID) (*Hash, error) {
+// NewHash creates a new *Hash and initializes it.
+func NewHash(hash ids.ID) (*Hash, error) {
 	bhp := &Hash{
 		Hash: hash,
 	}
-	return bhp, initialize(c, bhp)
+	b := zap.NewBuilder(zap.HeaderSize + hashSize)
+	ob := b.StartObject(hashSize)
+	ob.SetUint8(hashOffKind, uint8(pkindHash))
+	ob.SetBytesFixed(hashOffHash, hash[:])
+	ob.FinishAsRoot()
+	bhp.initialize(b.Finish())
+	return bhp, nil
 }
 
-// ParseHash converts a slice of bytes into an initialized Hash using
-// the supplied Codec.
-func ParseHash(c Codec, b []byte) (*Hash, error) {
-	payloadIntf, err := Parse(c, b)
+// ParseHash converts a slice of bytes into an initialized Hash.
+func ParseHash(b []byte) (*Hash, error) {
+	payloadIntf, err := Parse(b)
 	if err != nil {
 		return nil, err
 	}

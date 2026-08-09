@@ -12,7 +12,6 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
 	"github.com/luxfi/ordering"
-	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/signer"
 	"github.com/luxfi/proto/p/stakeable"
 	"github.com/luxfi/proto/p/txs"
@@ -52,14 +51,13 @@ type Genesis struct {
 	Message       string    `serialize:"true"`
 }
 
-// Parse decodes a Genesis from wire bytes using the supplied block
-// Codec. Both the outer Genesis container and the per-validator /
-// per-chain Tx Initialize calls use the same codec — callers pass the
-// genesis-sized codec (codec.NewManager(math.MaxInt32) bound through
-// block.RegisterTypes) here.
-func Parse(c block.Codec, genesisBytes []byte) (*Genesis, error) {
-	gen := &Genesis{}
-	if _, err := c.Unmarshal(genesisBytes, gen); err != nil {
+// Parse deserializes a P-Chain genesis blob from its native-ZAP wire form
+// (see genesiswire.go). Embedded validator + chain txs are re-parsed via
+// txs.Parse from their own self-delimiting signed bytes, so each TxID
+// (= hash(signedBytes)) is preserved byte-for-byte with no re-encoding.
+func Parse(genesisBytes []byte) (*Genesis, error) {
+	gen, err := parseGenesis(genesisBytes)
+	if err != nil {
 		return nil, err
 	}
 	for _, tx := range gen.Validators {
@@ -163,12 +161,8 @@ func bech32ToID(addrStr string) (ids.ShortID, error) {
 // [time] is the Platform Chain's time at network genesis.
 // [initialSupply] is the initial supply of the LUX asset.
 // [message] is the message to be sent to the genesis UTXOs.
-// New constructs a Genesis from the supplied parameters. The supplied
-// genesis Codec is used to initialize every embedded txs.Tx — callers
-// pass the genesis-sized codec (block.RegisterTypes bound through a
-// codec.NewManager(math.MaxInt32)) here.
+// New constructs a Genesis from the supplied parameters.
 func New(
-	c block.Codec,
 	utxoAssetID ids.ID,
 	networkID uint32,
 	allocations []Allocation,
@@ -361,8 +355,7 @@ func New(
 	return g, nil
 }
 
-// Bytes serializes the Genesis to bytes using the supplied PlatformVM
-// genesis codec.
-func (g *Genesis) Bytes(c block.Codec) ([]byte, error) {
-	return c.Marshal(CodecVersion, g)
+// Bytes serializes the Genesis to its canonical native-ZAP wire bytes.
+func (g *Genesis) Bytes() ([]byte, error) {
+	return marshalGenesis(g)
 }

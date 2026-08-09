@@ -1,12 +1,12 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
 
 import (
-	core "github.com/luxfi/consensus/core"
-	log "github.com/luxfi/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/proto/p/block"
+	vmcore "github.com/luxfi/vm"
 )
 
 var _ block.Visitor = (*rejector)(nil)
@@ -16,44 +16,24 @@ var _ block.Visitor = (*rejector)(nil)
 // being shutdown.
 type rejector struct {
 	*backend
-	toEngine        chan<- core.Message
+	toEngine        chan<- vmcore.Message
 	addTxsToMempool bool
 }
 
-func (r *rejector) BanffAbortBlock(b *block.BanffAbortBlock) error {
-	return r.rejectBlock(b, "banff abort")
+func (r *rejector) AbortBlock(b *block.AbortBlock) error {
+	return r.rejectBlock(b, "abort")
 }
 
-func (r *rejector) BanffCommitBlock(b *block.BanffCommitBlock) error {
-	return r.rejectBlock(b, "banff commit")
+func (r *rejector) CommitBlock(b *block.CommitBlock) error {
+	return r.rejectBlock(b, "commit")
 }
 
-func (r *rejector) BanffProposalBlock(b *block.BanffProposalBlock) error {
-	return r.rejectBlock(b, "banff proposal")
+func (r *rejector) ProposalBlock(b *block.ProposalBlock) error {
+	return r.rejectBlock(b, "proposal")
 }
 
-func (r *rejector) BanffStandardBlock(b *block.BanffStandardBlock) error {
-	return r.rejectBlock(b, "banff standard")
-}
-
-func (r *rejector) ApricotAbortBlock(b *block.ApricotAbortBlock) error {
-	return r.rejectBlock(b, "apricot abort")
-}
-
-func (r *rejector) ApricotCommitBlock(b *block.ApricotCommitBlock) error {
-	return r.rejectBlock(b, "apricot commit")
-}
-
-func (r *rejector) ApricotProposalBlock(b *block.ApricotProposalBlock) error {
-	return r.rejectBlock(b, "apricot proposal")
-}
-
-func (r *rejector) ApricotStandardBlock(b *block.ApricotStandardBlock) error {
-	return r.rejectBlock(b, "apricot standard")
-}
-
-func (r *rejector) ApricotAtomicBlock(b *block.ApricotAtomicBlock) error {
-	return r.rejectBlock(b, "apricot atomic")
+func (r *rejector) StandardBlock(b *block.StandardBlock) error {
+	return r.rejectBlock(b, "standard")
 }
 
 func (r *rejector) rejectBlock(b block.Block, blockType string) error {
@@ -88,7 +68,7 @@ func (r *rejector) rejectBlock(b block.Block, blockType string) error {
 	}
 
 	select {
-	case r.toEngine <- core.Message{Type: core.PendingTxs}:
+	case r.toEngine <- vmcore.Message{Type: vmcore.PendingTxs}:
 	default:
 	}
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -17,7 +17,6 @@ import (
 var _ txs.Visitor = (*Executor)(nil)
 
 type Executor struct {
-	Codec          txs.Codec
 	State          state.Chain // state will be modified
 	Tx             *txs.Tx
 	Inputs         set.Set[ids.ID]             // imported inputs
@@ -122,7 +121,10 @@ func (e *Executor) ExportTx(tx *txs.ExportTx) error {
 		}
 		index++
 
-		utxoBytes, err := e.Codec.Marshal(txs.CodecVersion, utxo)
+		// ZAP-native wire envelope — matches GetAtomicUTXOs' utxo.ParseUTXO
+		// dispatch on the import side. Same bytes flow on shared memory
+		// and disk (state.PutUTXO uses WireBytes too).
+		utxoBytes, err := utxo.WireBytes()
 		if err != nil {
 			return fmt.Errorf("failed to marshal UTXO: %w", err)
 		}

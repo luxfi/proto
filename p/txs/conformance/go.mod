@@ -8,13 +8,14 @@ go 1.26.4
 require (
 	github.com/luxfi/crypto v1.20.4
 	github.com/luxfi/ids v1.3.2
-	github.com/luxfi/node v1.36.68
+	github.com/luxfi/node v1.36.67
 	github.com/luxfi/proto v1.4.4
 	github.com/luxfi/utxo v0.5.8
 )
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
+	github.com/StephenButtolph/canoto v0.17.3 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.5.0 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.6 // indirect
 	github.com/btcsuite/btcd/chainhash/v2 v2.0.0 // indirect
@@ -22,6 +23,7 @@ require (
 	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/decred/dcrd/crypto/blake256 v1.1.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
+	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/go-json-experiment/json v0.0.0-20260601182631-00ed12fed2a6 // indirect
 	github.com/gorilla/rpc v1.2.1 // indirect
 	github.com/grandcat/zeroconf v1.0.0 // indirect
@@ -51,7 +53,9 @@ require (
 	github.com/luxfi/pq v1.1.0 // indirect
 	github.com/luxfi/runtime v1.3.1 // indirect
 	github.com/luxfi/sampler v1.1.0 // indirect
+	github.com/luxfi/threshold v1.12.6 // indirect
 	github.com/luxfi/timer v1.1.1 // indirect
+	github.com/luxfi/upgrade v1.0.3 // indirect
 	github.com/luxfi/utils v1.3.1 // indirect
 	github.com/luxfi/validators v1.3.1 // indirect
 	github.com/luxfi/version v1.0.1 // indirect

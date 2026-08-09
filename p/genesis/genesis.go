@@ -63,12 +63,12 @@ func Parse(c block.Codec, genesisBytes []byte) (*Genesis, error) {
 		return nil, err
 	}
 	for _, tx := range gen.Validators {
-		if err := tx.Initialize(c); err != nil {
+		if err := tx.Initialize(); err != nil {
 			return nil, err
 		}
 	}
 	for _, tx := range gen.Chains {
-		if err := tx.Initialize(c); err != nil {
+		if err := tx.Initialize(); err != nil {
 			return nil, err
 		}
 	}
@@ -318,7 +318,7 @@ func New(
 			}}
 		}
 
-		if err := tx.Initialize(c); err != nil {
+		if err := tx.Initialize(); err != nil {
 			return nil, err
 		}
 
@@ -340,7 +340,7 @@ func New(
 			GenesisData:       chain.GenesisData,
 			ChainAuth:         &secp256k1fx.Input{},
 		}}
-		if err := tx.Initialize(c); err != nil {
+		if err := tx.Initialize(); err != nil {
 			return nil, err
 		}
 

@@ -38,7 +38,7 @@ import (
 	"github.com/luxfi/proto/p/state/statetest"
 	"github.com/luxfi/proto/p/status"
 	"github.com/luxfi/proto/p/txs"
-	"github.com/luxfi/proto/p/txs/txstest"
+	"github.com/luxfi/sdk/wallet/chain/p/txstest"
 	"github.com/luxfi/proto/p/utxo"
 	"github.com/luxfi/proto/p/validators/validatorstest"
 	"github.com/luxfi/proto/txs/mempool"

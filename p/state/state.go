@@ -1364,7 +1364,7 @@ func (s *state) GetTx(txID ids.ID) (*txs.Tx, status.Status, error) {
 		return nil, status.Unknown, err
 	}
 
-	tx, err := txs.Parse(s.genesisCodec, stx.Tx)
+	tx, err := txs.Parse(stx.Tx)
 	if err != nil {
 		return nil, status.Unknown, err
 	}

@@ -61,7 +61,7 @@ type ApricotStandardBlock struct {
 func (b *ApricotStandardBlock) initialize(bytes []byte, c Codec) error {
 	b.CommonBlock.initialize(bytes)
 	for _, tx := range b.Transactions {
-		if err := tx.Initialize(c); err != nil {
+		if err := tx.Initialize(); err != nil {
 			return fmt.Errorf("failed to initialize tx: %w", err)
 		}
 	}

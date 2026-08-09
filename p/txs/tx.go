@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -26,65 +26,80 @@ var (
 	errSignedTxNotInitialized = errors.New("signed tx was never initialized and is not valid")
 )
 
-// Tx is a signed transaction
+// Tx is a signed transaction: an unsigned tx plus its credentials. The signed
+// bytes are the unsigned zap buffer followed by the credential buffer —
+// nothing wraps the pair, and the unsigned buffer's own size field is where a
+// reader splits them.
 type Tx struct {
 	// The body of this transaction
-	Unsigned UnsignedTx `serialize:"true" json:"unsignedTx"`
+	Unsigned UnsignedTx `json:"unsignedTx"`
 
 	// The credentials of this transaction
-	Creds []verify.Verifiable `serialize:"true" json:"credentials"`
+	Creds []verify.Verifiable `json:"credentials"`
 
-	TxID  ids.ID `serialize:"-" json:"id"`
+	TxID  ids.ID `json:"id"`
 	bytes []byte
 }
 
-func NewSigned(
-	unsigned UnsignedTx,
-	c Codec,
-	signers [][]*secp256k1.PrivateKey,
-) (*Tx, error) {
+// NewSigned builds a signed tx from an unsigned body and signs it.
+func NewSigned(unsigned UnsignedTx, signers [][]*secp256k1.PrivateKey) (*Tx, error) {
 	res := &Tx{Unsigned: unsigned}
-	return res, res.Sign(c, signers)
+	return res, res.Sign(signers)
 }
 
-func (tx *Tx) Initialize(c Codec) error {
-	signedBytes, err := c.Marshal(CodecVersion, tx)
+// Initialize binds the signed bytes and TxID from the unsigned body and the
+// credentials already attached — for txs assembled without signing here (a
+// multisig collection, a genesis tx).
+func (tx *Tx) Initialize() error {
+	unsignedBytes, err := Marshal(tx.Unsigned)
 	if err != nil {
-		return fmt.Errorf("couldn't marshal ProposalTx: %w", err)
+		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
 	}
-
-	unsignedBytesLen, err := c.Size(CodecVersion, &tx.Unsigned)
-	if err != nil {
-		return fmt.Errorf("couldn't calculate UnsignedTx marshal length: %w", err)
-	}
-
-	unsignedBytes := signedBytes[:unsignedBytesLen]
-	tx.SetBytes(unsignedBytes, signedBytes)
-	return nil
-}
-
-func (tx *Tx) SetBytes(unsignedBytes, signedBytes []byte) {
 	tx.Unsigned.SetBytes(unsignedBytes)
+	return tx.Bind(unsignedBytes)
+}
+
+// SetBytes binds the exact signed bytes and derives TxID = hash(signedBytes).
+func (tx *Tx) SetBytes(signedBytes []byte) {
 	tx.bytes = signedBytes
 	tx.TxID = hash.ComputeHash256Array(signedBytes)
 }
 
-// Parse signed tx starting from its byte representation.
-// Note: We explicitly pass the codec in Parse since we may need to parse
-// P-Chain genesis txs whose length exceed the max length of txs.Codec.
-func Parse(c Codec, signedBytes []byte) (*Tx, error) {
-	tx := &Tx{}
-	if _, err := c.Unmarshal(signedBytes, tx); err != nil {
+// Bind sets the signed bytes to the given unsigned buffer followed by the
+// credentials currently attached. It is the one place the pair is joined.
+func (tx *Tx) Bind(unsignedBytes []byte) error {
+	signedBytes := unsignedBytes
+	if len(tx.Creds) > 0 {
+		credsBuf, err := writeCredsBuf(tx.Creds)
+		if err != nil {
+			return fmt.Errorf("couldn't encode credentials: %w", err)
+		}
+		signedBytes = concat(unsignedBytes, credsBuf)
+	}
+	tx.SetBytes(signedBytes)
+	return nil
+}
+
+// Parse reads a signed tx from its wire bytes: the leading self-delimiting zap
+// buffer is the unsigned body, any remainder is the credential buffer.
+func Parse(signedBytes []byte) (*Tx, error) {
+	n, err := zapLen(signedBytes)
+	if err != nil {
 		return nil, fmt.Errorf("couldn't parse tx: %w", err)
 	}
-
-	unsignedBytesLen, err := c.Size(CodecVersion, &tx.Unsigned)
+	unsigned, err := Unmarshal(signedBytes[:n])
 	if err != nil {
-		return nil, fmt.Errorf("couldn't calculate UnsignedTx marshal length: %w", err)
+		return nil, fmt.Errorf("couldn't parse unsigned tx: %w", err)
 	}
-
-	unsignedBytes := signedBytes[:unsignedBytesLen]
-	tx.SetBytes(unsignedBytes, signedBytes)
+	tx := &Tx{Unsigned: unsigned}
+	if len(signedBytes) > n {
+		creds, err := parseCredsBuf(signedBytes[n:])
+		if err != nil {
+			return nil, fmt.Errorf("couldn't parse credentials: %w", err)
+		}
+		tx.Creds = creds
+	}
+	tx.SetBytes(signedBytes)
 	return tx, nil
 }
 
@@ -137,35 +152,29 @@ func (tx *Tx) SyntacticVerify(rt *runtime.Runtime) error {
 	}
 }
 
-// Sign this transaction with the provided signers
-// Note: We explicitly pass the codec in Sign since we may need to sign P-Chain
-// genesis txs whose length exceed the max length of txs.Codec.
-func (tx *Tx) Sign(c Codec, signers [][]*secp256k1.PrivateKey) error {
-	unsignedBytes, err := c.Marshal(CodecVersion, &tx.Unsigned)
+// Sign attaches a credential per signer set over the unsigned bytes, then
+// binds signed bytes = unsigned ‖ creds.
+func (tx *Tx) Sign(signers [][]*secp256k1.PrivateKey) error {
+	unsignedBytes, err := Marshal(tx.Unsigned)
 	if err != nil {
-		return fmt.Errorf("couldn't marshal UnsignedTx: %w", err)
+		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
 	}
+	tx.Unsigned.SetBytes(unsignedBytes)
+	h := hash.ComputeHash256(unsignedBytes)
 
-	// Attach credentials
-	hash := hash.ComputeHash256(unsignedBytes)
-	for _, keys := range signers {
+	tx.Creds = make([]verify.Verifiable, len(signers))
+	for i, keys := range signers {
 		cred := &secp256k1fx.Credential{
 			Sigs: make([][secp256k1.SignatureLen]byte, len(keys)),
 		}
-		for i, key := range keys {
-			sig, err := key.SignHash(hash) // Sign hash
+		for j, key := range keys {
+			sig, err := key.SignHash(h)
 			if err != nil {
-				return fmt.Errorf("problem generating credential: %w", err)
+				return fmt.Errorf("problem signing tx: %w", err)
 			}
-			copy(cred.Sigs[i][:], sig)
+			copy(cred.Sigs[j][:], sig)
 		}
-		tx.Creds = append(tx.Creds, cred) // Attach credential
+		tx.Creds[i] = cred
 	}
-
-	signedBytes, err := c.Marshal(CodecVersion, tx)
-	if err != nil {
-		return fmt.Errorf("couldn't marshal ProposalTx: %w", err)
-	}
-	tx.SetBytes(unsignedBytes, signedBytes)
-	return nil
+	return tx.Bind(unsignedBytes)
 }

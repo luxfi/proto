@@ -42,7 +42,7 @@ import (
 	"github.com/luxfi/proto/p/testcontext"
 
 	"github.com/luxfi/proto/p/txs"
-	"github.com/luxfi/proto/p/txs/txstest"
+	"github.com/luxfi/sdk/wallet/chain/p/txstest"
 	"github.com/luxfi/proto/p/utxo"
 
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"

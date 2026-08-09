@@ -72,7 +72,7 @@ func TestTxComplexity_Individual(t *testing.T) {
 			txBytes, err := hex.DecodeString(test.tx)
 			require.NoError(err)
 
-			tx, err := txs.Parse(testTxCodec, txBytes)
+			tx, err := txs.Parse(txBytes)
 			if err != nil {
 				t.Skipf("skipping invalid tx encoding: %v", err)
 			}
@@ -114,7 +114,7 @@ func TestTxComplexity_Batch(t *testing.T) {
 		txBytes, err := hex.DecodeString(test.tx)
 		require.NoError(err)
 
-		tx, err := txs.Parse(testTxCodec, txBytes)
+		tx, err := txs.Parse(txBytes)
 		if err != nil {
 			t.Skipf("skipping invalid tx encoding: %v", err)
 		}
@@ -135,7 +135,7 @@ func BenchmarkTxComplexity_Individual(b *testing.B) {
 			txBytes, err := hex.DecodeString(test.tx)
 			require.NoError(err)
 
-			tx, err := txs.Parse(testTxCodec, txBytes)
+			tx, err := txs.Parse(txBytes)
 			if err != nil {
 				b.Skipf("skipping invalid tx encoding: %v", err)
 			}
@@ -160,7 +160,7 @@ func BenchmarkTxComplexity_Batch(b *testing.B) {
 		txBytes, err := hex.DecodeString(test.tx)
 		require.NoError(err)
 
-		tx, err := txs.Parse(testTxCodec, txBytes)
+		tx, err := txs.Parse(txBytes)
 		if err != nil {
 			b.Skipf("skipping invalid tx encoding: %v", err)
 		}

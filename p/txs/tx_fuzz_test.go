@@ -34,13 +34,9 @@ func FuzzTransactionParsing(f *testing.F) {
 	withID := append([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01}, testID[:]...)
 	f.Add(withID)
 
-	// Parser is not available in this package, using Codec instead
-	codec := testCodec
-
 	f.Fuzz(func(t *testing.T, data []byte) {
 		// Try to parse as transaction
-		var tx Tx
-		_, err := codec.Unmarshal(data, &tx)
+		tx, err := Parse(data)
 		if err != nil {
 			// Expected for invalid transaction data
 			return
@@ -61,8 +57,7 @@ func FuzzTransactionParsing(f *testing.F) {
 		}
 
 		// Parse again and verify consistency
-		var tx2 Tx
-		_, err = codec.Unmarshal(bytes, &tx2)
+		tx2, err := Parse(bytes)
 		if err != nil {
 			t.Errorf("Failed to re-parse serialized transaction: %v", err)
 			return
@@ -425,9 +420,6 @@ func FuzzTransactionSignatures(f *testing.F) {
 	f.Add([]byte{}, []byte{})
 	f.Add(bytes.Repeat([]byte{0x01}, 65), bytes.Repeat([]byte{0x02}, 32))
 
-	// Parser is not available in this package, using Codec instead
-	codec := testCodec
-
 	f.Fuzz(func(t *testing.T, sigData []byte, txData []byte) {
 		// Create a basic transaction
 		baseTx := &Tx{
@@ -463,7 +455,7 @@ func FuzzTransactionSignatures(f *testing.F) {
 		}
 
 		// Initialize the transaction
-		if err := baseTx.Initialize(codec); err != nil {
+		if err := baseTx.Initialize(); err != nil {
 			// Some combinations might be invalid
 			return
 		}
@@ -472,8 +464,7 @@ func FuzzTransactionSignatures(f *testing.F) {
 		bytes := baseTx.Bytes()
 
 		// Try to parse back
-		var parsed Tx
-		_, err := codec.Unmarshal(bytes, &parsed)
+		parsed, err := Parse(bytes)
 		if err != nil {
 			// Should not fail for a transaction we created
 			t.Errorf("Failed to parse transaction we created: %v", err)
@@ -481,7 +472,7 @@ func FuzzTransactionSignatures(f *testing.F) {
 		}
 
 		// Initialize the parsed transaction to compute its ID
-		if err := parsed.Initialize(codec); err != nil {
+		if err := parsed.Initialize(); err != nil {
 			// Should not fail for a valid parsed transaction
 			t.Errorf("Failed to initialize parsed transaction: %v", err)
 			return

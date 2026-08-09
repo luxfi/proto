@@ -197,7 +197,7 @@ func TestState_writeStakers(t *testing.T) {
 
 	unsignedAddPrimaryNetworkValidator := createPermissionlessValidatorTx(t, constants.PrimaryNetworkID, primaryValidatorData)
 	addPrimaryNetworkValidator := &txs.Tx{Unsigned: unsignedAddPrimaryNetworkValidator}
-	require.NoError(t, addPrimaryNetworkValidator.Initialize(testTxCodec))
+	require.NoError(t, addPrimaryNetworkValidator.Initialize())
 
 	primaryNetworkPendingValidatorStaker, err := NewPendingStaker(
 		addPrimaryNetworkValidator.ID(),
@@ -215,7 +215,7 @@ func TestState_writeStakers(t *testing.T) {
 
 	unsignedAddPrimaryNetworkDelegator := createPermissionlessDelegatorTx(constants.PrimaryNetworkID, primaryDelegatorData)
 	addPrimaryNetworkDelegator := &txs.Tx{Unsigned: unsignedAddPrimaryNetworkDelegator}
-	require.NoError(t, addPrimaryNetworkDelegator.Initialize(testTxCodec))
+	require.NoError(t, addPrimaryNetworkDelegator.Initialize())
 
 	primaryNetworkPendingDelegatorStaker, err := NewPendingStaker(
 		addPrimaryNetworkDelegator.ID(),
@@ -233,7 +233,7 @@ func TestState_writeStakers(t *testing.T) {
 
 	unsignedAddNetValidator := createPermissionlessValidatorTx(t, chainID, chainValidatorData)
 	addNetValidator := &txs.Tx{Unsigned: unsignedAddNetValidator}
-	require.NoError(t, addNetValidator.Initialize(testTxCodec))
+	require.NoError(t, addNetValidator.Initialize())
 
 	chainCurrentValidatorStaker, err := NewCurrentStaker(
 		addNetValidator.ID(),
@@ -1366,7 +1366,7 @@ func makeBlocks(require *require.Assertions) []block.Block {
 				TxID: ids.GenerateTestID(),
 			},
 		}
-		require.NoError(tx.Initialize(testTxCodec))
+		require.NoError(tx.Initialize())
 		blk, err := block.NewApricotProposalBlock(testGenesisBlockCodec, ids.GenerateTestID(), 1000, tx)
 		require.NoError(err)
 		blks = append(blks, blk)
@@ -1378,7 +1378,7 @@ func makeBlocks(require *require.Assertions) []block.Block {
 				TxID: ids.GenerateTestID(),
 			},
 		}
-		require.NoError(tx.Initialize(testTxCodec))
+		require.NoError(tx.Initialize())
 		blk, err := block.NewApricotStandardBlock(testGenesisBlockCodec, ids.GenerateTestID(), 1000, []*txs.Tx{tx})
 		require.NoError(err)
 		blks = append(blks, blk)
@@ -1402,7 +1402,7 @@ func makeBlocks(require *require.Assertions) []block.Block {
 				TxID: ids.GenerateTestID(),
 			},
 		}
-		require.NoError(tx.Initialize(testTxCodec))
+		require.NoError(tx.Initialize())
 
 		blk, err := block.NewBanffProposalBlock(testGenesisBlockCodec, time.Now(), ids.GenerateTestID(), 1000, tx, []*txs.Tx{})
 		require.NoError(err)
@@ -1415,7 +1415,7 @@ func makeBlocks(require *require.Assertions) []block.Block {
 				TxID: ids.GenerateTestID(),
 			},
 		}
-		require.NoError(tx.Initialize(testTxCodec))
+		require.NoError(tx.Initialize())
 
 		blk, err := block.NewBanffStandardBlock(testGenesisBlockCodec, time.Now(), ids.GenerateTestID(), 1000, []*txs.Tx{tx})
 		require.NoError(err)
@@ -2120,7 +2120,7 @@ func TestLoadL1ValidatorAndLegacy(t *testing.T) {
 		},
 	)
 	addNetValidator := &txs.Tx{Unsigned: unsignedAddNetValidator}
-	require.NoError(addNetValidator.Initialize(testTxCodec))
+	require.NoError(addNetValidator.Initialize())
 	state.AddTx(addNetValidator, status.Committed)
 
 	legacyStaker := &Staker{

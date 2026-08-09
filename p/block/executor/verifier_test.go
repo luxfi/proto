@@ -137,7 +137,7 @@ func TestVerifierVisitProposalBlock(t *testing.T) {
 			},
 		}
 	)
-	require.NoError(proposalTx.Initialize(testCodec))
+	require.NoError(proposalTx.Initialize())
 
 	// Build the block that will be executed on top of the last accepted block.
 	lastAcceptedID := verifier.state.GetLastAccepted()

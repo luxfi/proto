@@ -34,7 +34,7 @@ import (
 	"github.com/luxfi/proto/p/status"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/proto/p/txs/executor"
-	"github.com/luxfi/proto/p/txs/txstest"
+	"github.com/luxfi/sdk/wallet/chain/p/txstest"
 	"github.com/luxfi/proto/p/utxo"
 	"github.com/luxfi/proto/txs/mempool"
 	consensuscontext "github.com/luxfi/runtime"

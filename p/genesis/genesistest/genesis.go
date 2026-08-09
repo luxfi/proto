@@ -149,7 +149,7 @@ func New(t testing.TB, codec platformvmgenesis.Codec, c Config) *platformvmgenes
 			DelegationShares: ValidatorDelegationShares,
 		}
 		validatorTx := &txs.Tx{Unsigned: validator}
-		require.NoError(validatorTx.Initialize(codec))
+		require.NoError(validatorTx.Initialize())
 
 		genesis.Validators[i] = validatorTx
 	}
@@ -165,7 +165,7 @@ func New(t testing.TB, codec platformvmgenesis.Codec, c Config) *platformvmgenes
 		ChainAuth:         &secp256k1fx.Input{},
 	}
 	chainTx := &txs.Tx{Unsigned: chain}
-	require.NoError(chainTx.Initialize(codec))
+	require.NoError(chainTx.Initialize())
 
 	genesis.Chains = []*txs.Tx{chainTx}
 	return genesis

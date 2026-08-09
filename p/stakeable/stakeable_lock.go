@@ -4,11 +4,11 @@
 package stakeable
 
 import (
-	"encoding/binary"
 	"errors"
 
 	"github.com/luxfi/runtime"
 	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/wire"
 )
 
 var (
@@ -35,27 +35,23 @@ func (s *LockOut) Addresses() [][]byte {
 	return nil
 }
 
-// Bytes returns a stable byte representation of this LockOut for use in
-// canonical sort comparisons (see lux.IsSortedTransferableOutputs).
+// Bytes returns the ZAP wire envelope for this LockOut: the shared
+// wire.LockedOutput schema (TypeKindReserved, ShapeKindLockedOutput),
+// carrying the locktime and the inner output's own envelope.
 //
-// Layout: stakeableLockMarker || big-endian Locktime || inner-output
-// Bytes() (empty if the inner output does not expose Bytes).
-//
-// The leading 0xFF marker ensures LockOut sorts AFTER any unlocked fxs
-// primitive (whose first byte is a dense TypeKind << 0xFF), preserving
-// the legacy "unlocked first, then locked" ordering that downstream tx
-// SyntacticVerify code expects.
+// The canonical output sort compares exactly these bytes, and the chain
+// re-serializes a parsed LockOut through the SAME wire.NewLockedOutput.
+// Any second encoding here is a fork: the two sides then disagree on
+// output ORDER and the chain rejects the tx as "outputs not sorted".
 func (s *LockOut) Bytes() []byte {
-	const stakeableLockMarker byte = 0xFF
 	var inner []byte
 	if ws, ok := s.TransferableOut.(interface{ Bytes() []byte }); ok {
 		inner = ws.Bytes()
 	}
-	b := make([]byte, 1+8+len(inner))
-	b[0] = stakeableLockMarker
-	binary.BigEndian.PutUint64(b[1:9], s.Locktime)
-	copy(b[9:], inner)
-	return b
+	return wire.NewLockedOutput(wire.LockedOutputInput{
+		Locktime:         s.Locktime,
+		TransferOutBytes: inner,
+	})
 }
 
 func (s *LockOut) Verify() error {

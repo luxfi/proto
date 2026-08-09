@@ -13,7 +13,7 @@ import (
 )
 
 func TestDynamicCalculator(t *testing.T) {
-	calculator := NewDynamicCalculator(testWarpCodec, testDynamicWeights, testDynamicPrice)
+	calculator := NewDynamicCalculator(testDynamicWeights, testDynamicPrice)
 	for _, test := range txTests {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)

@@ -1,9 +1,10 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package warp_test
+package warp
 
 import (
+	"bytes"
 	"context"
 	"math"
 	"testing"
@@ -11,20 +12,15 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
+	validators "github.com/luxfi/validators"
+	"github.com/luxfi/validators/validatorsmock"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/proto/internal/pvmcodectest"
-	"github.com/luxfi/proto/p/warp"
-	validators "github.com/luxfi/validators"
-	"github.com/luxfi/validators/validatorsmock"
 )
 
-var (
-	sourceChainID = ids.GenerateTestID()
-	netID         = ids.GenerateTestID()
-)
+var sourceChainID = ids.GenerateTestID()
 
 func getTestValidators() map[ids.NodeID]*validators.GetValidatorOutput {
 	return map[ids.NodeID]*validators.GetValidatorOutput{
@@ -48,49 +44,49 @@ func getTestValidators() map[ids.NodeID]*validators.GetValidatorOutput {
 
 func TestNumSigners(t *testing.T) {
 	tests := map[string]struct {
-		generateSignature func() *warp.BitSetSignature
+		generateSignature func() *BitSetSignature
 		count             int
 		err               error
 	}{
 		"empty signers": {
-			generateSignature: func() *warp.BitSetSignature {
-				return &warp.BitSetSignature{}
+			generateSignature: func() *BitSetSignature {
+				return &BitSetSignature{}
 			},
 		},
 		"invalid signers": {
-			generateSignature: func() *warp.BitSetSignature {
-				return &warp.BitSetSignature{
+			generateSignature: func() *BitSetSignature {
+				return &BitSetSignature{
 					Signers: make([]byte, 1),
 				}
 			},
-			err: warp.ErrInvalidBitSet,
+			err: ErrInvalidBitSet,
 		},
 		"no signers": {
-			generateSignature: func() *warp.BitSetSignature {
+			generateSignature: func() *BitSetSignature {
 				signers := set.NewBits()
-				return &warp.BitSetSignature{
+				return &BitSetSignature{
 					Signers: signers.Bytes(),
 				}
 			},
 		},
 		"1 signer": {
-			generateSignature: func() *warp.BitSetSignature {
+			generateSignature: func() *BitSetSignature {
 				signers := set.NewBits()
 				signers.Add(2)
-				return &warp.BitSetSignature{
+				return &BitSetSignature{
 					Signers: signers.Bytes(),
 				}
 			},
 			count: 1,
 		},
 		"multiple signers": {
-			generateSignature: func() *warp.BitSetSignature {
+			generateSignature: func() *BitSetSignature {
 				signers := set.NewBits()
 				signers.Add(2)
 				signers.Add(11)
 				signers.Add(55)
 				signers.Add(93)
-				return &warp.BitSetSignature{
+				return &BitSetSignature{
 					Signers: signers.Bytes(),
 				}
 			},
@@ -113,15 +109,13 @@ func TestSignatureVerification(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	c := pvmcodectest.NewWarpCodec()
-
 	tests := []struct {
 		name         string
 		networkID    uint32
 		stateF       func(*testing.T) validators.State
 		quorumNum    uint64
 		quorumDen    uint64
-		msgF         func(*require.Assertions) *warp.Message
+		msgF         func(*require.Assertions) *Message
 		verifyErr    error
 		canonicalErr error
 	}{
@@ -146,22 +140,22 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					nil,
 				)
 				require.NoError(err)
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{},
+					&BitSetSignature{},
 				)
 				require.NoError(err)
 				return msg
 			},
-			canonicalErr: warp.ErrWeightOverflow,
+			canonicalErr: ErrWeightOverflow,
 		},
 		{
 			name:      "invalid bit set index",
@@ -173,17 +167,17 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
 				)
 				require.NoError(err)
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   make([]byte, 1),
 						Signature: [bls.SignatureLen]byte{},
 					},
@@ -191,7 +185,7 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			verifyErr: warp.ErrInvalidBitSet,
+			verifyErr: ErrInvalidBitSet,
 		},
 		{
 			name:      "unknown index",
@@ -203,8 +197,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -214,16 +208,16 @@ func TestSignatureVerification(t *testing.T) {
 				signers := set.NewBits()
 				signers.Add(5) // Index 5 doesn't exist (only 0,1,2)
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers: signers.Bytes(),
 					},
 				)
 				require.NoError(err)
 				return msg
 			},
-			verifyErr: warp.ErrUnknownValidator,
+			verifyErr: ErrUnknownValidator,
 		},
 		{
 			name:      "insufficient weight",
@@ -235,8 +229,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 1,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -259,9 +253,9 @@ func TestSignatureVerification(t *testing.T) {
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -269,7 +263,7 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			verifyErr: warp.ErrInsufficientWeight,
+			verifyErr: ErrInsufficientWeight,
 		},
 		{
 			name:      "can't parse sig",
@@ -281,8 +275,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -293,9 +287,9 @@ func TestSignatureVerification(t *testing.T) {
 				signers.Add(0)
 				signers.Add(1)
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: [bls.SignatureLen]byte{},
 					},
@@ -303,7 +297,7 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			verifyErr: warp.ErrParseSignature,
+			verifyErr: ErrParseSignature,
 		},
 		{
 			name:      "no validators",
@@ -315,8 +309,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -329,9 +323,9 @@ func TestSignatureVerification(t *testing.T) {
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(vdr0Sig))
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   nil,
 						Signature: aggSigBytes,
 					},
@@ -351,8 +345,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 3,
 			quorumDen: 5,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -375,9 +369,9 @@ func TestSignatureVerification(t *testing.T) {
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -385,7 +379,7 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			verifyErr: warp.ErrInvalidSignature,
+			verifyErr: ErrInvalidSignature,
 		},
 		{
 			name:      "invalid signature (missing one)",
@@ -397,8 +391,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 3,
 			quorumDen: 5,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -416,9 +410,9 @@ func TestSignatureVerification(t *testing.T) {
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(vdr0Sig))
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -426,7 +420,7 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			verifyErr: warp.ErrInvalidSignature,
+			verifyErr: ErrInvalidSignature,
 		},
 		{
 			name:      "invalid signature (extra one)",
@@ -438,8 +432,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 3,
 			quorumDen: 5,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -464,9 +458,9 @@ func TestSignatureVerification(t *testing.T) {
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -474,7 +468,7 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			verifyErr: warp.ErrInvalidSignature,
+			verifyErr: ErrInvalidSignature,
 		},
 		{
 			name:      "valid signature",
@@ -486,8 +480,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -509,9 +503,9 @@ func TestSignatureVerification(t *testing.T) {
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -531,8 +525,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 2,
 			quorumDen: 3,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -555,9 +549,9 @@ func TestSignatureVerification(t *testing.T) {
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -593,8 +587,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 3,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -618,9 +612,9 @@ func TestSignatureVerification(t *testing.T) {
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -656,8 +650,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 2,
 			quorumDen: 3,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -678,9 +672,9 @@ func TestSignatureVerification(t *testing.T) {
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(vdr2Sig))
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -716,8 +710,8 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *warp.Message {
-				unsignedMsg, err := warp.NewUnsignedMessage(c,
+			msgF: func(require *require.Assertions) *Message {
+				unsignedMsg, err := NewUnsignedMessage(
 					constants.UnitTestID+1,
 					sourceChainID,
 					[]byte{1, 2, 3},
@@ -740,9 +734,9 @@ func TestSignatureVerification(t *testing.T) {
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := warp.NewMessage(c,
+				msg, err := NewMessage(
 					unsignedMsg,
-					&warp.BitSetSignature{
+					&BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -750,7 +744,7 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			verifyErr: warp.ErrWrongNetworkID,
+			verifyErr: ErrWrongNetworkID,
 		},
 	}
 
@@ -761,7 +755,7 @@ func TestSignatureVerification(t *testing.T) {
 			msg := tt.msgF(require)
 			pChainState := tt.stateF(t)
 
-			validators, err := warp.GetCanonicalValidatorSetFromChainID(
+			validators, err := GetCanonicalValidatorSetFromChainID(
 				context.Background(),
 				pChainState,
 				pChainHeight,
@@ -782,4 +776,58 @@ func TestSignatureVerification(t *testing.T) {
 			require.ErrorIs(err, tt.verifyErr)
 		})
 	}
+}
+
+// TestAggregateCoronaPublicKeysRejectsDistinctGroupKeys pins the aggregate
+// against keys that are not the same threshold group key. The function returns
+// publicKeys[0], so admitting differing keys means one signer's key stands in
+// for the whole quorum the caller already tallied.
+func TestAggregateCoronaPublicKeysRejectsDistinctGroupKeys(t *testing.T) {
+	require := require.New(t)
+
+	groupKey := bytes.Repeat([]byte{0xa1}, 32)
+	otherKey := bytes.Repeat([]byte{0xb2}, 32)
+
+	_, err := AggregateCoronaPublicKeys([][]byte{groupKey, otherKey})
+	require.ErrorIs(err, ErrCoronaGroupKeyMismatch)
+
+	// Same length, still a different key: length agreement is not key agreement.
+	_, err = AggregateCoronaPublicKeys([][]byte{groupKey, groupKey, otherKey})
+	require.ErrorIs(err, ErrCoronaGroupKeyMismatch)
+}
+
+// TestHybridCoronaKeysAreBoundToTheValidatorSet pins that the post-quantum leg
+// verifies against the signers' registered Corona keys, not against the keys the
+// signature carries. A message that names its own verification keys authenticates
+// nothing: the author picks the key it is checked against.
+func TestHybridCoronaKeysAreBoundToTheValidatorSet(t *testing.T) {
+	require := require.New(t)
+
+	msg, err := NewUnsignedMessage(constants.UnitTestID, sourceChainID, []byte("payload"))
+	require.NoError(err)
+
+	registeredKey := bytes.Repeat([]byte{0x01}, 32)
+	attackerKey := bytes.Repeat([]byte{0xff}, 32)
+	coronaSig := bytes.Repeat([]byte{0x02}, 64)
+
+	// A signer whose registered key is known: a key from the wire that differs
+	// from it is refused.
+	sig := &HybridBLSCoronaSignature{
+		CoronaSignature:  coronaSig,
+		CoronaPublicKeys: [][]byte{attackerKey},
+	}
+	err = sig.verifyCorona(msg, []*Validator{{CoronaPubKey: registeredKey}})
+	require.ErrorIs(err, ErrCoronaPublicKeyMismatch)
+
+	// A signer that registered no Corona key cannot be vouched for by a key the
+	// message supplies.
+	err = sig.verifyCorona(msg, []*Validator{{}})
+	require.ErrorIs(err, ErrMissingCoronaPublicKey)
+
+	// The binding does not reject a message that presents the registered key;
+	// verification proceeds to the scheme.
+	sig.CoronaPublicKeys = [][]byte{registeredKey}
+	err = sig.verifyCorona(msg, []*Validator{{CoronaPubKey: registeredKey}})
+	require.NotErrorIs(err, ErrCoronaPublicKeyMismatch)
+	require.NotErrorIs(err, ErrMissingCoronaPublicKey)
 }

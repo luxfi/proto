@@ -10,7 +10,6 @@ import (
 	"github.com/luxfi/container/iterator"
 	"github.com/luxfi/math"
 	"github.com/luxfi/proto/p/config"
-	"github.com/luxfi/proto/p/warp"
 	"github.com/luxfi/timer/mockable"
 	"github.com/luxfi/vm/components/gas"
 
@@ -138,12 +137,8 @@ func getNextL1ValidatorEvictionTime(
 // PickFeeCalculator creates either a simple or a dynamic fee calculator,
 // depending on the active upgrade.
 //
-// PickFeeCalculator does not modify [state]. The warpCodec is the
-// proto/p/warp codec used by the L1-validator family (Register /
-// SetWeight / etc.) to parse the warp message embedded in those txs;
-// pass nil if no L1 validator txs will be priced through this
-// calculator.
-func PickFeeCalculator(config *config.Internal, warpCodec warp.Codec, state Chain) txfee.Calculator {
+// PickFeeCalculator does not modify [state].
+func PickFeeCalculator(config *config.Internal, state Chain) txfee.Calculator {
 	timestamp := state.GetTimestamp()
 	if !config.UpgradeConfig.IsQuasarActivated(timestamp) {
 		return txfee.NewSimpleCalculator(0)
@@ -156,7 +151,6 @@ func PickFeeCalculator(config *config.Internal, warpCodec warp.Codec, state Chai
 		config.DynamicFeeConfig.ExcessConversionConstant,
 	)
 	return txfee.NewDynamicCalculator(
-		warpCodec,
 		config.DynamicFeeConfig.Weights,
 		gasPrice,
 	)

@@ -198,14 +198,9 @@ type ProposalTxBuilder interface {
 	NewRewardValidatorTx(txID ids.ID) (*txs.Tx, error)
 }
 
-// New constructs a Builder backed by the supplied codec. The codec is
-// the PVM runtime tx codec used to sign every constructed *txs.Tx; it
-// must be threaded in from the same source as state.New's txCodec so
-// the signed tx bytes are byte-compatible with what the state will
-// later parse.
+// New constructs a Builder.
 func New(
 	rt *runtime.Runtime,
-	c txs.Codec,
 	cfg *config.Config,
 	clk *mockable.Clock,
 	fx fx.Fx,
@@ -217,7 +212,6 @@ func New(
 		AtomicUTXOManager: atomicUTXOManager,
 		Spender:           utxoSpender,
 		state:             state,
-		codec:             c,
 		cfg:               cfg,
 		rt:                rt,
 		NetworkID:         rt.NetworkID,
@@ -233,7 +227,6 @@ type builder struct {
 	utxo.Spender
 	state state.State
 
-	codec       txs.Codec
 	cfg         *config.Config
 	rt          *runtime.Runtime
 	NetworkID   uint32

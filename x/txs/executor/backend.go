@@ -5,7 +5,6 @@ package executor
 
 import (
 	"context"
-	"reflect"
 
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
@@ -22,8 +21,7 @@ type Backend struct {
 	LuxCtx        *consContext.Context // Lux consensus context
 	Config        *config.Config
 	Fxs           []*fxs.ParsedFx
-	TypeToFxIndex map[reflect.Type]int
-	Codec         txs.Codec
+	FxIndex       *txs.FxIndex
 	// Note: FeeAssetID may be different than ctx.UTXOAssetID if this XVM is
 	// running in a chain.
 	FeeAssetID   ids.ID

@@ -51,8 +51,7 @@ func (b *Block) VerifyWithContext(ctx context.Context, blockContext *block.Conte
 		err := VerifyWarpMessages(
 			ctx,
 			b.manager.rt.NetworkID,
-			b.manager.txExecutorBackend.WarpCodec,
-			b.manager.validatorManager,
+						b.manager.validatorManager,
 			blockContext.PChainHeight,
 			b,
 		)
@@ -104,7 +103,6 @@ func (b *Block) Options(context.Context) ([2]block.Block, error) {
 		primaryUptimePercentage: b.manager.txExecutorBackend.Config.UptimePercentage,
 		uptimes:                 b.manager.txExecutorBackend.Uptimes,
 		state:                   b.manager.backend.state,
-		codec:                   b.manager.blockCodec,
 	}
 	if err := b.Block.Visit(&options); err != nil {
 		return [2]block.Block{}, err

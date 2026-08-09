@@ -18,7 +18,6 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
 	"github.com/luxfi/ordering"
-	"github.com/luxfi/proto/p/block"
 	validators "github.com/luxfi/validators"
 )
 
@@ -197,7 +196,6 @@ func (v L1Validator) effectivePublicKeyBytes() []byte {
 }
 
 func getL1Validator(
-	c block.Codec,
 	cache cache.Cacher[ids.ID, maybe.Maybe[L1Validator]],
 	db database.KeyValueReader,
 	validationID ids.ID,
@@ -221,7 +219,7 @@ func getL1Validator(
 	l1Validator := L1Validator{
 		ValidationID: validationID,
 	}
-	if _, err := c.Unmarshal(bytes, &l1Validator); err != nil {
+	if err := parseL1Validator(bytes, &l1Validator); err != nil {
 		return L1Validator{}, fmt.Errorf("failed to unmarshal L1 validator: %w", err)
 	}
 
@@ -230,12 +228,11 @@ func getL1Validator(
 }
 
 func putL1Validator(
-	c block.Codec,
 	db database.KeyValueWriter,
 	cache cache.Cacher[ids.ID, maybe.Maybe[L1Validator]],
 	l1Validator L1Validator,
 ) error {
-	bytes, err := c.Marshal(block.CodecVersion, l1Validator)
+	bytes, err := marshalL1Validator(l1Validator)
 	if err != nil {
 		return fmt.Errorf("failed to marshal L1 validator: %w", err)
 	}

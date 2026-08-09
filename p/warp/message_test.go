@@ -1,7 +1,7 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package warp_test
+package warp
 
 import (
 	"testing"
@@ -11,29 +11,25 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pvmcodectest"
-	"github.com/luxfi/proto/p/warp"
+	"github.com/luxfi/zap"
 )
 
 func TestMessage(t *testing.T) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
 	payload := []byte("payload")
 
-	unsignedMsg, err := warp.NewUnsignedMessage(
-		c,
+	unsignedMsg, err := NewUnsignedMessage(
 		constants.UnitTestID,
 		ids.GenerateTestID(),
 		payload,
 	)
 	require.NoError(err)
-	require.Len(unsignedMsg.Bytes(), 42+len(payload))
+	require.Len(unsignedMsg.Bytes(), zap.HeaderSize+umSize+len(payload)) // header + object (incl. inline bytes-ptr) + payload blob
 
-	msg, err := warp.NewMessage(
-		c,
+	msg, err := NewMessage(
 		unsignedMsg,
-		&warp.BitSetSignature{
+		&BitSetSignature{
 			Signers:   []byte{1, 2, 3},
 			Signature: [bls.SignatureLen]byte{4, 5, 6},
 		},
@@ -41,16 +37,15 @@ func TestMessage(t *testing.T) {
 	require.NoError(err)
 
 	msgBytes := msg.Bytes()
-	msg2, err := warp.ParseMessage(c, msgBytes)
+	msg2, err := ParseMessage(msgBytes)
 	require.NoError(err)
 	require.Equal(msg, msg2)
 }
 
 func TestParseMessageJunk(t *testing.T) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
 	bytes := []byte{0, 1, 2, 3, 4, 5, 6, 7}
-	_, err := warp.ParseMessage(c, bytes)
-	require.Error(err)
+	_, err := ParseMessage(bytes)
+	require.ErrorIs(err, zap.ErrBufferTooSmall)
 }

@@ -18,15 +18,11 @@ const (
 
 var _ txs.Visitor = (*warpVerifier)(nil)
 
-// VerifyWarpMessages verifies all warp messages in the tx. The warpCodec
-// is the proto/p/warp codec used to parse the cross-chain warp
-// messages embedded in the L1-validator family of txs; callers thread
-// it in from their PVM bundle. If any of the warp messages are
-// invalid, an error is returned.
+// VerifyWarpMessages verifies all warp messages in the tx. If any of the
+// warp messages are invalid, an error is returned.
 func VerifyWarpMessages(
 	ctx context.Context,
 	networkID uint32,
-	warpCodec warp.Codec,
 	validatorState validators.State,
 	pChainHeight uint64,
 	tx txs.UnsignedTx,
@@ -34,7 +30,6 @@ func VerifyWarpMessages(
 	return tx.Visit(&warpVerifier{
 		context:        ctx,
 		networkID:      networkID,
-		warpCodec:      warpCodec,
 		validatorState: validatorState,
 		pChainHeight:   pChainHeight,
 	})
@@ -43,7 +38,6 @@ func VerifyWarpMessages(
 type warpVerifier struct {
 	context        context.Context
 	networkID      uint32
-	warpCodec      warp.Codec
 	validatorState validators.State
 	pChainHeight   uint64
 }
@@ -129,7 +123,7 @@ func (w *warpVerifier) SetL1ValidatorWeightTx(tx *txs.SetL1ValidatorWeightTx) er
 }
 
 func (w *warpVerifier) verify(message []byte) error {
-	msg, err := warp.ParseMessage(w.warpCodec, message)
+	msg, err := warp.ParseMessage(message)
 	if err != nil {
 		return err
 	}

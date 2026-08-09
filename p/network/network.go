@@ -39,7 +39,6 @@ type Network struct {
 
 // warpSignerAdapter adapts warp.Signer (node's internal) to extwarp.Signer (external warp)
 type warpSignerAdapter struct {
-	codec  warp.Codec
 	signer warp.Signer
 }
 
@@ -47,7 +46,7 @@ type warpSignerAdapter struct {
 func (a *warpSignerAdapter) Sign(msg *extwarp.Message) ([]byte, error) {
 	// Convert external warp message to internal warp message
 	// msg.SourceChainID is already ids.ID type
-	internalMsg, err := warp.NewUnsignedMessage(a.codec, msg.NetworkID, msg.SourceChainID, msg.Payload)
+	internalMsg, err := warp.NewUnsignedMessage(msg.NetworkID, msg.SourceChainID, msg.Payload)
 	if err != nil {
 		return nil, err
 	}
@@ -59,13 +58,9 @@ func (a *warpSignerAdapter) Sign(msg *extwarp.Message) ([]byte, error) {
 	return sig, nil
 }
 
-// New constructs a Network. txCodec is the PVM runtime tx codec used by
-// gossip to encode / decode tx wire bytes; warpCodec is the proto/p/warp
-// codec used by the cross-chain warp message wrapping.
+// New constructs a Network.
 func New(
 	log log.Logger,
-	txCodec txs.Codec,
-	warpCodec warp.Codec,
 	nodeID ids.NodeID,
 	netID ids.ID,
 	vdrs validators.State,
@@ -84,7 +79,7 @@ func New(
 		return nil, err
 	}
 
-	marshaller := txMarshaller{codec: txCodec}
+	marshaller := txMarshaller{}
 	validators := p2p.NewValidators(
 		p2pNetwork.Peers,
 		log,
@@ -194,7 +189,7 @@ func New(
 	// Create a cache for signature requests (100 entries)
 	signatureCache := &cache.LRU[ids.ID, []byte]{Size: 100}
 	// Wrap signer to adapt node's warp.Signer to extwarp.Signer
-	signerAdapter := &warpSignerAdapter{codec: warpCodec, signer: signer}
+	signerAdapter := &warpSignerAdapter{signer: signer}
 	cachedHandler := extwarp.NewCachedSignatureHandler(signatureCache, verifier, signerAdapter)
 	signatureHandler := extwarp.NewSignatureHandlerAdapter(cachedHandler)
 

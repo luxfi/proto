@@ -1,7 +1,7 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package txs_test
+package txs
 
 import (
 	"errors"
@@ -11,30 +11,17 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/xcodectest"
-	"github.com/luxfi/proto/x/txs"
+	"github.com/luxfi/vm/components/verify"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
-	"github.com/luxfi/vm/components/verify"
 )
 
 var errTest = errors.New("non-nil error")
 
-func TestInitialStateVerifySerialization(t *testing.T) {
+func TestInitialStateRoundTrip(t *testing.T) {
 	require := require.New(t)
 
-	m, c := xcodectest.NewRuntimeCodec()
-	require.NoError(c.RegisterType(&secp256k1fx.TransferOutput{}))
-
-	expected := []byte{
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x39, 0x30,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x31, 0xd4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
-		0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x51, 0x02, 0x5c, 0x61, 0xfb, 0xcf, 0xc0, 0x78, 0xf6, 0x93,
-		0x34, 0xf8, 0x34, 0xbe, 0x6d, 0xd2, 0x6d, 0x55, 0xa9, 0x55, 0xc3, 0x34, 0x41, 0x28, 0xe0, 0x60,
-		0x12, 0x8e, 0xde, 0x35, 0x23, 0xa2, 0x4a, 0x46, 0x1c, 0x89, 0x43, 0xab, 0x08, 0x59,
-	}
-
-	is := &txs.InitialState{
+	is := &InitialState{
 		FxIndex: 0,
 		Outs: []verify.State{
 			&secp256k1fx.TransferOutput{
@@ -42,117 +29,104 @@ func TestInitialStateVerifySerialization(t *testing.T) {
 				OutputOwners: secp256k1fx.OutputOwners{
 					Locktime:  54321,
 					Threshold: 1,
-					Addrs: []ids.ShortID{
-						{
-							0x51, 0x02, 0x5c, 0x61, 0xfb, 0xcf, 0xc0, 0x78,
-							0xf6, 0x93, 0x34, 0xf8, 0x34, 0xbe, 0x6d, 0xd2,
-							0x6d, 0x55, 0xa9, 0x55,
-						},
-						{
-							0xc3, 0x34, 0x41, 0x28, 0xe0, 0x60, 0x12, 0x8e,
-							0xde, 0x35, 0x23, 0xa2, 0x4a, 0x46, 0x1c, 0x89,
-							0x43, 0xab, 0x08, 0x59,
-						},
-					},
+					Addrs:     []ids.ShortID{keys[0].PublicKey().Address()},
 				},
 			},
 		},
 	}
 
-	isBytes, err := m.Marshal(txs.CodecVersion, is)
+	b, err := is.Bytes()
 	require.NoError(err)
-	require.Equal(expected, isBytes)
+
+	got, err := parseInitialState(b)
+	require.NoError(err)
+	require.EqualValues(0, got.FxIndex)
+	require.Len(got.Outs, 1)
+	require.Equal(fxBytes(t, is.Outs[0]), fxBytes(t, got.Outs[0]))
 }
 
 func TestInitialStateVerifyNil(t *testing.T) {
 	require := require.New(t)
-
-	m, _ := xcodectest.NewRuntimeCodec()
 	numFxs := 1
 
-	is := (*txs.InitialState)(nil)
-	err := is.Verify(m, numFxs)
-	require.ErrorIs(err, txs.ErrNilInitialState)
+	is := (*InitialState)(nil)
+	err := is.Verify(numFxs)
+	require.ErrorIs(err, ErrNilInitialState)
 }
 
 func TestInitialStateVerifyUnknownFxID(t *testing.T) {
 	require := require.New(t)
-
-	m, _ := xcodectest.NewRuntimeCodec()
 	numFxs := 1
 
-	is := txs.InitialState{
+	is := InitialState{
 		FxIndex: 1,
 	}
-	err := is.Verify(m, numFxs)
-	require.ErrorIs(err, txs.ErrUnknownFx)
+	err := is.Verify(numFxs)
+	require.ErrorIs(err, ErrUnknownFx)
 }
 
 func TestInitialStateVerifyNilOutput(t *testing.T) {
 	require := require.New(t)
-
-	m, _ := xcodectest.NewRuntimeCodec()
 	numFxs := 1
 
-	is := txs.InitialState{
+	is := InitialState{
 		FxIndex: 0,
 		Outs:    []verify.State{nil},
 	}
-	err := is.Verify(m, numFxs)
-	require.ErrorIs(err, txs.ErrNilFxOutput)
+	err := is.Verify(numFxs)
+	require.ErrorIs(err, ErrNilFxOutput)
 }
 
 func TestInitialStateVerifyInvalidOutput(t *testing.T) {
 	require := require.New(t)
-
-	m, c := xcodectest.NewRuntimeCodec()
-	require.NoError(c.RegisterType(&lux.TestState{}))
 	numFxs := 1
 
-	is := txs.InitialState{
+	is := InitialState{
 		FxIndex: 0,
 		Outs:    []verify.State{&lux.TestState{Err: errTest}},
 	}
-	err := is.Verify(m, numFxs)
+	err := is.Verify(numFxs)
 	require.ErrorIs(err, errTest)
 }
 
 func TestInitialStateVerifyUnsortedOutputs(t *testing.T) {
 	require := require.New(t)
-
-	m, c := xcodectest.NewRuntimeCodec()
-	require.NoError(c.RegisterType(&lux.TestTransferable{}))
 	numFxs := 1
 
-	is := txs.InitialState{
-		FxIndex: 0,
-		Outs: []verify.State{
-			&lux.TestTransferable{Val: 1},
-			&lux.TestTransferable{Val: 0},
-		},
+	outA := &secp256k1fx.TransferOutput{
+		Amt:          1,
+		OutputOwners: secp256k1fx.OutputOwners{Threshold: 1, Addrs: []ids.ShortID{keys[0].PublicKey().Address()}},
 	}
-	err := is.Verify(m, numFxs)
-	require.ErrorIs(err, txs.ErrOutputsNotSorted)
-	is.Sort(m)
-	require.NoError(is.Verify(m, numFxs))
+	outB := &secp256k1fx.TransferOutput{
+		Amt:          2,
+		OutputOwners: secp256k1fx.OutputOwners{Threshold: 1, Addrs: []ids.ShortID{keys[0].PublicKey().Address()}},
+	}
+	is := InitialState{FxIndex: 0, Outs: []verify.State{outA, outB}}
+	// Force an unsorted order regardless of the canonical wire byte ordering.
+	if isSortedState(is.Outs) {
+		is.Outs[0], is.Outs[1] = is.Outs[1], is.Outs[0]
+	}
+	require.ErrorIs(is.Verify(numFxs), ErrOutputsNotSorted)
+	is.Sort()
+	require.NoError(is.Verify(numFxs))
 }
 
 func TestInitialStateCompare(t *testing.T) {
 	tests := []struct {
-		a        *txs.InitialState
-		b        *txs.InitialState
+		a        *InitialState
+		b        *InitialState
 		expected int
 	}{
 		{
-			a:        &txs.InitialState{},
-			b:        &txs.InitialState{},
+			a:        &InitialState{},
+			b:        &InitialState{},
 			expected: 0,
 		},
 		{
-			a: &txs.InitialState{
+			a: &InitialState{
 				FxIndex: 1,
 			},
-			b:        &txs.InitialState{},
+			b:        &InitialState{},
 			expected: 1,
 		},
 	}

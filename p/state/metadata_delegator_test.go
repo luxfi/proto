@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -10,124 +10,73 @@ import (
 
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pvmcodectest"
 )
 
 func TestParseDelegatorMetadata(t *testing.T) {
-	c := pvmcodectest.NewMetadataCodec()
+	full := &delegatorMetadata{PotentialReward: 123, StakerStartTime: 456}
+	fullBytes, err := marshalDelegatorMetadata(full)
+	require.NoError(t, err)
+
 	type test struct {
-		name      string
-		bytes     []byte
-		expected  *delegatorMetadata
-		expectErr bool
+		name    string
+		bytes   []byte
+		initial *delegatorMetadata // caller-supplied defaults before parse
+		want    *delegatorMetadata
+		wantErr bool
 	}
 	tests := []test{
 		{
-			name: "potential reward only no codec",
-			bytes: []byte{
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7b,
-			},
-			expected: &delegatorMetadata{
-				PotentialReward: 123,
-				StakerStartTime: 0,
-			},
+			// Empty ⇒ nothing persisted; the caller's tx-derived StakerStartTime
+			// default is kept.
+			name:    "empty keeps defaults",
+			bytes:   nil,
+			initial: &delegatorMetadata{StakerStartTime: 456},
+			want:    &delegatorMetadata{StakerStartTime: 456},
 		},
 		{
-			name: "potential reward + staker start time with codec v1",
-			bytes: []byte{
-				0x01, 0x00, 0x7b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc8, 0x01, 0x00, 0x00, 0x00, 0x00,
-				0x00, 0x00,
-			},
-			expected: &delegatorMetadata{
-				PotentialReward: 123,
-				StakerStartTime: 456,
-			},
+			name:    "full native round-trip",
+			bytes:   fullBytes,
+			initial: &delegatorMetadata{StakerStartTime: 999},
+			want:    &delegatorMetadata{PotentialReward: 123, StakerStartTime: 456},
 		},
 		{
-			name: "invalid codec version",
-			bytes: []byte{
-				// codec version
-				0x00, 0x02,
-				// potential reward
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7b,
-				// staker start time
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xc8,
-			},
-			expected:  nil,
-			expectErr: true,
-		},
-		{
-			name: "short byte len",
-			bytes: []byte{
-				// codec version
-				0x00, 0x01,
-				// potential reward
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7b,
-				// staker start time
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			},
-			expected:  nil,
-			expectErr: true,
+			name:    "truncated buffer errors",
+			bytes:   fullBytes[:len(fullBytes)-1],
+			initial: &delegatorMetadata{},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
-			var metadata delegatorMetadata
-			err := parseDelegatorMetadata(c, tt.bytes, &metadata)
-			if tt.expectErr {
+			metadata := tt.initial
+			err := parseDelegatorMetadata(tt.bytes, metadata)
+			if tt.wantErr {
 				require.Error(err)
 				return
 			}
 			require.NoError(err)
-			require.Equal(tt.expected, &metadata)
+			require.Equal(tt.want, metadata)
 		})
 	}
 }
 
 func TestWriteDelegatorMetadata(t *testing.T) {
-	c := pvmcodectest.NewMetadataCodec()
-	type test struct {
-		name     string
-		version  uint16
-		metadata *delegatorMetadata
-		expected []byte
+	require := require.New(t)
+	db := memdb.New()
+
+	metadata := &delegatorMetadata{
+		PotentialReward: 123,
+		StakerStartTime: 456,
+		txID:            ids.GenerateTestID(),
 	}
-	tests := []test{
-		{
-			name:    CodecVersion0Tag,
-			version: CodecVersion0,
-			metadata: &delegatorMetadata{
-				PotentialReward: 123,
-				StakerStartTime: 456,
-			},
-			expected: []byte{
-				// potential reward
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7b,
-			},
-		},
-		{
-			name:    CodecVersion1Tag,
-			version: CodecVersion1,
-			metadata: &delegatorMetadata{
-				PotentialReward: 123,
-				StakerStartTime: 456,
-			},
-			expected: []byte{
-				0x01, 0x00, 0x7b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc8, 0x01, 0x00, 0x00, 0x00, 0x00,
-				0x00, 0x00,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			require := require.New(t)
-			db := memdb.New()
-			tt.metadata.txID = ids.GenerateTestID()
-			require.NoError(writeDelegatorMetadata(c, db, tt.metadata, tt.version))
-			bytes, err := db.Get(tt.metadata.txID[:])
-			require.NoError(err)
-			require.Equal(tt.expected, bytes)
-		})
-	}
+	require.NoError(writeDelegatorMetadata(db, metadata))
+
+	bytes, err := db.Get(metadata.txID[:])
+	require.NoError(err)
+
+	// The persisted bytes round-trip back to the same serialized fields.
+	got := &delegatorMetadata{txID: metadata.txID}
+	require.NoError(parseDelegatorMetadata(bytes, got))
+	require.Equal(metadata, got)
 }

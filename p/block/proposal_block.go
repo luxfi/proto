@@ -1,141 +1,60 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
 
 import (
-	"context"
-	"fmt"
 	"time"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/p/txs"
-	"github.com/luxfi/runtime"
 )
 
-var (
-	_ BanffBlock = (*BanffProposalBlock)(nil)
-	_ Block      = (*ApricotProposalBlock)(nil)
-)
+var _ Block = (*ProposalBlock)(nil)
 
-type BanffProposalBlock struct {
-	Time                 uint64    `serialize:"true" json:"time"`
-	Transactions         []*txs.Tx `serialize:"true" json:"txs"`
-	ApricotProposalBlock `serialize:"true"`
+// ProposalBlock is the canonical P-Chain proposal block. It carries a
+// per-block timestamp, a tail of decision txs (stored as the u32 length list +
+// blob), and a single proposal Tx that commits atomically with them.
+type ProposalBlock struct {
+	commonZapBlock
 }
 
-func (b *BanffProposalBlock) initialize(bytes []byte, c Codec) error {
-	if err := b.ApricotProposalBlock.initialize(bytes, c); err != nil {
-		return err
+// Tx returns the single proposal tx.
+func (b *ProposalBlock) Tx() *txs.Tx {
+	tx, _ := readProposalTx(b.msg.Root())
+	return tx
+}
+
+// Txs returns the decision txs followed by the proposal Tx (last), matching
+// the canonical block ordering.
+func (b *ProposalBlock) Txs() []*txs.Tx {
+	decision, _ := readTxList(b.msg.Root(), offBlkTxLengths, offBlkTxBlob)
+	proposal := b.Tx()
+	if proposal == nil {
+		return decision
 	}
-	for _, tx := range b.Transactions {
-		if err := tx.Initialize(); err != nil {
-			return fmt.Errorf("failed to initialize tx: %w", err)
-		}
-	}
-	return nil
+	out := make([]*txs.Tx, len(decision)+1)
+	copy(out, decision)
+	out[len(decision)] = proposal
+	return out
 }
 
-func (b *BanffProposalBlock) InitRuntime(rt *runtime.Runtime) {
-	for _, tx := range b.Transactions {
-		tx.Unsigned.InitRuntime(rt)
-	}
-	b.ApricotProposalBlock.InitRuntime(rt)
-}
+func (b *ProposalBlock) Visit(v Visitor) error { return v.ProposalBlock(b) }
 
-func (b *BanffProposalBlock) Timestamp() time.Time {
-	return time.Unix(int64(b.Time), 0)
-}
-
-func (b *BanffProposalBlock) Txs() []*txs.Tx {
-	l := len(b.Transactions)
-	txs := make([]*txs.Tx, l+1)
-	copy(txs, b.Transactions)
-	txs[l] = b.Tx
-	return txs
-}
-
-func (b *BanffProposalBlock) Visit(v Visitor) error {
-	return v.BanffProposalBlock(b)
-}
-
-// NewBanffProposalBlock builds and initializes a BanffProposalBlock
-// against the supplied block Codec.
-func NewBanffProposalBlock(
-	c Codec,
+func NewProposalBlock(
 	timestamp time.Time,
 	parentID ids.ID,
 	height uint64,
 	proposalTx *txs.Tx,
 	decisionTxs []*txs.Tx,
-) (*BanffProposalBlock, error) {
-	blk := &BanffProposalBlock{
-		Transactions: decisionTxs,
-		Time:         uint64(timestamp.Unix()),
-		ApricotProposalBlock: ApricotProposalBlock{
-			CommonBlock: CommonBlock{
-				PrntID: parentID,
-				Hght:   height,
-			},
-			Tx: proposalTx,
-		},
+) (*ProposalBlock, error) {
+	bytes, err := buildBlock(blkProposal, parentID, height, uint64(timestamp.Unix()), decisionTxs, proposalTx)
+	if err != nil {
+		return nil, err
 	}
-	return blk, initialize(c, blk, &blk.CommonBlock)
-}
-
-type ApricotProposalBlock struct {
-	CommonBlock `serialize:"true"`
-	Tx          *txs.Tx `serialize:"true" json:"tx"`
-}
-
-func (b *ApricotProposalBlock) initialize(bytes []byte, c Codec) error {
-	b.CommonBlock.initialize(bytes)
-	if err := b.Tx.Initialize(); err != nil {
-		return fmt.Errorf("failed to initialize tx: %w", err)
+	blk := &ProposalBlock{}
+	if err := blk.setID(bytes); err != nil {
+		return nil, err
 	}
-	return nil
-}
-
-func (b *ApricotProposalBlock) InitRuntime(rt *runtime.Runtime) {
-	b.Tx.Unsigned.InitRuntime(rt)
-}
-
-func (b *ApricotProposalBlock) Txs() []*txs.Tx {
-	return []*txs.Tx{b.Tx}
-}
-
-func (b *ApricotProposalBlock) Visit(v Visitor) error {
-	return v.ApricotProposalBlock(b)
-}
-
-// NewApricotProposalBlock is kept for testing purposes only.
-// Following Banff activation and subsequent code cleanup, Apricot Proposal blocks
-// should be only verified (upon bootstrap), never created anymore.
-// It builds and initializes the block against the supplied block Codec.
-func NewApricotProposalBlock(
-	c Codec,
-	parentID ids.ID,
-	height uint64,
-	tx *txs.Tx,
-) (*ApricotProposalBlock, error) {
-	blk := &ApricotProposalBlock{
-		CommonBlock: CommonBlock{
-			PrntID: parentID,
-			Hght:   height,
-		},
-		Tx: tx,
-	}
-	return blk, initialize(c, blk, &blk.CommonBlock)
-}
-
-// InitializeWithContext initializes the block with consensus context
-func (b *BanffProposalBlock) InitializeWithContext(ctx context.Context) error {
-	// Initialize any context-dependent fields here
-	return nil
-}
-
-// InitializeWithContext initializes the block with consensus context
-func (b *ApricotProposalBlock) InitializeWithContext(ctx context.Context) error {
-	// Initialize any context-dependent fields here
-	return nil
+	return blk, nil
 }

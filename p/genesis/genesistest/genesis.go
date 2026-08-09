@@ -68,7 +68,7 @@ type Config struct {
 	InitialBalance uint64
 }
 
-func New(t testing.TB, codec platformvmgenesis.Codec, c Config) *platformvmgenesis.Genesis {
+func New(t testing.TB, c Config) *platformvmgenesis.Genesis {
 	if c.NetworkID == 0 {
 		c.NetworkID = constants.UnitTestID
 	}
@@ -171,9 +171,8 @@ func New(t testing.TB, codec platformvmgenesis.Codec, c Config) *platformvmgenes
 	return genesis
 }
 
-func NewBytes(t testing.TB, codec platformvmgenesis.Codec, c Config) []byte {
-	g := New(t, codec, c)
-	genesisBytes, err := codec.Marshal(platformvmgenesis.CodecVersion, g)
+func NewBytes(t testing.TB, c Config) []byte {
+	genesisBytes, err := New(t, c).Bytes()
 	require.NoError(t, err)
 	return genesisBytes
 }

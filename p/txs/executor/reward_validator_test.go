@@ -25,7 +25,7 @@ import (
 
 func newRewardValidatorTx(t testing.TB, txID ids.ID) (*txs.Tx, error) {
 	utx := &txs.RewardValidatorTx{TxID: txID}
-	tx, err := txs.NewSigned(utx, testCodec, nil)
+	tx, err := txs.NewSigned(utx, nil)
 	if err != nil {
 		return nil, err
 	}

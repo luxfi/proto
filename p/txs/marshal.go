@@ -9,6 +9,7 @@ package txs
 // can only point backwards into what is already laid down.
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/luxfi/ids"
@@ -16,8 +17,14 @@ import (
 	"github.com/luxfi/zap"
 )
 
+// errNilUnsigned names an empty tx body, which has no wire form.
+var errNilUnsigned = errors.New("txs: nil unsigned tx")
+
 // Marshal encodes an unsigned tx as the chain's wire bytes.
 func Marshal(u UnsignedTx) ([]byte, error) {
+	if u == nil {
+		return nil, errNilUnsigned
+	}
 	m := &marshaler{}
 	if err := u.Visit(m); err != nil {
 		return nil, err

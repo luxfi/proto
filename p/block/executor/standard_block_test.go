@@ -21,6 +21,7 @@ import (
 	"github.com/luxfi/proto/p/genesis/genesistest"
 	"github.com/luxfi/proto/p/state"
 	"github.com/luxfi/proto/p/status"
+	"github.com/luxfi/proto/p/security"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/proto/p/txs/executor"
 	"github.com/luxfi/upgrade/upgradetest"
@@ -169,10 +170,11 @@ func TestBanffStandardBlockTimeVerification(t *testing.T) {
 		}},
 	}
 	tx := &txs.Tx{Unsigned: &txs.CreateNetworkTx{
-		BaseTx: utx.BaseTx,
-		Owner:  &secp256k1fx.OutputOwners{},
+		BaseTx:   utx.BaseTx,
+		Owner:    &secp256k1fx.OutputOwners{},
+		Security: security.Mode{RestakeParent: true},
 	}}
-	require.NoError(tx.Sign(testCodec, [][]*secp256k1.PrivateKey{{}}))
+	require.NoError(tx.Sign([][]*secp256k1.PrivateKey{{}}))
 
 	{
 		// wrong version

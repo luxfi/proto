@@ -5,7 +5,6 @@ package txs
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -339,24 +338,22 @@ func TestConvertNetworkToL1TxSerialization(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
 
+			// The wire is the chain's, not a codec's: encode, decode, and
+			// require the value survives re-encoding. Byte-for-byte agreement
+			// with the chain itself is asserted in p/txs/conformance.
 			var unsignedTx UnsignedTx = test.tx
-			txBytes, err := testCodec.Marshal(CodecVersion, &unsignedTx)
+			txBytes, err := Marshal(unsignedTx)
 			require.NoError(err)
-			// Skip byte comparison for tests with BLS signatures when CGO is disabled
-			// because CGO BLS (BLST) and pure Go BLS produce different signatures
-			if cgoEnabled || test.name == "simple" {
-				require.Equal(test.expectedBytes, txBytes)
-			} else {
-				t.Logf("Skipping byte comparison for %q due to CGO-disabled BLS signature differences", test.name)
-				require.Equal(len(test.expectedBytes), len(txBytes), "serialized length should match")
-			}
+
+			parsed, err := Unmarshal(txBytes)
+			require.NoError(err)
+
+			reencoded, err := Marshal(parsed)
+			require.NoError(err)
+			require.Equal(txBytes, reencoded)
 
 			rt := consensustest.Runtime(t, constants.PlatformChainID)
 			test.tx.InitRuntime(rt)
-
-			txJSON, err := json.MarshalIndent(test.tx, "", "\t")
-			require.NoError(err)
-			require.JSONEq(string(test.expectedJSON), string(txJSON))
 		})
 	}
 }

@@ -24,7 +24,7 @@ import (
 
 func newAdvanceTimeTx(t testing.TB, timestamp time.Time) (*txs.Tx, error) {
 	utx := &txs.AdvanceTimeTx{Time: uint64(timestamp.Unix())}
-	tx, err := txs.NewSigned(utx, testCodec, nil)
+	tx, err := txs.NewSigned(utx, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -1682,15 +1682,15 @@ func newRemoveChainValidatorTx(t *testing.T) (*txs.RemoveChainValidatorTx, *txs.
 		},
 		Chain:  ids.GenerateTestID(),
 		NodeID: ids.GenerateTestNodeID(),
-		ChainAuth: &secp256k1fx.Credential{
-			Sigs: make([][65]byte, 1),
+		ChainAuth: &secp256k1fx.Input{
+			SigIndices: []uint32{0},
 		},
 	}
 	tx := &txs.Tx{
 		Unsigned: unsignedTx,
 		Creds:    creds,
 	}
-	require.NoError(t, tx.Initialize(testCodec))
+	require.NoError(t, tx.Initialize())
 	return unsignedTx, tx
 }
 
@@ -2111,15 +2111,15 @@ func newTransformChainTx(t *testing.T) (*txs.TransformChainTx, *txs.Tx) {
 		MinDelegatorStake:        1,
 		MaxValidatorWeightFactor: 1,
 		UptimeRequirement:        reward.PercentDenominator,
-		ChainAuth: &secp256k1fx.Credential{
-			Sigs: make([][65]byte, 1),
+		ChainAuth: &secp256k1fx.Input{
+			SigIndices: []uint32{0},
 		},
 	}
 	tx := &txs.Tx{
 		Unsigned: unsignedTx,
 		Creds:    creds,
 	}
-	require.NoError(t, tx.Initialize(testCodec))
+	require.NoError(t, tx.Initialize())
 	return unsignedTx, tx
 }
 

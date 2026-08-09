@@ -230,7 +230,7 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 			tx: func() *txs.Tx {
 				tx := &txs.Tx{Unsigned: &txs.BaseTx{}}
 				bytes := make([]byte, pmempool.MaxTxSize+1)
-				tx.SetBytes(bytes, bytes)
+				tx.SetBytes(bytes)
 				return tx
 			}(),
 			expectedErr: mempool.ErrTxTooLarge,
@@ -289,7 +289,7 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 				for i := 0; i < 32; i++ {
 					tx := &txs.Tx{Unsigned: &txs.BaseTx{}}
 					bytes := make([]byte, pmempool.MaxTxSize)
-					tx.SetBytes(bytes, bytes)
+					tx.SetBytes(bytes)
 					tx.TxID = ids.GenerateTestID()
 					require.NoError(t, mempool.Add(tx))
 				}
@@ -302,7 +302,7 @@ func TestNetworkIssueTxFromRPC(t *testing.T) {
 			},
 			tx: func() *txs.Tx {
 				tx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: lux.BaseTx{}}}
-				tx.SetBytes([]byte{1, 2, 3}, []byte{1, 2, 3})
+				tx.SetBytes([]byte{1, 2, 3})
 				return tx
 			}(),
 			expectedErr: mempool.ErrMempoolFull,

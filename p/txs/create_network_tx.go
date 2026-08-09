@@ -37,12 +37,12 @@ var (
 
 // NetworkValidator is a genesis validator of a network's own validator set.
 type NetworkValidator struct {
-	NodeID                types.JSONByteSlice       `json:"nodeID"`
-	Weight                uint64                    `json:"weight"`
-	Balance               uint64                    `json:"balance"`
-	Signer                signer.ProofOfPossession  `json:"signer"`
-	RemainingBalanceOwner message.PChainOwner       `json:"remainingBalanceOwner"`
-	DeactivationOwner     message.PChainOwner       `json:"deactivationOwner"`
+	NodeID                types.JSONByteSlice      `serialize:"true" json:"nodeID"`
+	Weight                uint64                   `serialize:"true" json:"weight"`
+	Balance               uint64                   `serialize:"true" json:"balance"`
+	Signer                signer.ProofOfPossession `serialize:"true" json:"signer"`
+	RemainingBalanceOwner message.PChainOwner      `serialize:"true" json:"remainingBalanceOwner"`
+	DeactivationOwner     message.PChainOwner      `serialize:"true" json:"deactivationOwner"`
 }
 
 func (v *NetworkValidator) Compare(o *NetworkValidator) int { return bytes.Compare(v.NodeID, o.NodeID) }
@@ -80,11 +80,11 @@ func (v *NetworkValidator) Verify() error {
 // Chains are not created here — CreateChainTx is the sole chain constructor.
 type CreateNetworkTx struct {
 	// Metadata, inputs and outputs
-	BaseTx
+	BaseTx `serialize:"true"`
 	// Parent network; ids.Empty for a network anchored at the primary network
 	Parent ids.ID `json:"parent"`
 	// Who is authorized to manage this network
-	Owner fx.Owner `json:"owner"`
+	Owner fx.Owner `serialize:"true" json:"owner"`
 	// How this network is secured
 	Security security.Mode `json:"security"`
 	// Genesis validators of the network's own set

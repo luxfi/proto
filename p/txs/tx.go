@@ -32,10 +32,10 @@ var (
 // reader splits them.
 type Tx struct {
 	// The body of this transaction
-	Unsigned UnsignedTx `json:"unsignedTx"`
+	Unsigned UnsignedTx `serialize:"true" json:"unsignedTx"`
 
 	// The credentials of this transaction
-	Creds []verify.Verifiable `json:"credentials"`
+	Creds []verify.Verifiable `serialize:"true" json:"credentials"`
 
 	TxID  ids.ID `json:"id"`
 	bytes []byte
@@ -162,8 +162,8 @@ func (tx *Tx) Sign(signers [][]*secp256k1.PrivateKey) error {
 	tx.Unsigned.SetBytes(unsignedBytes)
 	h := hash.ComputeHash256(unsignedBytes)
 
-	tx.Creds = make([]verify.Verifiable, len(signers))
-	for i, keys := range signers {
+	tx.Creds = nil
+	for _, keys := range signers {
 		cred := &secp256k1fx.Credential{
 			Sigs: make([][secp256k1.SignatureLen]byte, len(keys)),
 		}
@@ -174,7 +174,7 @@ func (tx *Tx) Sign(signers [][]*secp256k1.PrivateKey) error {
 			}
 			copy(cred.Sigs[j][:], sig)
 		}
-		tx.Creds[i] = cred
+		tx.Creds = append(tx.Creds, cred)
 	}
 	return tx.Bind(unsignedBytes)
 }

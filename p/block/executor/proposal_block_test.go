@@ -89,7 +89,7 @@ func TestApricotProposalBlockTimeVerification(t *testing.T) {
 		DelegationShares: uint32(defaultTxFee),
 	}
 	addValTx := &txs.Tx{Unsigned: utx}
-	require.NoError(addValTx.Initialize(testCodec))
+	require.NoError(addValTx.Initialize())
 	blkTx := &txs.Tx{
 		Unsigned: &txs.RewardValidatorTx{
 			TxID: addValTx.ID(),
@@ -211,7 +211,7 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 		DelegationShares: uint32(defaultTxFee),
 	}
 	nextStakerTx := &txs.Tx{Unsigned: unsignedNextStakerTx}
-	require.NoError(nextStakerTx.Initialize(testCodec))
+	require.NoError(nextStakerTx.Initialize())
 
 	nextStakerTxID := nextStakerTx.ID()
 	onParentAccept.EXPECT().GetTx(nextStakerTxID).Return(nextStakerTx, status.Processing, nil)
@@ -244,7 +244,7 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 			TxID: nextStakerTxID,
 		},
 	}
-	require.NoError(blkTx.Initialize(testCodec))
+	require.NoError(blkTx.Initialize())
 
 	{
 		// wrong height
@@ -335,7 +335,7 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 				Time: uint64(nextStakerTime.Unix()),
 			},
 		}
-		require.NoError(invalidTx.Initialize(testCodec))
+		require.NoError(invalidTx.Initialize())
 		statelessProposalBlock, err := block.NewBanffProposalBlock(testBlockCodec, 
 			parentTime.Add(time.Second),
 			parentID,
@@ -632,7 +632,7 @@ func TestBanffProposalBlockUpdateStakers(t *testing.T) {
 						TxID: staker0.TxID,
 					},
 				}
-				require.NoError(s0RewardTx.Initialize(testCodec))
+				require.NoError(s0RewardTx.Initialize())
 
 				// build proposal block moving ahead chain time
 				// as well as rewarding staker0
@@ -832,7 +832,7 @@ func TestBanffProposalBlockRemoveNetValidator(t *testing.T) {
 			TxID: addStaker0.ID(),
 		},
 	}
-	require.NoError(s0RewardTx.Initialize(testCodec))
+	require.NoError(s0RewardTx.Initialize())
 
 	// build proposal block moving ahead chain time
 	preferredID := env.state.GetLastAccepted()
@@ -954,7 +954,7 @@ func TestBanffProposalBlockTrackedNet(t *testing.T) {
 					TxID: addStaker0.ID(),
 				},
 			}
-			require.NoError(s0RewardTx.Initialize(testCodec))
+			require.NoError(s0RewardTx.Initialize())
 
 			// build proposal block moving ahead chain time
 			preferredID := env.state.GetLastAccepted()
@@ -1046,7 +1046,7 @@ func TestBanffProposalBlockDelegatorStakerWeight(t *testing.T) {
 			TxID: addStaker0.ID(),
 		},
 	}
-	require.NoError(s0RewardTx.Initialize(testCodec))
+	require.NoError(s0RewardTx.Initialize())
 
 	// build proposal block moving ahead chain time
 	preferredID := env.state.GetLastAccepted()
@@ -1135,7 +1135,7 @@ func TestBanffProposalBlockDelegatorStakerWeight(t *testing.T) {
 			TxID: addStaker0.ID(),
 		},
 	}
-	require.NoError(s0RewardTx.Initialize(testCodec))
+	require.NoError(s0RewardTx.Initialize())
 
 	// Advance Time
 	preferredID = env.state.GetLastAccepted()
@@ -1231,7 +1231,7 @@ func TestBanffProposalBlockDelegatorStakers(t *testing.T) {
 			TxID: addStaker0.ID(),
 		},
 	}
-	require.NoError(s0RewardTx.Initialize(testCodec))
+	require.NoError(s0RewardTx.Initialize())
 
 	// build proposal block moving ahead chain time
 	preferredID := env.state.GetLastAccepted()
@@ -1320,7 +1320,7 @@ func TestBanffProposalBlockDelegatorStakers(t *testing.T) {
 			TxID: addStaker0.ID(),
 		},
 	}
-	require.NoError(s0RewardTx.Initialize(testCodec))
+	require.NoError(s0RewardTx.Initialize())
 
 	// Advance Time
 	preferredID = env.state.GetLastAccepted()
@@ -1514,7 +1514,7 @@ func TestAddValidatorProposalBlock(t *testing.T) {
 
 func newRewardValidatorTx(t testing.TB, txID ids.ID) (*txs.Tx, error) {
 	utx := &txs.RewardValidatorTx{TxID: txID}
-	tx, err := txs.NewSigned(utx, testCodec, nil)
+	tx, err := txs.NewSigned(utx, nil)
 	if err != nil {
 		return nil, err
 	}

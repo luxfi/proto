@@ -665,7 +665,7 @@ func TestDiffTx(t *testing.T) {
 			ValidateNetworkID: netID,
 		},
 	}
-	tx.SetBytes(crypto.RandomBytes(16), crypto.RandomBytes(16))
+	tx.SetBytes(crypto.RandomBytes(16))
 	d.AddTx(tx, status.Committed)
 
 	{
@@ -684,7 +684,7 @@ func TestDiffTx(t *testing.T) {
 				ValidateNetworkID: netID,
 			},
 		}
-		parentTx.SetBytes(crypto.RandomBytes(16), crypto.RandomBytes(16))
+		parentTx.SetBytes(crypto.RandomBytes(16))
 		state.EXPECT().GetTx(parentTx.ID()).Return(parentTx, status.Committed, nil).Times(1)
 		gotParentTx, gotStatus, err := d.GetTx(parentTx.ID())
 		require.NoError(err)

@@ -1,15 +1,40 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
 
-// Parse decodes a Block from wire bytes using the supplied Codec. The
-// Codec must have block.RegisterTypes (or its equivalent) called against
-// its registry before invocation.
-func Parse(c Codec, b []byte) (Block, error) {
-	var blk Block
-	if _, err := c.Unmarshal(b, &blk); err != nil {
-		return nil, err
+// Parse dispatch. There is no codec: Parse wraps the buffer zero-copy and
+// dispatches on the 1-byte blockKind at object offset 0. Parse never
+// re-marshals the input; ID = hash(b) verbatim and b is the block's
+// authoritative bytes.
+
+import (
+	"fmt"
+
+	"github.com/luxfi/zap"
+)
+
+// Parse decodes a native-ZAP P-chain block. It reads the blockKind
+// discriminator and wraps the matching typed block over b (byte-preserving).
+func Parse(b []byte) (Block, error) {
+	msg, err := zap.Parse(b)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't parse block: %w", err)
 	}
-	return blk, blk.initialize(b, c)
+	switch k := blockKind(msg.Root().Uint8(offBlkKind)); k {
+	case blkAbort:
+		blk := &AbortBlock{}
+		return blk, blk.setID(b)
+	case blkCommit:
+		blk := &CommitBlock{}
+		return blk, blk.setID(b)
+	case blkProposal:
+		blk := &ProposalBlock{}
+		return blk, blk.setID(b)
+	case blkStandard:
+		blk := &StandardBlock{}
+		return blk, blk.setID(b)
+	default:
+		return nil, fmt.Errorf("zap: unknown block kind %d", k)
+	}
 }

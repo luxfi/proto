@@ -36,27 +36,26 @@ type options struct {
 	primaryUptimePercentage float64
 	uptimes                 uptime.Calculator
 	state                   state.Chain
-	codec                   block.Codec
 
 	// outputs populated by this struct's methods:
 	preferredBlock block.Block
 	alternateBlock block.Block
 }
 
-func (*options) BanffAbortBlock(*block.BanffAbortBlock) error {
+func (*options) AbortBlock(*block.AbortBlock) error {
 	return ErrNotOracle
 }
 
-func (*options) BanffCommitBlock(*block.BanffCommitBlock) error {
+func (*options) CommitBlock(*block.CommitBlock) error {
 	return ErrNotOracle
 }
 
-func (o *options) BanffProposalBlock(b *block.BanffProposalBlock) error {
+func (o *options) ProposalBlock(b *block.ProposalBlock) error {
 	timestamp := b.Timestamp()
 	blkID := b.ID()
 	nextHeight := b.Height() + 1
 
-	commitBlock, err := block.NewBanffCommitBlock(o.codec, timestamp, blkID, nextHeight)
+	commitBlock, err := block.NewCommitBlock(timestamp, blkID, nextHeight)
 	if err != nil {
 		return fmt.Errorf(
 			"failed to create commit block: %w",
@@ -64,7 +63,7 @@ func (o *options) BanffProposalBlock(b *block.BanffProposalBlock) error {
 		)
 	}
 
-	abortBlock, err := block.NewBanffAbortBlock(o.codec, timestamp, blkID, nextHeight)
+	abortBlock, err := block.NewAbortBlock(timestamp, blkID, nextHeight)
 	if err != nil {
 		return fmt.Errorf(
 			"failed to create abort block: %w",
@@ -72,7 +71,7 @@ func (o *options) BanffProposalBlock(b *block.BanffProposalBlock) error {
 		)
 	}
 
-	prefersCommit, err := o.prefersCommit(b.Tx)
+	prefersCommit, err := o.prefersCommit(b.Tx())
 	if err != nil {
 		o.log.Debug("falling back to prefer commit",
 			"error", err,
@@ -96,48 +95,10 @@ func (o *options) BanffProposalBlock(b *block.BanffProposalBlock) error {
 	return nil
 }
 
-func (*options) BanffStandardBlock(*block.BanffStandardBlock) error {
+func (*options) StandardBlock(*block.StandardBlock) error {
 	return ErrNotOracle
 }
 
-func (*options) ApricotAbortBlock(*block.ApricotAbortBlock) error {
-	return ErrNotOracle
-}
-
-func (*options) ApricotCommitBlock(*block.ApricotCommitBlock) error {
-	return ErrNotOracle
-}
-
-func (o *options) ApricotProposalBlock(b *block.ApricotProposalBlock) error {
-	blkID := b.ID()
-	nextHeight := b.Height() + 1
-
-	var err error
-	o.preferredBlock, err = block.NewApricotCommitBlock(o.codec, blkID, nextHeight)
-	if err != nil {
-		return fmt.Errorf(
-			"failed to create commit block: %w",
-			err,
-		)
-	}
-
-	o.alternateBlock, err = block.NewApricotAbortBlock(o.codec, blkID, nextHeight)
-	if err != nil {
-		return fmt.Errorf(
-			"failed to create abort block: %w",
-			err,
-		)
-	}
-	return nil
-}
-
-func (*options) ApricotStandardBlock(*block.ApricotStandardBlock) error {
-	return ErrNotOracle
-}
-
-func (*options) ApricotAtomicBlock(*block.ApricotAtomicBlock) error {
-	return ErrNotOracle
-}
 
 func (o *options) prefersCommit(tx *txs.Tx) (bool, error) {
 	unsignedTx, ok := tx.Unsigned.(*txs.RewardValidatorTx)

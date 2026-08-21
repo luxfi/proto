@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -12,64 +12,27 @@ import (
 	"github.com/luxfi/math/set"
 )
 
-// preDelegateeRewardSize is the size of codec marshalling
-// [preDelegateeRewardMetadata].
-//
-// codec.VersionSize (= wrappers.ShortLen) + 3 * wrappers.LongLen
-// We use the inline literals (2 + 24) here rather than importing
-// luxfi/codec so proto/p stays free of that dependency post Wave 2A.
-const preDelegateeRewardSize = 2 + 3*8
-
 var _ validatorState = (*metadata)(nil)
 
-type preDelegateeRewardMetadata struct {
-	UpDuration      time.Duration `v0:"true"`
-	LastUpdated     uint64        `v0:"true"` // Unix time in seconds
-	PotentialReward uint64        `v0:"true"`
-}
-
 type validatorMetadata struct {
-	UpDuration               time.Duration `v0:"true"`
-	LastUpdated              uint64        `v0:"true"` // Unix time in seconds
-	PotentialReward          uint64        `v0:"true"`
-	PotentialDelegateeReward uint64        `v0:"true"`
-	StakerStartTime          uint64        `          v1:"true"`
+	UpDuration               time.Duration
+	LastUpdated              uint64 // Unix time in seconds
+	PotentialReward          uint64
+	PotentialDelegateeReward uint64
+	StakerStartTime          uint64
 
 	txID        ids.ID
 	lastUpdated time.Time
 }
 
-// Permissioned validators originally wrote their values as nil.
-// With Banff we wrote the potential reward.
-// With Cortina we wrote the potential reward with the potential delegatee reward.
-// We now write the uptime, reward, and delegatee reward together.
-func parseValidatorMetadata(c MetadataCodec, bytes []byte, metadata *validatorMetadata) error {
-	switch len(bytes) {
-	case 0:
-	// nothing was stored
-
-	case database.Uint64Size:
-		// only potential reward was stored
-		var err error
-		metadata.PotentialReward, err = database.ParseUInt64(bytes)
-		if err != nil {
-			return err
-		}
-
-	case preDelegateeRewardSize:
-		// potential reward and uptime was stored but potential delegatee reward
-		// was not
-		tmp := preDelegateeRewardMetadata{}
-		if _, err := c.Unmarshal(bytes, &tmp); err != nil {
-			return err
-		}
-
-		metadata.UpDuration = tmp.UpDuration
-		metadata.LastUpdated = tmp.LastUpdated
-		metadata.PotentialReward = tmp.PotentialReward
-	default:
-		// everything was stored
-		if _, err := c.Unmarshal(bytes, metadata); err != nil {
+// parseValidatorMetadata overlays metadata's persisted fields (native
+// validatorMetadata wire) from bytes. Empty bytes means nothing was persisted
+// for this staker — the caller pre-populates tx-derived defaults
+// (StakerStartTime/LastUpdated), which are kept as-is. lastUpdated is always
+// derived from the resulting LastUpdated.
+func parseValidatorMetadata(bytes []byte, metadata *validatorMetadata) error {
+	if len(bytes) > 0 {
+		if err := unmarshalValidatorMetadata(bytes, metadata); err != nil {
 			return err
 		}
 	}
@@ -128,14 +91,10 @@ type validatorState interface {
 	DeleteValidatorMetadata(vdrID ids.NodeID, netID ids.ID)
 
 	// WriteValidatorMetadata writes all staged updates from prior calls to
-	// SetUptime or SetDelegateeReward. The supplied codec is the
-	// state-side MetadataCodec wired through the proto/p/state
-	// constructor — callers thread it in from their PVM state bundle.
+	// SetUptime or SetDelegateeReward.
 	WriteValidatorMetadata(
-		c MetadataCodec,
 		dbPrimary database.KeyValueWriter,
 		dbNet database.KeyValueWriter,
-		codecVersion uint16,
 	) error
 }
 
@@ -234,17 +193,15 @@ func (m *metadata) DeleteValidatorMetadata(vdrID ids.NodeID, netID ids.ID) {
 }
 
 func (m *metadata) WriteValidatorMetadata(
-	c MetadataCodec,
 	dbPrimary database.KeyValueWriter,
 	dbNet database.KeyValueWriter,
-	codecVersion uint16,
 ) error {
 	for vdrID, updatedNets := range m.updatedMetadata {
 		for netID := range updatedNets {
 			metadata := m.metadata[vdrID][netID]
 			metadata.LastUpdated = uint64(metadata.lastUpdated.Unix())
 
-			metadataBytes, err := c.Marshal(codecVersion, metadata)
+			metadataBytes, err := marshalValidatorMetadata(metadata)
 			if err != nil {
 				return err
 			}

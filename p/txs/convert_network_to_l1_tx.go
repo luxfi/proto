@@ -1,51 +1,50 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
 
 import (
-	"github.com/luxfi/runtime"
-
-	"bytes"
 	"errors"
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/p/signer"
-	"github.com/luxfi/proto/p/warp/message"
-	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/proto/p/security"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/vm/types"
 )
 
-const MaxChainAddressLength = 4096
-
 var (
 	_ UnsignedTx = (*ConvertNetworkToL1Tx)(nil)
-	_ interface {
-		Compare(*ConvertNetworkToL1Validator) int
-	} = (*ConvertNetworkToL1Validator)(nil)
 
 	ErrConvertPermissionlessChain          = errors.New("cannot convert a permissionless chain")
-	ErrAddressTooLong                      = errors.New("address is too long")
 	ErrConvertMustIncludeValidators        = errors.New("conversion must include at least one validator")
 	ErrConvertValidatorsNotSortedAndUnique = errors.New("conversion validators must be sorted and unique")
-	ErrZeroWeight                          = errors.New("validator weight must be non-zero")
 )
 
+// ConvertNetworkToL1Validator is a genesis validator of the promoted network's
+// own set. Same value as a network's birth validator — one definition.
+type ConvertNetworkToL1Validator = NetworkValidator
+
+// ConvertNetworkToL1Tx promotes an existing network: inherited security to
+// sovereign, re-anchored on a new parent.
 type ConvertNetworkToL1Tx struct {
 	// Metadata, inputs and outputs
 	BaseTx `serialize:"true"`
-	// ID of the Chain to transform
+	// ID of the network being promoted
 	Chain ids.ID `serialize:"true" json:"chainID"`
-	// Blockchain where the Chain manager lives
+	// New parent network
+	Parent ids.ID `json:"parent"`
+	// Blockchain where the network manager lives
 	ManagerChainID ids.ID `serialize:"true" json:"managerChainID"`
-	// Address of the Chain manager
+	// Address of the network manager
 	Address types.JSONByteSlice `serialize:"true" json:"address"`
-	// Initial pay-as-you-go validators for the Chain
+	// Initial pay-as-you-go validators for the network
 	Validators []*ConvertNetworkToL1Validator `serialize:"true" json:"validators"`
 	// Authorizes this conversion
 	ChainAuth verify.Verifiable `serialize:"true" json:"chainAuthorization"`
+	// How the promoted network is secured
+	Security security.Mode `json:"security"`
 }
 
 func (tx *ConvertNetworkToL1Tx) SyntacticVerify(rt *runtime.Runtime) error {
@@ -83,51 +82,4 @@ func (tx *ConvertNetworkToL1Tx) SyntacticVerify(rt *runtime.Runtime) error {
 
 func (tx *ConvertNetworkToL1Tx) Visit(visitor Visitor) error {
 	return visitor.ConvertNetworkToL1Tx(tx)
-}
-
-type ConvertNetworkToL1Validator struct {
-	// NodeID of this validator
-	NodeID types.JSONByteSlice `serialize:"true" json:"nodeID"`
-	// Weight of this validator used when sampling
-	Weight uint64 `serialize:"true" json:"weight"`
-	// Initial balance for this validator
-	Balance uint64 `serialize:"true" json:"balance"`
-	// [Signer] is the BLS key for this validator.
-	// Note: We do not enforce that the BLS key is unique across all validators.
-	//       This means that validators can share a key if they so choose.
-	//       However, a NodeID + Chain does uniquely map to a BLS key
-	Signer signer.ProofOfPossession `serialize:"true" json:"signer"`
-	// Leftover $LUX from the [Balance] will be issued to this owner once it is
-	// removed from the validator set.
-	RemainingBalanceOwner message.PChainOwner `serialize:"true" json:"remainingBalanceOwner"`
-	// This owner has the authority to manually deactivate this validator.
-	DeactivationOwner message.PChainOwner `serialize:"true" json:"deactivationOwner"`
-}
-
-func (v *ConvertNetworkToL1Validator) Compare(o *ConvertNetworkToL1Validator) int {
-	return bytes.Compare(v.NodeID, o.NodeID)
-}
-
-func (v *ConvertNetworkToL1Validator) Verify() error {
-	if v.Weight == 0 {
-		return ErrZeroWeight
-	}
-	nodeID, err := ids.ToNodeID(v.NodeID)
-	if err != nil {
-		return err
-	}
-	if nodeID == ids.EmptyNodeID {
-		return errEmptyNodeID
-	}
-	return verify.All(
-		&v.Signer,
-		&secp256k1fx.OutputOwners{
-			Threshold: v.RemainingBalanceOwner.Threshold,
-			Addrs:     v.RemainingBalanceOwner.Addresses,
-		},
-		&secp256k1fx.OutputOwners{
-			Threshold: v.DeactivationOwner.Threshold,
-			Addrs:     v.DeactivationOwner.Addresses,
-		},
-	)
 }

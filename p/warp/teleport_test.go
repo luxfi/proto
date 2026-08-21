@@ -1,15 +1,13 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package warp_test
+package warp
 
 import (
 	"testing"
 
 	"github.com/cloudflare/circl/kem/mlkem/mlkem768"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pvmcodectest"
-	"github.com/luxfi/proto/p/warp"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,10 +20,10 @@ func TestNewTeleportMessage(t *testing.T) {
 	payload := []byte("test transfer payload")
 	nonce := uint64(12345)
 
-	msg := warp.NewTeleportMessage(warp.TeleportTransfer, sourceChain, destChain, nonce, payload)
+	msg := NewTeleportMessage(TeleportTransfer, sourceChain, destChain, nonce, payload)
 
-	require.Equal(warp.TeleportVersion, msg.Version)
-	require.Equal(warp.TeleportTransfer, msg.MessageType)
+	require.Equal(TeleportVersion, msg.Version)
+	require.Equal(TeleportTransfer, msg.MessageType)
 	require.Equal(sourceChain, msg.SourceChainID)
 	require.Equal(destChain, msg.DestChainID)
 	require.Equal(nonce, msg.Nonce)
@@ -39,14 +37,14 @@ func TestTeleportMessageValidate(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		msg         *warp.TeleportMessage
+		msg         *TeleportMessage
 		expectError error
 	}{
 		{
 			name: "valid message",
-			msg: &warp.TeleportMessage{
-				Version:       warp.TeleportVersion,
-				MessageType:   warp.TeleportTransfer,
+			msg: &TeleportMessage{
+				Version:       TeleportVersion,
+				MessageType:   TeleportTransfer,
 				SourceChainID: ids.GenerateTestID(),
 				DestChainID:   ids.GenerateTestID(),
 				Nonce:         1,
@@ -56,39 +54,39 @@ func TestTeleportMessageValidate(t *testing.T) {
 		},
 		{
 			name: "invalid version",
-			msg: &warp.TeleportMessage{
+			msg: &TeleportMessage{
 				Version:       99, // Wrong version
-				MessageType:   warp.TeleportTransfer,
+				MessageType:   TeleportTransfer,
 				SourceChainID: ids.GenerateTestID(),
 				DestChainID:   ids.GenerateTestID(),
 				Nonce:         1,
 				Payload:       []byte("payload"),
 			},
-			expectError: warp.ErrInvalidTeleportVersion,
+			expectError: ErrInvalidTeleportVersion,
 		},
 		{
 			name: "invalid message type",
-			msg: &warp.TeleportMessage{
-				Version:       warp.TeleportVersion,
+			msg: &TeleportMessage{
+				Version:       TeleportVersion,
 				MessageType:   99, // Invalid type
 				SourceChainID: ids.GenerateTestID(),
 				DestChainID:   ids.GenerateTestID(),
 				Nonce:         1,
 				Payload:       []byte("payload"),
 			},
-			expectError: warp.ErrInvalidTeleportType,
+			expectError: ErrInvalidTeleportType,
 		},
 		{
 			name: "empty payload",
-			msg: &warp.TeleportMessage{
-				Version:       warp.TeleportVersion,
-				MessageType:   warp.TeleportTransfer,
+			msg: &TeleportMessage{
+				Version:       TeleportVersion,
+				MessageType:   TeleportTransfer,
 				SourceChainID: ids.GenerateTestID(),
 				DestChainID:   ids.GenerateTestID(),
 				Nonce:         1,
 				Payload:       []byte{}, // Empty
 			},
-			expectError: warp.ErrMissingPayload,
+			expectError: ErrMissingPayload,
 		},
 	}
 
@@ -107,16 +105,15 @@ func TestTeleportMessageValidate(t *testing.T) {
 // TestTeleportMessageToWarpMessage tests conversion to Warp message
 func TestTeleportMessageToWarpMessage(t *testing.T) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
 	sourceChain := ids.GenerateTestID()
 	destChain := ids.GenerateTestID()
 	payload := []byte("test payload for warp")
 	networkID := uint32(96369)
 
-	teleport := warp.NewTeleportMessage(warp.TeleportLock, sourceChain, destChain, 100, payload)
+	teleport := NewTeleportMessage(TeleportLock, sourceChain, destChain, 100, payload)
 
-	warpMsg, err := teleport.ToWarpMessage(c, networkID)
+	warpMsg, err := teleport.ToWarpMessage(networkID)
 	require.NoError(err)
 	require.NotNil(warpMsg)
 	require.Equal(networkID, warpMsg.NetworkID)
@@ -127,7 +124,6 @@ func TestTeleportMessageToWarpMessage(t *testing.T) {
 // TestNewPrivateTeleportMessage tests encrypted message creation
 func TestNewPrivateTeleportMessage(t *testing.T) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
 	sourceChain := ids.GenerateTestID()
 	destChain := ids.GenerateTestID()
@@ -142,12 +138,12 @@ func TestNewPrivateTeleportMessage(t *testing.T) {
 	require.NoError(err)
 	recipientKeyID := []byte("recipient-key-123")
 
-	msg, err := warp.NewPrivateTeleportMessage(c, sourceChain, destChain, nonce, payload, recipientPubKey, recipientKeyID)
+	msg, err := NewPrivateTeleportMessage(sourceChain, destChain, nonce, payload, recipientPubKey, recipientKeyID)
 	require.NoError(err)
 	require.NotNil(msg)
 
-	require.Equal(warp.TeleportVersion, msg.Version)
-	require.Equal(warp.TeleportPrivate, msg.MessageType)
+	require.Equal(TeleportVersion, msg.Version)
+	require.Equal(TeleportPrivate, msg.MessageType)
 	require.True(msg.Encrypted)
 	require.NotEmpty(msg.Payload)
 	require.NotEqual(payload, msg.Payload) // Should be encrypted
@@ -156,7 +152,6 @@ func TestNewPrivateTeleportMessage(t *testing.T) {
 // TestPrivateTeleportMessageDecrypt tests decryption of private messages
 func TestPrivateTeleportMessageDecrypt(t *testing.T) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
 	sourceChain := ids.GenerateTestID()
 	destChain := ids.GenerateTestID()
@@ -174,12 +169,12 @@ func TestPrivateTeleportMessageDecrypt(t *testing.T) {
 	recipientKeyID := []byte("test-key")
 
 	// Create encrypted message
-	msg, err := warp.NewPrivateTeleportMessage(c, sourceChain, destChain, nonce, originalPayload, recipientPubKey, recipientKeyID)
+	msg, err := NewPrivateTeleportMessage(sourceChain, destChain, nonce, originalPayload, recipientPubKey, recipientKeyID)
 	require.NoError(err)
 	require.True(msg.Encrypted)
 
 	// Decrypt
-	decrypted, err := msg.DecryptPayload(c, recipientPrivKey)
+	decrypted, err := msg.DecryptPayload(recipientPrivKey)
 	require.NoError(err)
 	require.Equal(originalPayload, decrypted)
 }
@@ -188,8 +183,8 @@ func TestPrivateTeleportMessageDecrypt(t *testing.T) {
 func TestTeleportMessageString(t *testing.T) {
 	require := require.New(t)
 
-	msg := warp.NewTeleportMessage(
-		warp.TeleportSwap,
+	msg := NewTeleportMessage(
+		TeleportSwap,
 		ids.GenerateTestID(),
 		ids.GenerateTestID(),
 		123,
@@ -205,11 +200,10 @@ func TestTeleportMessageString(t *testing.T) {
 // TestTeleportMessageCodecRoundTrip tests serialization
 func TestTeleportMessageCodecRoundTrip(t *testing.T) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
-	original := &warp.TeleportMessage{
-		Version:       warp.TeleportVersion,
-		MessageType:   warp.TeleportGovernance,
+	original := &TeleportMessage{
+		Version:       TeleportVersion,
+		MessageType:   TeleportGovernance,
 		SourceChainID: ids.GenerateTestID(),
 		DestChainID:   ids.GenerateTestID(),
 		Nonce:         12345,
@@ -217,13 +211,11 @@ func TestTeleportMessageCodecRoundTrip(t *testing.T) {
 		Encrypted:     false,
 	}
 
-	// Encode
-	encoded, err := c.Marshal(warp.CodecVersion, original)
-	require.NoError(err)
+	// Encode (native ZAP, wkind-tagged)
+	encoded := marshalTeleportMessage(original)
 
 	// Decode
-	decoded := &warp.TeleportMessage{}
-	_, err = c.Unmarshal(encoded, decoded)
+	decoded, err := ParseTeleportMessage(encoded)
 	require.NoError(err)
 
 	// Verify
@@ -239,7 +231,6 @@ func TestTeleportMessageCodecRoundTrip(t *testing.T) {
 // TestTeleportTransferPayload tests transfer payload handling
 func TestTeleportTransferPayload(t *testing.T) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
 	assetID := ids.GenerateTestID()
 	amount := uint64(1000000)
@@ -248,7 +239,7 @@ func TestTeleportTransferPayload(t *testing.T) {
 	fee := uint64(100)
 	memo := []byte("test transfer")
 
-	payload := warp.NewTransferPayload(assetID, amount, sender, recipient, fee, memo)
+	payload := NewTransferPayload(assetID, amount, sender, recipient, fee, memo)
 
 	require.Equal(assetID, payload.AssetID)
 	require.Equal(amount, payload.Amount)
@@ -258,11 +249,11 @@ func TestTeleportTransferPayload(t *testing.T) {
 	require.Equal(memo, payload.Memo)
 
 	// Test serialization
-	encoded, err := payload.Bytes(c)
+	encoded, err := payload.Bytes()
 	require.NoError(err)
 
 	// Test parsing
-	parsed, err := warp.ParseTransferPayload(c, encoded)
+	parsed, err := ParseTransferPayload(encoded)
 	require.NoError(err)
 	require.Equal(payload.AssetID, parsed.AssetID)
 	require.Equal(payload.Amount, parsed.Amount)
@@ -275,22 +266,20 @@ func TestTeleportTransferPayload(t *testing.T) {
 // TestTeleportAttestPayload tests attestation payload handling
 func TestTeleportAttestPayload(t *testing.T) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
-	payload := &warp.TeleportAttestPayload{
+	payload := &TeleportAttestPayload{
 		AttestationType: 1,
 		Timestamp:       1234567890,
 		Data:            []byte("price: 100.50 USD"),
 		AttesterID:      ids.GenerateTestNodeID(),
 	}
 
-	// Encode
-	encoded, err := c.Marshal(warp.CodecVersion, payload)
+	// Encode (native ZAP, wkind-tagged)
+	encoded, err := payload.Bytes()
 	require.NoError(err)
 
 	// Decode
-	decoded := &warp.TeleportAttestPayload{}
-	_, err = c.Unmarshal(encoded, decoded)
+	decoded, err := ParseAttestPayload(encoded)
 	require.NoError(err)
 
 	// Verify
@@ -305,18 +294,18 @@ func TestSignatureType(t *testing.T) {
 	require := require.New(t)
 
 	// Test recommended type
-	recommended := warp.RecommendedSignatureType()
-	require.Equal(warp.SigTypeCorona, recommended)
+	recommended := RecommendedSignatureType()
+	require.Equal(SigTypeCorona, recommended)
 
 	// Test quantum safety
-	require.False(warp.SigTypeBLS.IsQuantumSafe())
-	require.True(warp.SigTypeCorona.IsQuantumSafe())
-	require.True(warp.SigTypeHybrid.IsQuantumSafe())
+	require.False(SigTypeBLS.IsQuantumSafe())
+	require.True(SigTypeCorona.IsQuantumSafe())
+	require.True(SigTypeHybrid.IsQuantumSafe())
 
 	// Test string representation
-	require.Equal("BLS", warp.SigTypeBLS.String())
-	require.Equal("Corona", warp.SigTypeCorona.String())
-	require.Equal("Hybrid", warp.SigTypeHybrid.String())
+	require.Equal("BLS", SigTypeBLS.String())
+	require.Equal("Corona", SigTypeCorona.String())
+	require.Equal("Hybrid", SigTypeHybrid.String())
 }
 
 // TestTeleportTypes tests all teleport types
@@ -324,30 +313,30 @@ func TestTeleportTypes(t *testing.T) {
 	require := require.New(t)
 
 	// Verify constants are sequential
-	require.Equal(warp.TeleportType(0), warp.TeleportTransfer)
-	require.Equal(warp.TeleportType(1), warp.TeleportSwap)
-	require.Equal(warp.TeleportType(2), warp.TeleportLock)
-	require.Equal(warp.TeleportType(3), warp.TeleportUnlock)
-	require.Equal(warp.TeleportType(4), warp.TeleportAttest)
-	require.Equal(warp.TeleportType(5), warp.TeleportGovernance)
-	require.Equal(warp.TeleportType(6), warp.TeleportPrivate)
+	require.Equal(TeleportType(0), TeleportTransfer)
+	require.Equal(TeleportType(1), TeleportSwap)
+	require.Equal(TeleportType(2), TeleportLock)
+	require.Equal(TeleportType(3), TeleportUnlock)
+	require.Equal(TeleportType(4), TeleportAttest)
+	require.Equal(TeleportType(5), TeleportGovernance)
+	require.Equal(TeleportType(6), TeleportPrivate)
 }
 
 // TestTeleportMessageAllTypes tests creating messages of all types
 func TestTeleportMessageAllTypes(t *testing.T) {
 	require := require.New(t)
 
-	types := []warp.TeleportType{
-		warp.TeleportTransfer,
-		warp.TeleportSwap,
-		warp.TeleportLock,
-		warp.TeleportUnlock,
-		warp.TeleportAttest,
-		warp.TeleportGovernance,
+	types := []TeleportType{
+		TeleportTransfer,
+		TeleportSwap,
+		TeleportLock,
+		TeleportUnlock,
+		TeleportAttest,
+		TeleportGovernance,
 	}
 
 	for _, tt := range types {
-		msg := warp.NewTeleportMessage(
+		msg := NewTeleportMessage(
 			tt,
 			ids.GenerateTestID(),
 			ids.GenerateTestID(),
@@ -363,5 +352,5 @@ func TestTeleportMessageAllTypes(t *testing.T) {
 // TestTeleportVersion tests version constant
 func TestTeleportVersion(t *testing.T) {
 	require := require.New(t)
-	require.Equal(uint8(1), warp.TeleportVersion)
+	require.Equal(uint8(1), TeleportVersion)
 }

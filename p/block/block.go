@@ -1,61 +1,42 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
 
 import (
-	"github.com/luxfi/runtime"
-
-	"fmt"
 	"time"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/runtime"
 )
 
-// ContextInitializable defines the interface for initializing context
-type ContextInitializable interface {
+// RuntimeInitializable binds a runtime into a block's embedded txs.
+type RuntimeInitializable interface {
 	InitRuntime(rt *runtime.Runtime)
 }
 
-// Block defines the common stateless interface for all blocks
+// Block is the common stateless interface for all P-chain blocks. Every block
+// is a single native-ZAP object; there is no codec and no initialize step —
+// the bytes are authoritative and blocks are built by New*Block or read by
+// Parse, both of which bind ID = hash(bytes).
 type Block interface {
-	ContextInitializable
+	RuntimeInitializable
 	ID() ids.ID
 	Parent() ids.ID
 	Bytes() []byte
 	Height() uint64
 
-	// Txs returns list of transactions contained in the block
+	// Txs returns the transactions contained in the block.
 	Txs() []*txs.Tx
 
-	// Visit calls [visitor] with this block's concrete type
+	// Visit calls [visitor] with this block's concrete type.
 	Visit(visitor Visitor) error
-
-	// note: initialize does not assume that block transactions
-	// are initialized, and initializes them itself if they aren't.
-	// The Codec is the wire codec used to initialize embedded txs
-	// (which need it to compute their own canonical TxID).
-	initialize(bytes []byte, c Codec) error
 }
 
-type BanffBlock interface {
+// TimestampedBlock is a Block that carries a per-block timestamp. Every
+// canonical P-chain block kind is timestamped.
+type TimestampedBlock interface {
 	Block
 	Timestamp() time.Time
-}
-
-// initialize is the canonical block-bytes computation. It marshals the
-// block through the supplied Codec, records the resulting bytes on the
-// CommonBlock, and returns any marshal error. Tx-level Initialize is
-// handled in each concrete block's own initialize() method.
-func initialize(c Codec, blk Block, commonBlk *CommonBlock) error {
-	// We serialize this block as a pointer so that it can be deserialized into
-	// a Block
-	bytes, err := c.Marshal(CodecVersion, &blk)
-	if err != nil {
-		return fmt.Errorf("couldn't marshal block: %w", err)
-	}
-
-	commonBlk.initialize(bytes)
-	return nil
 }

@@ -1,7 +1,7 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package txs_test
+package txs
 
 import (
 	"testing"
@@ -9,43 +9,47 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/xcodectest"
-	"github.com/luxfi/proto/x/txs"
-	"github.com/luxfi/runtime"
-	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
+	lux "github.com/luxfi/utxo"
 )
 
+// testOperable is a minimal fxs.FxOperation: it verifies (via the embedded
+// TestState), costs zero (via TestTransferable), yields no outputs, and is
+// wire-serializable via a constant fx-operation envelope so the byte-keyed
+// operation sort has a stable key.
 type testOperable struct {
-	lux.TestTransferable `serialize:"true"`
+	lux.TestTransferable
 
-	Outputs []verify.State `serialize:"true"`
+	Outputs []verify.State
 }
-
-func (*testOperable) InitRuntime(*runtime.Runtime) {}
-
-func (*testOperable) InitializeRuntime(*runtime.Runtime) error { return nil }
 
 func (o *testOperable) Outs() []verify.State {
 	return o.Outputs
 }
 
+func (*testOperable) Bytes() []byte {
+	// A deterministic, non-empty fx-operation envelope stand-in. The operation
+	// sort key is Asset + UTXOIDs + this blob; distinct UTXOIDs make distinct
+	// keys.
+	return []byte{0x01, 0x05}
+}
+
 func TestOperationVerifyNil(t *testing.T) {
-	op := (*txs.Operation)(nil)
+	op := (*Operation)(nil)
 	err := op.Verify()
-	require.ErrorIs(t, err, txs.ErrNilOperation)
+	require.ErrorIs(t, err, ErrNilOperation)
 }
 
 func TestOperationVerifyEmpty(t *testing.T) {
-	op := &txs.Operation{
+	op := &Operation{
 		Asset: lux.Asset{ID: ids.Empty},
 	}
 	err := op.Verify()
-	require.ErrorIs(t, err, txs.ErrNilFxOperation)
+	require.ErrorIs(t, err, ErrNilFxOperation)
 }
 
 func TestOperationVerifyUTXOIDsNotSorted(t *testing.T) {
-	op := &txs.Operation{
+	op := &Operation{
 		Asset: lux.Asset{ID: ids.Empty},
 		UTXOIDs: []*lux.UTXOID{
 			{
@@ -60,12 +64,12 @@ func TestOperationVerifyUTXOIDsNotSorted(t *testing.T) {
 		Op: &testOperable{},
 	}
 	err := op.Verify()
-	require.ErrorIs(t, err, txs.ErrNotSortedAndUniqueUTXOIDs)
+	require.ErrorIs(t, err, ErrNotSortedAndUniqueUTXOIDs)
 }
 
 func TestOperationVerify(t *testing.T) {
 	assetID := ids.GenerateTestID()
-	op := &txs.Operation{
+	op := &Operation{
 		Asset: lux.Asset{ID: assetID},
 		UTXOIDs: []*lux.UTXOID{
 			{
@@ -81,49 +85,31 @@ func TestOperationVerify(t *testing.T) {
 func TestOperationSorting(t *testing.T) {
 	require := require.New(t)
 
-	m, c := xcodectest.NewRuntimeCodec()
-	require.NoError(c.RegisterType(&testOperable{}))
-
-	ops := []*txs.Operation{
+	ops := []*Operation{
 		{
-			Asset: lux.Asset{ID: ids.Empty},
-			UTXOIDs: []*lux.UTXOID{
-				{
-					TxID:        ids.Empty,
-					OutputIndex: 1,
-				},
-			},
-			Op: &testOperable{},
+			Asset:   lux.Asset{ID: ids.Empty},
+			UTXOIDs: []*lux.UTXOID{{TxID: ids.Empty, OutputIndex: 1}},
+			Op:      &testOperable{},
 		},
 		{
-			Asset: lux.Asset{ID: ids.Empty},
-			UTXOIDs: []*lux.UTXOID{
-				{
-					TxID:        ids.Empty,
-					OutputIndex: 0,
-				},
-			},
-			Op: &testOperable{},
+			Asset:   lux.Asset{ID: ids.Empty},
+			UTXOIDs: []*lux.UTXOID{{TxID: ids.Empty, OutputIndex: 0}},
+			Op:      &testOperable{},
 		},
 	}
-	require.False(txs.IsSortedAndUniqueOperations(ops, m))
-	txs.SortOperations(ops, m)
-	require.True(txs.IsSortedAndUniqueOperations(ops, m))
-	ops = append(ops, &txs.Operation{
-		Asset: lux.Asset{ID: ids.Empty},
-		UTXOIDs: []*lux.UTXOID{
-			{
-				TxID:        ids.Empty,
-				OutputIndex: 1,
-			},
-		},
-		Op: &testOperable{},
+	require.False(IsSortedAndUniqueOperations(ops))
+	SortOperations(ops)
+	require.True(IsSortedAndUniqueOperations(ops))
+	ops = append(ops, &Operation{
+		Asset:   lux.Asset{ID: ids.Empty},
+		UTXOIDs: []*lux.UTXOID{{TxID: ids.Empty, OutputIndex: 1}},
+		Op:      &testOperable{},
 	})
-	require.False(txs.IsSortedAndUniqueOperations(ops, m))
+	require.False(IsSortedAndUniqueOperations(ops))
 }
 
 func TestOperationTxNotState(t *testing.T) {
-	intf := interface{}(&txs.OperationTx{})
+	intf := interface{}(&OperationTx{})
 	_, ok := intf.(verify.State)
 	require.False(t, ok)
 }

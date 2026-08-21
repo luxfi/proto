@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package metrics
@@ -41,80 +41,41 @@ func newBlockMetrics(registerer metric.Registerer) (*blockMetrics, error) {
 	return m, nil
 }
 
-func (m *blockMetrics) BanffAbortBlock(*block.BanffAbortBlock) error {
+func (m *blockMetrics) AbortBlock(*block.AbortBlock) error {
 	m.numBlocks.With(metric.Labels{
 		blkLabel: "abort",
 	}).Inc()
 	return nil
 }
 
-func (m *blockMetrics) BanffCommitBlock(*block.BanffCommitBlock) error {
+func (m *blockMetrics) CommitBlock(*block.CommitBlock) error {
 	m.numBlocks.With(metric.Labels{
 		blkLabel: "commit",
 	}).Inc()
 	return nil
 }
 
-func (m *blockMetrics) BanffProposalBlock(b *block.BanffProposalBlock) error {
+func (m *blockMetrics) ProposalBlock(b *block.ProposalBlock) error {
 	m.numBlocks.With(metric.Labels{
 		blkLabel: "proposal",
 	}).Inc()
-	for _, tx := range b.Transactions {
+	// Txs() returns the decision txs followed by the proposal tx (last).
+	for _, tx := range b.Txs() {
 		if err := tx.Unsigned.Visit(m.txMetrics); err != nil {
 			return err
 		}
 	}
-	return b.Tx.Unsigned.Visit(m.txMetrics)
+	return nil
 }
 
-func (m *blockMetrics) BanffStandardBlock(b *block.BanffStandardBlock) error {
+func (m *blockMetrics) StandardBlock(b *block.StandardBlock) error {
 	m.numBlocks.With(metric.Labels{
 		blkLabel: "standard",
 	}).Inc()
-	for _, tx := range b.Transactions {
+	for _, tx := range b.Txs() {
 		if err := tx.Unsigned.Visit(m.txMetrics); err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-func (m *blockMetrics) ApricotAbortBlock(*block.ApricotAbortBlock) error {
-	m.numBlocks.With(metric.Labels{
-		blkLabel: "abort",
-	}).Inc()
-	return nil
-}
-
-func (m *blockMetrics) ApricotCommitBlock(*block.ApricotCommitBlock) error {
-	m.numBlocks.With(metric.Labels{
-		blkLabel: "commit",
-	}).Inc()
-	return nil
-}
-
-func (m *blockMetrics) ApricotProposalBlock(b *block.ApricotProposalBlock) error {
-	m.numBlocks.With(metric.Labels{
-		blkLabel: "proposal",
-	}).Inc()
-	return b.Tx.Unsigned.Visit(m.txMetrics)
-}
-
-func (m *blockMetrics) ApricotStandardBlock(b *block.ApricotStandardBlock) error {
-	m.numBlocks.With(metric.Labels{
-		blkLabel: "standard",
-	}).Inc()
-	for _, tx := range b.Transactions {
-		if err := tx.Unsigned.Visit(m.txMetrics); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (m *blockMetrics) ApricotAtomicBlock(b *block.ApricotAtomicBlock) error {
-	m.numBlocks.With(metric.Labels{
-		blkLabel: "atomic",
-	}).Inc()
-	return b.Tx.Unsigned.Visit(m.txMetrics)
 }

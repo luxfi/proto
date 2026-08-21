@@ -1,7 +1,7 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package warp_test
+package warp
 
 import (
 	"testing"
@@ -10,16 +10,13 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pvmcodectest"
-	"github.com/luxfi/proto/p/warp"
+	"github.com/luxfi/zap"
 )
 
 func TestUnsignedMessage(t *testing.T) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
-	msg, err := warp.NewUnsignedMessage(
-		c,
+	msg, err := NewUnsignedMessage(
 		constants.UnitTestID,
 		ids.GenerateTestID(),
 		[]byte("payload"),
@@ -27,16 +24,15 @@ func TestUnsignedMessage(t *testing.T) {
 	require.NoError(err)
 
 	msgBytes := msg.Bytes()
-	msg2, err := warp.ParseUnsignedMessage(c, msgBytes)
+	msg2, err := ParseUnsignedMessage(msgBytes)
 	require.NoError(err)
 	require.Equal(msg, msg2)
 }
 
 func TestParseUnsignedMessageJunk(t *testing.T) {
 	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
 
 	bytes := []byte{0, 1, 2, 3, 4, 5, 6, 7}
-	_, err := warp.ParseUnsignedMessage(c, bytes)
-	require.Error(err)
+	_, err := ParseUnsignedMessage(bytes)
+	require.ErrorIs(err, zap.ErrBufferTooSmall)
 }

@@ -42,21 +42,21 @@ type verifier struct {
 	pChainHeight      uint64
 }
 
-func (v *verifier) BanffAbortBlock(b *block.BanffAbortBlock) error {
+func (v *verifier) AbortBlock(b *block.AbortBlock) error {
 	if err := v.banffOptionBlock(b); err != nil {
 		return err
 	}
 	return v.abortBlock(b) // Must be the last validity check on the block
 }
 
-func (v *verifier) BanffCommitBlock(b *block.BanffCommitBlock) error {
+func (v *verifier) CommitBlock(b *block.CommitBlock) error {
 	if err := v.banffOptionBlock(b); err != nil {
 		return err
 	}
 	return v.commitBlock(b) // Must be the last validity check on the block
 }
 
-func (v *verifier) BanffProposalBlock(b *block.BanffProposalBlock) error {
+func (v *verifier) ProposalBlock(b *block.ProposalBlock) error {
 	if err := v.banffNonOptionBlock(b); err != nil {
 		return err
 	}
@@ -73,9 +73,9 @@ func (v *verifier) BanffProposalBlock(b *block.BanffProposalBlock) error {
 		return err
 	}
 
-	feeCalculator := state.PickFeeCalculator(v.txExecutorBackend.Config, v.txExecutorBackend.WarpCodec, onDecisionState)
+	feeCalculator := state.PickFeeCalculator(v.txExecutorBackend.Config, onDecisionState)
 	inputs, atomicRequests, onAcceptFunc, gasConsumed, _, err := v.processStandardTxs(
-		b.Transactions,
+		b.Txs(),
 		feeCalculator,
 		onDecisionState,
 		b.Parent(),
@@ -96,7 +96,7 @@ func (v *verifier) BanffProposalBlock(b *block.BanffProposalBlock) error {
 
 	return v.proposalBlock( // Must be the last validity check on the block
 		b,
-		b.Tx,
+		b.Tx(),
 		onDecisionState,
 		gasConsumed,
 		onCommitState,
@@ -108,7 +108,7 @@ func (v *verifier) BanffProposalBlock(b *block.BanffProposalBlock) error {
 	)
 }
 
-func (v *verifier) BanffStandardBlock(b *block.BanffStandardBlock) error {
+func (v *verifier) StandardBlock(b *block.StandardBlock) error {
 	if err := v.banffNonOptionBlock(b); err != nil {
 		return err
 	}
@@ -129,143 +129,18 @@ func (v *verifier) BanffStandardBlock(b *block.BanffStandardBlock) error {
 		return err
 	}
 
-	feeCalculator := state.PickFeeCalculator(v.txExecutorBackend.Config, v.txExecutorBackend.WarpCodec, onAcceptState)
+	feeCalculator := state.PickFeeCalculator(v.txExecutorBackend.Config, onAcceptState)
 	return v.standardBlock( // Must be the last validity check on the block
 		b,
-		b.Transactions,
+		b.Txs(),
 		feeCalculator,
 		onAcceptState,
 		changed,
 	)
 }
 
-func (v *verifier) ApricotAbortBlock(b *block.ApricotAbortBlock) error {
-	if err := v.apricotCommonBlock(b); err != nil {
-		return err
-	}
-	return v.abortBlock(b) // Must be the last validity check on the block
-}
 
-func (v *verifier) ApricotCommitBlock(b *block.ApricotCommitBlock) error {
-	if err := v.apricotCommonBlock(b); err != nil {
-		return err
-	}
-	return v.commitBlock(b) // Must be the last validity check on the block
-}
-
-func (v *verifier) ApricotProposalBlock(b *block.ApricotProposalBlock) error {
-	if err := v.apricotCommonBlock(b); err != nil {
-		return err
-	}
-
-	parentID := b.Parent()
-	onCommitState, err := state.NewDiff(parentID, v.backend)
-	if err != nil {
-		return err
-	}
-	onAbortState, err := state.NewDiff(parentID, v.backend)
-	if err != nil {
-		return err
-	}
-
-	feeCalculator := txfee.NewSimpleCalculator(0)
-	return v.proposalBlock( // Must be the last validity check on the block
-		b,
-		b.Tx,
-		nil,
-		0,
-		onCommitState,
-		onAbortState,
-		feeCalculator,
-		nil,
-		nil,
-		nil,
-	)
-}
-
-func (v *verifier) ApricotStandardBlock(b *block.ApricotStandardBlock) error {
-	if err := v.apricotCommonBlock(b); err != nil {
-		return err
-	}
-
-	parentID := b.Parent()
-	onAcceptState, err := state.NewDiff(parentID, v)
-	if err != nil {
-		return err
-	}
-
-	feeCalculator := txfee.NewSimpleCalculator(0)
-	return v.standardBlock( // Must be the last validity check on the block
-		b,
-		b.Transactions,
-		feeCalculator,
-		onAcceptState,
-		true,
-	)
-}
-
-func (v *verifier) ApricotAtomicBlock(b *block.ApricotAtomicBlock) error {
-	// We call [commonBlock] here rather than [apricotCommonBlock] because below
-	// this check we perform the more strict check that ApricotPhase5 isn't
-	// activated.
-	if err := v.commonBlock(b); err != nil {
-		return err
-	}
-
-	parentID := b.Parent()
-	currentTimestamp := v.getTimestamp(parentID)
-	cfg := v.txExecutorBackend.Config
-	if cfg.UpgradeConfig.IsApricotPhase5Activated(currentTimestamp) {
-		return fmt.Errorf(
-			"the chain timestamp (%d) is after the apricot phase 5 time (%d), hence atomic transactions should go through the standard block",
-			currentTimestamp.Unix(),
-			cfg.UpgradeConfig.ApricotPhase5Time.Unix(),
-		)
-	}
-
-	feeCalculator := txfee.NewSimpleCalculator(0)
-	onAcceptState, atomicInputs, atomicRequests, err := txexecutor.AtomicTx(
-		v.txExecutorBackend,
-		feeCalculator,
-		parentID,
-		v,
-		b.Tx,
-	)
-	if err != nil {
-		txID := b.Tx.ID()
-		v.MarkDropped(txID, err) // cache tx as dropped
-		return err
-	}
-
-	onAcceptState.AddTx(b.Tx, status.Committed)
-
-	if err := v.verifyUniqueInputs(parentID, atomicInputs); err != nil {
-		return err
-	}
-
-	v.Mempool.Remove(b.Tx)
-
-	blkID := b.ID()
-	v.setBlockState(blkID, &blockState{
-		statelessBlock: b,
-
-		onAcceptState: onAcceptState,
-
-		inputs:          atomicInputs,
-		timestamp:       onAcceptState.GetTimestamp(),
-		atomicRequests:  atomicRequests,
-		verifiedHeights: set.Of(v.pChainHeight),
-		metrics: calculateBlockMetrics(
-			v.txExecutorBackend.Config,
-			b,
-			onAcceptState,
-			0,
-		),
-	})
-	return nil
-}
-
-func (v *verifier) banffOptionBlock(b block.BanffBlock) error {
+func (v *verifier) banffOptionBlock(b block.TimestampedBlock) error {
 	if err := v.commonBlock(b); err != nil {
 		return err
 	}
@@ -288,7 +163,7 @@ func (v *verifier) banffOptionBlock(b block.BanffBlock) error {
 	return nil
 }
 
-func (v *verifier) banffNonOptionBlock(b block.BanffBlock) error {
+func (v *verifier) banffNonOptionBlock(b block.TimestampedBlock) error {
 	if err := v.commonBlock(b); err != nil {
 		return err
 	}
@@ -526,7 +401,7 @@ func (v *verifier) processStandardTxs(txs []*txs.Tx, feeCalculator txfee.Calcula
 	if timestamp := diff.GetTimestamp(); v.txExecutorBackend.Config.UpgradeConfig.IsQuasarActivated(timestamp) {
 		var blockComplexity gas.Dimensions
 		for _, tx := range txs {
-			txComplexity, err := txfee.TxComplexity(v.txExecutorBackend.WarpCodec, tx.Unsigned)
+			txComplexity, err := txfee.TxComplexity(tx.Unsigned)
 			if err != nil {
 				txID := tx.ID()
 				v.MarkDropped(txID, err)

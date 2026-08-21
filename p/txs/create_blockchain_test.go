@@ -160,7 +160,7 @@ func TestUnsignedCreateChainTxVerify(t *testing.T) {
 			}
 
 			signers := [][]*secp256k1.PrivateKey{preFundedKeys}
-			stx, err := NewSigned(createChainTx, testCodec, signers)
+			stx, err := NewSigned(createChainTx, signers)
 			require.NoError(err)
 
 			createChainTx.SyntacticallyVerified = false

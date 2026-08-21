@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -14,15 +14,13 @@ import (
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/metric"
-	"github.com/luxfi/proto/internal/xcodectest"
+	"github.com/luxfi/node/upgrade"
+	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/proto/x/block"
 	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/txs"
-	"github.com/luxfi/upgrade"
-	lux "github.com/luxfi/utxo"
 
 	"github.com/luxfi/utxo/secp256k1fx"
-	luxwire "github.com/luxfi/utxo/wire"
 )
 
 const trackChecksums = false
@@ -41,7 +39,6 @@ var (
 func init() {
 	var err error
 	parser, err = block.NewParser(
-		xcodectest.New(),
 		[]fxs.Fx{
 			&secp256k1fx.Fx{},
 		},
@@ -49,30 +46,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	// Register the fx-aware ParseUTXO factory so utxo_state.GetUTXO
-	// can decode wire bytes back to *lux.UTXO. In production this is
-	// wired by node/vms/components/lux/utxo_parser.go at boot; the
-	// test environment registers a secp256k1fx-only variant since that
-	// is the only fx the x/state tests exercise.
-	lux.RegisterParseUTXO(func(wireBytes []byte) (*lux.UTXO, error) {
-		w, err := luxwire.WrapUTXO(wireBytes)
-		if err != nil {
-			return nil, err
-		}
-		out, err := secp256k1fx.WrapTransferOutput(w.OutputBytes())
-		if err != nil {
-			return nil, err
-		}
-		return &lux.UTXO{
-			UTXOID: lux.UTXOID{
-				TxID:        w.TxID(),
-				OutputIndex: w.OutputIndex(),
-			},
-			Asset: lux.Asset{ID: w.AssetID()},
-			Out:   out,
-		}, nil
-	})
 
 	populatedUTXO = &lux.UTXO{
 		UTXOID: lux.UTXOID{
@@ -90,24 +63,26 @@ func init() {
 	populatedTx = &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: lux.BaseTx{
 		BlockchainID: ids.GenerateTestID(),
 	}}}
-	err = populatedTx.Initialize(parser.Codec())
+	err = populatedTx.Initialize()
 	if err != nil {
 		panic(err)
 	}
 	populatedTxID = populatedTx.ID()
 
+	// Native-ZAP blocks store each tx's own wire bytes, so a block's txs must
+	// be Initialized (bytes populated) before the block is built — the same
+	// contract production uses (mempool/parse hand the builder initialized txs).
+	blkTx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: lux.BaseTx{
+		BlockchainID: ids.GenerateTestID(),
+	}}}
+	if err = blkTx.Initialize(); err != nil {
+		panic(err)
+	}
 	populatedBlk, err = block.NewStandardBlock(
 		ids.GenerateTestID(),
 		1,
 		time.Now(),
-		[]*txs.Tx{
-			{
-				Unsigned: &txs.BaseTx{BaseTx: lux.BaseTx{
-					BlockchainID: ids.GenerateTestID(),
-				}},
-			},
-		},
-		parser.Codec(),
+		[]*txs.Tx{blkTx},
 	)
 	if err != nil {
 		panic(err)
@@ -226,7 +201,7 @@ func ChainTxTest(t *testing.T, c Chain) {
 	tx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: lux.BaseTx{
 		BlockchainID: ids.GenerateTestID(),
 	}}}
-	require.NoError(tx.Initialize(parser.Codec()))
+	require.NoError(tx.Initialize())
 	txID := tx.ID()
 
 	_, err = c.GetTx(txID)
@@ -263,18 +238,15 @@ func ChainBlockTest(t *testing.T, c Chain) {
 	require.NoError(err)
 	require.Equal(populatedBlk.ID(), fetchedBlk.ID())
 
+	inlineTx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: lux.BaseTx{
+		BlockchainID: ids.GenerateTestID(),
+	}}}
+	require.NoError(inlineTx.Initialize())
 	blk, err := block.NewStandardBlock(
 		ids.GenerateTestID(),
 		10,
 		time.Now(),
-		[]*txs.Tx{
-			{
-				Unsigned: &txs.BaseTx{BaseTx: lux.BaseTx{
-					BlockchainID: ids.GenerateTestID(),
-				}},
-			},
-		},
-		parser.Codec(),
+		[]*txs.Tx{inlineTx},
 	)
 	if err != nil {
 		panic(err)
@@ -329,7 +301,6 @@ func TestInitializeChainState(t *testing.T) {
 		genesis.Height()+1,
 		genesisTimestamp,
 		nil,
-		parser.Codec(),
 	)
 	require.NoError(err)
 

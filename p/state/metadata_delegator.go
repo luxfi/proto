@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -9,33 +9,24 @@ import (
 )
 
 type delegatorMetadata struct {
-	PotentialReward uint64 `v1:"true"`
-	StakerStartTime uint64 `v1:"true"`
+	PotentialReward uint64
+	StakerStartTime uint64
 
 	txID ids.ID
 }
 
-func parseDelegatorMetadata(c MetadataCodec, bytes []byte, metadata *delegatorMetadata) error {
-	var err error
-	switch len(bytes) {
-	case database.Uint64Size:
-		// only potential reward was stored
-		metadata.PotentialReward, err = database.ParseUInt64(bytes)
-	default:
-		_, err = c.Unmarshal(bytes, metadata)
+// parseDelegatorMetadata overlays metadata's persisted fields (native
+// delegatorMetadata wire) from bytes. Empty bytes means nothing was persisted —
+// the caller's tx-derived StakerStartTime default is kept.
+func parseDelegatorMetadata(bytes []byte, metadata *delegatorMetadata) error {
+	if len(bytes) == 0 {
+		return nil
 	}
-	return err
+	return unmarshalDelegatorMetadata(bytes, metadata)
 }
 
-func writeDelegatorMetadata(c MetadataCodec, db database.KeyValueWriter, metadata *delegatorMetadata, codecVersion uint16) error {
-	// The "0" codec is skipped for [delegatorMetadata]. This is to ensure the
-	// [validatorMetadata] codec version is the same as the [delegatorMetadata]
-	// codec version.
-	//
-	if codecVersion == 0 {
-		return database.PutUInt64(db, metadata.txID[:], metadata.PotentialReward)
-	}
-	metadataBytes, err := c.Marshal(codecVersion, metadata)
+func writeDelegatorMetadata(db database.KeyValueWriter, metadata *delegatorMetadata) error {
+	metadataBytes, err := marshalDelegatorMetadata(metadata)
 	if err != nil {
 		return err
 	}

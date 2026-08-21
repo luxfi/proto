@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -6,13 +6,12 @@ package executor
 import (
 	"errors"
 	"fmt"
-	"reflect"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/x/state"
-	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
+	"github.com/luxfi/proto/x/state"
+	"github.com/luxfi/proto/x/txs"
 )
 
 var (
@@ -106,15 +105,18 @@ func (v *SemanticVerifier) ImportTx(tx *txs.ImportTx) error {
 
 	offset := len(tx.Ins)
 	for i, in := range tx.ImportedIns {
-		utxo := lux.UTXO{}
-		if _, err := v.Codec.Unmarshal(allUTXOBytes[i], &utxo); err != nil {
+		// ZAP-native wire envelope — matches executor.ExportTx's
+		// utxo.WireBytes() emit path. Same bytes flow on shared memory
+		// and disk.
+		u, err := lux.ParseUTXO(allUTXOBytes[i])
+		if err != nil {
 			return err
 		}
 
 		// Note: Verification of the length of [t.tx.Creds] happens during
 		// syntactic verification, which happens before semantic verification.
 		cred := v.Tx.Creds[i+offset].Credential
-		if err := v.verifyTransferOfUTXO(tx, in, cred, &utxo); err != nil {
+		if err := v.verifyTransferOfUTXO(tx, in, cred, u); err != nil {
 			return err
 		}
 	}
@@ -243,9 +245,8 @@ func (v *SemanticVerifier) verifyFxUsage(
 }
 
 func (v *SemanticVerifier) getFx(val interface{}) (int, error) {
-	valType := reflect.TypeOf(val)
-	fx, exists := v.TypeToFxIndex[valType]
-	if !exists {
+	fx, ok := v.FxIndex.GetFx(val)
+	if !ok {
 		return 0, errUnknownFx
 	}
 	return fx, nil

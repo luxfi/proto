@@ -198,14 +198,9 @@ type ProposalTxBuilder interface {
 	NewRewardValidatorTx(txID ids.ID) (*txs.Tx, error)
 }
 
-// New constructs a Builder backed by the supplied codec. The codec is
-// the PVM runtime tx codec used to sign every constructed *txs.Tx; it
-// must be threaded in from the same source as state.New's txCodec so
-// the signed tx bytes are byte-compatible with what the state will
-// later parse.
+// New constructs a Builder.
 func New(
 	rt *runtime.Runtime,
-	c txs.Codec,
 	cfg *config.Config,
 	clk *mockable.Clock,
 	fx fx.Fx,
@@ -217,7 +212,6 @@ func New(
 		AtomicUTXOManager: atomicUTXOManager,
 		Spender:           utxoSpender,
 		state:             state,
-		codec:             c,
 		cfg:               cfg,
 		rt:                rt,
 		NetworkID:         rt.NetworkID,
@@ -233,7 +227,6 @@ type builder struct {
 	utxo.Spender
 	state state.State
 
-	codec       txs.Codec
 	cfg         *config.Config
 	rt          *runtime.Runtime
 	NetworkID   uint32
@@ -335,7 +328,7 @@ func (b *builder) NewImportTx(
 		SourceChain:    from,
 		ImportedInputs: importedInputs,
 	}
-	tx, err := txs.NewSigned(utx, b.codec, signers)
+	tx, err := txs.NewSigned(utx, signers)
 	if err != nil {
 		return nil, err
 	}
@@ -379,7 +372,7 @@ func (b *builder) NewExportTx(
 			},
 		}},
 	}
-	tx, err := txs.NewSigned(utx, b.codec, signers)
+	tx, err := txs.NewSigned(utx, signers)
 	if err != nil {
 		return nil, err
 	}
@@ -425,7 +418,7 @@ func (b *builder) NewCreateChainTx(
 		GenesisData:       genesisData,
 		ChainAuth:         chainAuth,
 	}
-	tx, err := txs.NewSigned(utx, b.codec, signers)
+	tx, err := txs.NewSigned(utx, signers)
 	if err != nil {
 		return nil, err
 	}
@@ -460,7 +453,7 @@ func (b *builder) NewCreateNetworkTx(
 			Addrs:     ownerAddrs,
 		},
 	}
-	tx, err := txs.NewSigned(utx, b.codec, signers)
+	tx, err := txs.NewSigned(utx, signers)
 	if err != nil {
 		return nil, err
 	}
@@ -503,7 +496,7 @@ func (b *builder) NewAddValidatorTx(
 		},
 		DelegationShares: shares,
 	}
-	tx, err := txs.NewSigned(utx, b.codec, signers)
+	tx, err := txs.NewSigned(utx, signers)
 	if err != nil {
 		return nil, err
 	}
@@ -544,7 +537,7 @@ func (b *builder) NewAddDelegatorTx(
 			Addrs:     []ids.ShortID{rewardAddress},
 		},
 	}
-	tx, err := txs.NewSigned(utx, b.codec, signers)
+	tx, err := txs.NewSigned(utx, signers)
 	if err != nil {
 		return nil, err
 	}
@@ -590,7 +583,7 @@ func (b *builder) NewAddChainValidatorTx(
 		},
 		ChainAuth: chainAuth,
 	}
-	tx, err := txs.NewSigned(utx, b.codec, signers)
+	tx, err := txs.NewSigned(utx, signers)
 	if err != nil {
 		return nil, err
 	}
@@ -626,7 +619,7 @@ func (b *builder) NewRemoveChainValidatorTx(
 		NodeID:    nodeID,
 		ChainAuth: chainAuth,
 	}
-	tx, err := txs.NewSigned(utx, b.codec, signers)
+	tx, err := txs.NewSigned(utx, signers)
 	if err != nil {
 		return nil, err
 	}
@@ -635,7 +628,7 @@ func (b *builder) NewRemoveChainValidatorTx(
 
 func (b *builder) NewAdvanceTimeTx(timestamp time.Time) (*txs.Tx, error) {
 	utx := &txs.AdvanceTimeTx{Time: uint64(timestamp.Unix())}
-	tx, err := txs.NewSigned(utx, b.codec, nil)
+	tx, err := txs.NewSigned(utx, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -644,7 +637,7 @@ func (b *builder) NewAdvanceTimeTx(timestamp time.Time) (*txs.Tx, error) {
 
 func (b *builder) NewRewardValidatorTx(txID ids.ID) (*txs.Tx, error) {
 	utx := &txs.RewardValidatorTx{TxID: txID}
-	tx, err := txs.NewSigned(utx, b.codec, nil)
+	tx, err := txs.NewSigned(utx, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -684,7 +677,7 @@ func (b *builder) NewTransferChainOwnershipTx(
 			Addrs:     ownerAddrs,
 		},
 	}
-	tx, err := txs.NewSigned(utx, b.codec, signers)
+	tx, err := txs.NewSigned(utx, signers)
 	if err != nil {
 		return nil, err
 	}
@@ -724,7 +717,7 @@ func (b *builder) NewBaseTx(
 			Outs:         outs,
 		},
 	}
-	tx, err := txs.NewSigned(utx, b.codec, signers)
+	tx, err := txs.NewSigned(utx, signers)
 	if err != nil {
 		return nil, err
 	}

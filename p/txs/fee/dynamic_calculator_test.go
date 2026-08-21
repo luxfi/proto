@@ -13,7 +13,7 @@ import (
 )
 
 func TestDynamicCalculator(t *testing.T) {
-	calculator := NewDynamicCalculator(testWarpCodec, testDynamicWeights, testDynamicPrice)
+	calculator := NewDynamicCalculator(testDynamicWeights, testDynamicPrice)
 	for _, test := range txTests {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
@@ -21,7 +21,7 @@ func TestDynamicCalculator(t *testing.T) {
 			txBytes, err := hex.DecodeString(test.tx)
 			require.NoError(err)
 
-			tx, err := txs.Parse(testTxCodec, txBytes)
+			tx, err := txs.Parse(txBytes)
 			if err != nil {
 				t.Skipf("skipping invalid tx encoding: %v", err)
 			}

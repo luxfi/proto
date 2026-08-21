@@ -1,23 +1,19 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
 
 import (
-	"errors"
-	"reflect"
-
-	log "github.com/luxfi/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/txs"
 	"github.com/luxfi/timer/mockable"
 )
 
-// CodecVersion is the current default codec version
-const CodecVersion = txs.CodecVersion
-
 var _ Parser = (*parser)(nil)
 
+// Parser parses both X-chain txs and blocks. It embeds the codec-free
+// txs.Parser (for ParseTx / ParseGenesisTx) and adds native-ZAP block parsing.
 type Parser interface {
 	txs.Parser
 
@@ -29,64 +25,35 @@ type parser struct {
 	txs.Parser
 }
 
-// NewParser wires the block-level type registry on top of a tx-level
-// parser. The caller injects the four ParserCodecs (codec.Manager /
-// linearcodec or zapcodec instances). proto/x/block stays free of
-// any github.com/luxfi/codec import — Wave 1A of the codec rip (#101).
-func NewParser(codecs txs.ParserCodecs, fxList []fxs.Fx) (Parser, error) {
-	p, err := txs.NewParser(codecs, fxList)
+func NewParser(fxs []fxs.Fx) (Parser, error) {
+	p, err := txs.NewParser(fxs)
 	if err != nil {
 		return nil, err
 	}
-	c := p.CodecRegistry()
-	gc := p.GenesisCodecRegistry()
-
-	err = errors.Join(
-		c.RegisterType(&StandardBlock{}),
-		gc.RegisterType(&StandardBlock{}),
-	)
-	return &parser{
-		Parser: p,
-	}, err
+	return &parser{Parser: p}, nil
 }
 
-// NewCustomParser is NewParser with explicit clock and logger
-// injection.
 func NewCustomParser(
-	codecs txs.ParserCodecs,
-	typeToFxIndex map[reflect.Type]int,
+	fxIndex *txs.FxIndex,
 	clock *mockable.Clock,
-	logger log.Logger,
-	fxList []fxs.Fx,
+	log log.Logger,
+	fxs []fxs.Fx,
 ) (Parser, error) {
-	p, err := txs.NewCustomParser(codecs, typeToFxIndex, clock, logger, fxList)
+	p, err := txs.NewCustomParser(fxIndex, clock, log, fxs)
 	if err != nil {
 		return nil, err
 	}
-	c := p.CodecRegistry()
-	gc := p.GenesisCodecRegistry()
-
-	err = errors.Join(
-		c.RegisterType(&StandardBlock{}),
-		gc.RegisterType(&StandardBlock{}),
-	)
-	return &parser{
-		Parser: p,
-	}, err
+	return &parser{Parser: p}, nil
 }
 
-func (p *parser) ParseBlock(bytes []byte) (Block, error) {
-	return parse(p.Codec(), bytes)
+// ParseBlock decodes a native-ZAP X-chain block (byte-preserving).
+func (*parser) ParseBlock(bytes []byte) (Block, error) {
+	return parseStandardBlock(bytes)
 }
 
-func (p *parser) ParseGenesisBlock(bytes []byte) (Block, error) {
-	return parse(p.GenesisCodec(), bytes)
-}
-
-func parse(cm txs.Codec, bytes []byte) (Block, error) {
-	var blk Block
-	if _, err := cm.Unmarshal(bytes, &blk); err != nil {
-		return nil, err
-	}
-	return blk, blk.initialize(bytes, cm)
+// ParseGenesisBlock decodes the genesis block. Same wire as any other block —
+// the genesis/standard distinction was a codec-version artifact that no longer
+// exists.
+func (*parser) ParseGenesisBlock(bytes []byte) (Block, error) {
+	return parseStandardBlock(bytes)
 }

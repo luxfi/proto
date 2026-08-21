@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/proto/p/txs/txheap"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -18,7 +17,6 @@ import (
 
 func TestByEndTime(t *testing.T) {
 	require := require.New(t)
-	c, _ := pvmcodectest.NewPVMRuntimeCodec()
 
 	txHeap := txheap.NewByEndTime()
 
@@ -33,7 +31,7 @@ func TestByEndTime(t *testing.T) {
 		RewardsOwner: &secp256k1fx.OutputOwners{},
 	}
 	tx0 := &txs.Tx{Unsigned: utx0}
-	require.NoError(tx0.Initialize(c))
+	require.NoError(tx0.Initialize())
 
 	utx1 := &txs.AddValidatorTx{
 		Validator: txs.Validator{
@@ -44,7 +42,7 @@ func TestByEndTime(t *testing.T) {
 		RewardsOwner: &secp256k1fx.OutputOwners{},
 	}
 	tx1 := &txs.Tx{Unsigned: utx1}
-	require.NoError(tx1.Initialize(c))
+	require.NoError(tx1.Initialize())
 
 	utx2 := &txs.AddValidatorTx{
 		Validator: txs.Validator{
@@ -55,7 +53,7 @@ func TestByEndTime(t *testing.T) {
 		RewardsOwner: &secp256k1fx.OutputOwners{},
 	}
 	tx2 := &txs.Tx{Unsigned: utx2}
-	require.NoError(tx2.Initialize(c))
+	require.NoError(tx2.Initialize())
 
 	txHeap.Add(tx2)
 	require.Equal(utx2.EndTime(), txHeap.Timestamp())

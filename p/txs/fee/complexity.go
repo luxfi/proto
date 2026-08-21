@@ -261,18 +261,14 @@ var (
 )
 
 // TxComplexity computes the gas-cost dimensions for one or more
-// unsigned PVM txs. The warpCodec is the proto/p/warp codec used by the
-// L1-validator family (Register / SetWeight / Increase / Disable) to
-// parse the warp message embedded in those txs; pass nil if none of
-// the supplied txs carry warp messages — TxComplexity will surface a
-// nil-codec error from the visitor at the first warp parse attempt.
-func TxComplexity(warpCodec warp.Codec, txList ...txs.UnsignedTx) (gas.Dimensions, error) {
+// unsigned PVM txs.
+func TxComplexity(txList ...txs.UnsignedTx) (gas.Dimensions, error) {
 	var (
 		c          complexityVisitor
 		complexity gas.Dimensions
 	)
 	for _, tx := range txList {
-		c = complexityVisitor{warpCodec: warpCodec}
+		c = complexityVisitor{}
 		err := tx.Visit(&c)
 		if err != nil {
 			return gas.Dimensions{}, err
@@ -502,11 +498,9 @@ func SignerComplexity(s signer.Signer) (gas.Dimensions, error) {
 }
 
 // WarpComplexity returns the complexity a warp message adds to a
-// transaction. The warpCodec is the proto/p/warp codec used to parse
-// the supplied message bytes; callers thread it in from their PVM
-// parser bundle.
-func WarpComplexity(warpCodec warp.Codec, message []byte) (gas.Dimensions, error) {
-	msg, err := warp.ParseMessage(warpCodec, message)
+// transaction.
+func WarpComplexity(message []byte) (gas.Dimensions, error) {
+	msg, err := warp.ParseMessage(message)
 	if err != nil {
 		return gas.Dimensions{}, err
 	}
@@ -533,8 +527,7 @@ func WarpComplexity(warpCodec warp.Codec, message []byte) (gas.Dimensions, error
 }
 
 type complexityVisitor struct {
-	output    gas.Dimensions
-	warpCodec warp.Codec
+	output gas.Dimensions
 }
 
 func (*complexityVisitor) AddValidatorTx(*txs.AddValidatorTx) error {
@@ -786,7 +779,7 @@ func (c *complexityVisitor) RegisterL1ValidatorTx(tx *txs.RegisterL1ValidatorTx)
 	if err != nil {
 		return err
 	}
-	warpComplexity, err := WarpComplexity(c.warpCodec, tx.Message)
+	warpComplexity, err := WarpComplexity(tx.Message)
 	if err != nil {
 		return err
 	}
@@ -802,7 +795,7 @@ func (c *complexityVisitor) SetL1ValidatorWeightTx(tx *txs.SetL1ValidatorWeightT
 	if err != nil {
 		return err
 	}
-	warpComplexity, err := WarpComplexity(c.warpCodec, tx.Message)
+	warpComplexity, err := WarpComplexity(tx.Message)
 	if err != nil {
 		return err
 	}

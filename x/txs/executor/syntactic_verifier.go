@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -11,8 +11,9 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/proto/x/txs"
+	"github.com/luxfi/utils"
 )
 
 const (
@@ -127,11 +128,11 @@ func (v *SyntacticVerifier) CreateAssetTx(tx *txs.CreateAssetTx) error {
 	}
 
 	for _, state := range tx.States {
-		if err := state.Verify(v.Codec, len(v.Fxs)); err != nil {
+		if err := state.Verify(len(v.Fxs)); err != nil {
 			return err
 		}
 	}
-	if !txs.IsSortedAndUniqueByCompare(tx.States) {
+	if !utils.IsSortedAndUnique(tx.States) {
 		return errInitialStatesNotSortedUnique
 	}
 
@@ -190,7 +191,7 @@ func (v *SyntacticVerifier) OperationTx(tx *txs.OperationTx) error {
 			inputs.Add(inputID)
 		}
 	}
-	if !txs.IsSortedAndUniqueOperations(tx.Ops, v.Codec) {
+	if !txs.IsSortedAndUniqueOperations(tx.Ops) {
 		return errOperationsNotSortedUnique
 	}
 

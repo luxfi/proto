@@ -339,8 +339,8 @@ func (e *standardTxExecutor) ImportTx(tx *txs.ImportTx) error {
 			utxos[index] = utxo
 		}
 		for i, utxoBytes := range allUTXOBytes {
-			utxo := &lux.UTXO{}
-			if _, err := e.backend.TxCodec.Unmarshal(utxoBytes, utxo); err != nil {
+			utxo, err := lux.ParseUTXO(utxoBytes)
+			if err != nil {
 				return fmt.Errorf("failed to unmarshal UTXO: %w", err)
 			}
 			utxos[i+len(tx.Ins)] = utxo
@@ -450,7 +450,7 @@ func (e *standardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 			Out:   out.Out,
 		}
 
-		utxoBytes, err := e.backend.TxCodec.Marshal(txs.CodecVersion, utxo)
+		utxoBytes, err := utxo.WireBytes()
 		if err != nil {
 			return fmt.Errorf("failed to marshal UTXO: %w", err)
 		}
@@ -732,11 +732,17 @@ func (e *standardTxExecutor) ConvertNetworkToL1Tx(tx *txs.ConvertNetworkToL1Tx) 
 			return err
 		}
 
-		remainingBalanceOwner, err := e.backend.TxCodec.Marshal(txs.CodecVersion, &vdr.RemainingBalanceOwner)
+		remainingBalanceOwner, err := txs.MarshalOwner(&secp256k1fx.OutputOwners{
+			Threshold: vdr.RemainingBalanceOwner.Threshold,
+			Addrs:     vdr.RemainingBalanceOwner.Addresses,
+		})
 		if err != nil {
 			return err
 		}
-		deactivationOwner, err := e.backend.TxCodec.Marshal(txs.CodecVersion, &vdr.DeactivationOwner)
+		deactivationOwner, err := txs.MarshalOwner(&secp256k1fx.OutputOwners{
+			Threshold: vdr.DeactivationOwner.Threshold,
+			Addrs:     vdr.DeactivationOwner.Addresses,
+		})
 		if err != nil {
 			return err
 		}
@@ -793,7 +799,7 @@ func (e *standardTxExecutor) ConvertNetworkToL1Tx(tx *txs.ConvertNetworkToL1Tx) 
 		return err
 	}
 
-	conversionID, err := message.ChainToL1ConversionID(e.backend.WarpMsgCodec, chainToL1ConversionData)
+	conversionID, err := message.ChainToL1ConversionID(chainToL1ConversionData)
 	if err != nil {
 		return err
 	}
@@ -857,15 +863,15 @@ func (e *standardTxExecutor) RegisterL1ValidatorTx(tx *txs.RegisterL1ValidatorTx
 	}
 
 	// Parse the warp message.
-	warpMessage, err := warp.ParseMessage(e.backend.WarpCodec, tx.Message)
+	warpMessage, err := warp.ParseMessage(tx.Message)
 	if err != nil {
 		return err
 	}
-	addressedCall, err := payload.ParseAddressedCall(e.backend.PayloadCodec, warpMessage.Payload)
+	addressedCall, err := payload.ParseAddressedCall(warpMessage.Payload)
 	if err != nil {
 		return err
 	}
-	msg, err := message.ParseRegisterL1Validator(e.backend.WarpMsgCodec, addressedCall.Payload)
+	msg, err := message.ParseRegisterL1Validator(addressedCall.Payload)
 	if err != nil {
 		return err
 	}
@@ -917,11 +923,17 @@ func (e *standardTxExecutor) RegisterL1ValidatorTx(tx *txs.RegisterL1ValidatorTx
 	if err != nil {
 		return err
 	}
-	remainingBalanceOwner, err := e.backend.TxCodec.Marshal(txs.CodecVersion, &msg.RemainingBalanceOwner)
+	remainingBalanceOwner, err := txs.MarshalOwner(&secp256k1fx.OutputOwners{
+		Threshold: msg.RemainingBalanceOwner.Threshold,
+		Addrs:     msg.RemainingBalanceOwner.Addresses,
+	})
 	if err != nil {
 		return err
 	}
-	deactivationOwner, err := e.backend.TxCodec.Marshal(txs.CodecVersion, &msg.DisableOwner)
+	deactivationOwner, err := txs.MarshalOwner(&secp256k1fx.OutputOwners{
+		Threshold: msg.DisableOwner.Threshold,
+		Addrs:     msg.DisableOwner.Addresses,
+	})
 	if err != nil {
 		return err
 	}
@@ -1005,15 +1017,15 @@ func (e *standardTxExecutor) SetL1ValidatorWeightTx(tx *txs.SetL1ValidatorWeight
 	}
 
 	// Parse the warp message.
-	warpMessage, err := warp.ParseMessage(e.backend.WarpCodec, tx.Message)
+	warpMessage, err := warp.ParseMessage(tx.Message)
 	if err != nil {
 		return err
 	}
-	addressedCall, err := payload.ParseAddressedCall(e.backend.PayloadCodec, warpMessage.Payload)
+	addressedCall, err := payload.ParseAddressedCall(warpMessage.Payload)
 	if err != nil {
 		return err
 	}
-	msg, err := message.ParseL1ValidatorWeight(e.backend.WarpMsgCodec, addressedCall.Payload)
+	msg, err := message.ParseL1ValidatorWeight(addressedCall.Payload)
 	if err != nil {
 		return err
 	}
@@ -1052,10 +1064,11 @@ func (e *standardTxExecutor) SetL1ValidatorWeightTx(tx *txs.SetL1ValidatorWeight
 		// If the validator is currently active, we need to refund the remaining
 		// balance.
 		if l1Validator.EndAccumulatedFee != 0 {
-			var remainingBalanceOwner message.PChainOwner
-			if _, err := e.backend.TxCodec.Unmarshal(l1Validator.RemainingBalanceOwner, &remainingBalanceOwner); err != nil {
+			remOwner, err := txs.UnmarshalOwner(l1Validator.RemainingBalanceOwner)
+			if err != nil {
 				return fmt.Errorf("%w: remaining balance owner is malformed", errStateCorruption)
 			}
+			remainingBalanceOwner := message.PChainOwner{Threshold: remOwner.Threshold, Addresses: remOwner.Addrs}
 
 			accruedFees := e.state.GetAccruedFees()
 			if l1Validator.EndAccumulatedFee <= accruedFees {
@@ -1198,10 +1211,11 @@ func (e *standardTxExecutor) DisableL1ValidatorTx(tx *txs.DisableL1ValidatorTx) 
 		return fmt.Errorf("%w: %w", errCouldNotLoadL1Validator, err)
 	}
 
-	var disableOwner message.PChainOwner
-	if _, err := e.backend.TxCodec.Unmarshal(l1Validator.DeactivationOwner, &disableOwner); err != nil {
+	disOwner, err := txs.UnmarshalOwner(l1Validator.DeactivationOwner)
+	if err != nil {
 		return err
 	}
+	disableOwner := message.PChainOwner{Threshold: disOwner.Threshold, Addresses: disOwner.Addrs}
 
 	baseTxCreds, err := verifyAuthorization(
 		e.backend.Fx,
@@ -1247,10 +1261,11 @@ func (e *standardTxExecutor) DisableL1ValidatorTx(tx *txs.DisableL1ValidatorTx) 
 		return nil
 	}
 
-	var remainingBalanceOwner message.PChainOwner
-	if _, err := e.backend.TxCodec.Unmarshal(l1Validator.RemainingBalanceOwner, &remainingBalanceOwner); err != nil {
+	remOwner, err := txs.UnmarshalOwner(l1Validator.RemainingBalanceOwner)
+	if err != nil {
 		return err
 	}
+	remainingBalanceOwner := message.PChainOwner{Threshold: remOwner.Threshold, Addresses: remOwner.Addrs}
 
 	accruedFees := e.state.GetAccruedFees()
 	if l1Validator.EndAccumulatedFee <= accruedFees {

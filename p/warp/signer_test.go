@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp_test
@@ -9,10 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/constants"
-	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pvmcodectest"
 	"github.com/luxfi/proto/p/warp"
 	"github.com/luxfi/proto/p/warp/signertest"
 )
@@ -31,57 +29,3 @@ func TestSigner(t *testing.T) {
 	}
 }
 
-// Test that using a random SourceChainID results in an error
-func testWrongChainID(t *testing.T, s warp.Signer, _ *localsigner.LocalSigner, _ uint32, _ ids.ID) {
-	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
-
-	msg, err := warp.NewUnsignedMessage(c,
-		constants.UnitTestID,
-		ids.GenerateTestID(),
-		[]byte("payload"),
-	)
-	require.NoError(err)
-
-	_, err = s.Sign(msg)
-	require.Error(err) //nolint:forbidigo // currently returns grpc errors too
-}
-
-// Test that using a different networkID results in an error
-func testWrongNetworkID(t *testing.T, s warp.Signer, _ *localsigner.LocalSigner, networkID uint32, blockchainID ids.ID) {
-	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
-
-	msg, err := warp.NewUnsignedMessage(c,
-		networkID+1,
-		blockchainID,
-		[]byte("payload"),
-	)
-	require.NoError(err)
-
-	_, err = s.Sign(msg)
-	require.Error(err) //nolint:forbidigo // currently returns grpc errors too
-}
-
-// Test that a signature generated with the signer verifies correctly
-func testVerifies(t *testing.T, s warp.Signer, sk *localsigner.LocalSigner, networkID uint32, chainID ids.ID) {
-	require := require.New(t)
-	c := pvmcodectest.NewWarpCodec()
-
-	msg, err := warp.NewUnsignedMessage(c,
-		networkID,
-		chainID,
-		[]byte("payload"),
-	)
-	require.NoError(err)
-
-	sigBytes, err := s.Sign(msg)
-	require.NoError(err)
-
-	sig, err := bls.SignatureFromBytes(sigBytes)
-	require.NoError(err)
-
-	pk := sk.PublicKey()
-	msgBytes := msg.Bytes()
-	require.True(bls.Verify(pk, sig, msgBytes))
-}

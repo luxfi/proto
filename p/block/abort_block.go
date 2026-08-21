@@ -1,100 +1,38 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
 
 import (
-	"context"
 	"time"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/p/txs"
-	"github.com/luxfi/runtime"
 )
 
-var (
-	_ BanffBlock = (*BanffAbortBlock)(nil)
-	_ Block      = (*ApricotAbortBlock)(nil)
-)
+var _ Block = (*AbortBlock)(nil)
 
-type BanffAbortBlock struct {
-	Time              uint64 `serialize:"true" json:"time"`
-	ApricotAbortBlock `serialize:"true"`
+// AbortBlock is the canonical P-Chain abort outcome of a ProposalBlock. It
+// carries a timestamp and no txs; the struct is the zap buffer.
+type AbortBlock struct {
+	commonZapBlock
 }
 
-func (b *BanffAbortBlock) Timestamp() time.Time {
-	return time.Unix(int64(b.Time), 0)
-}
+func (*AbortBlock) Txs() []*txs.Tx          { return nil }
+func (b *AbortBlock) Visit(v Visitor) error { return v.AbortBlock(b) }
 
-func (b *BanffAbortBlock) Visit(v Visitor) error {
-	return v.BanffAbortBlock(b)
-}
-
-// NewBanffAbortBlock builds and initializes a BanffAbortBlock against
-// the supplied block Codec.
-func NewBanffAbortBlock(
-	c Codec,
+func NewAbortBlock(
 	timestamp time.Time,
 	parentID ids.ID,
 	height uint64,
-) (*BanffAbortBlock, error) {
-	blk := &BanffAbortBlock{
-		Time: uint64(timestamp.Unix()),
-		ApricotAbortBlock: ApricotAbortBlock{
-			CommonBlock: CommonBlock{
-				PrntID: parentID,
-				Hght:   height,
-			},
-		},
+) (*AbortBlock, error) {
+	bytes, err := buildBlock(blkAbort, parentID, height, uint64(timestamp.Unix()), nil, nil)
+	if err != nil {
+		return nil, err
 	}
-	return blk, initialize(c, blk, &blk.CommonBlock)
-}
-
-type ApricotAbortBlock struct {
-	CommonBlock `serialize:"true"`
-}
-
-func (b *ApricotAbortBlock) initialize(bytes []byte, _ Codec) error {
-	b.CommonBlock.initialize(bytes)
-	return nil
-}
-
-func (*ApricotAbortBlock) InitRuntime(*runtime.Runtime) {}
-
-func (*ApricotAbortBlock) Txs() []*txs.Tx {
-	return nil
-}
-
-func (b *ApricotAbortBlock) Visit(v Visitor) error {
-	return v.ApricotAbortBlock(b)
-}
-
-// NewApricotAbortBlock is kept for testing purposes only.
-// Following Banff activation and subsequent code cleanup, Apricot Abort blocks
-// should be only verified (upon bootstrap), never created anymore.
-// It builds and initializes the block against the supplied block Codec.
-func NewApricotAbortBlock(
-	c Codec,
-	parentID ids.ID,
-	height uint64,
-) (*ApricotAbortBlock, error) {
-	blk := &ApricotAbortBlock{
-		CommonBlock: CommonBlock{
-			PrntID: parentID,
-			Hght:   height,
-		},
+	blk := &AbortBlock{}
+	if err := blk.setID(bytes); err != nil {
+		return nil, err
 	}
-	return blk, initialize(c, blk, &blk.CommonBlock)
-}
-
-// InitializeWithContext initializes the block with consensus context
-func (b *BanffAbortBlock) InitializeWithContext(ctx context.Context) error {
-	// Initialize any context-dependent fields here
-	return nil
-}
-
-// InitializeWithContext initializes the block with consensus context
-func (b *ApricotAbortBlock) InitializeWithContext(ctx context.Context) error {
-	// Initialize any context-dependent fields here
-	return nil
+	return blk, nil
 }

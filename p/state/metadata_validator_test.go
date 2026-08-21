@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -12,7 +12,6 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/proto/internal/pvmcodectest"
 )
 
 func TestValidatorUptimes(t *testing.T) {
@@ -53,9 +52,18 @@ func TestValidatorUptimes(t *testing.T) {
 	require.Equal(newUpDuration, upDuration)
 	require.Equal(newLastUpdated, lastUpdated)
 
-	// set uptime for non-existent
-	err = state.SetUptime(ids.GenerateTestNodeID(), netID, 1, time.Now())
-	require.ErrorIs(err, database.ErrNotFound)
+	// load uptime changes uptimes
+	newTestMetadata := &validatorMetadata{
+		UpDuration:  testMetadata.UpDuration + time.Hour,
+		lastUpdated: testMetadata.lastUpdated.Add(time.Hour),
+	}
+	state.LoadValidatorMetadata(nodeID, netID, newTestMetadata)
+
+	// get new uptime
+	upDuration, lastUpdated, err = state.GetUptime(nodeID, netID)
+	require.NoError(err)
+	require.Equal(newTestMetadata.UpDuration, upDuration)
+	require.Equal(newTestMetadata.lastUpdated, lastUpdated)
 
 	// delete uptime
 	state.DeleteValidatorMetadata(nodeID, netID)
@@ -63,6 +71,49 @@ func TestValidatorUptimes(t *testing.T) {
 	// get deleted uptime
 	_, _, err = state.GetUptime(nodeID, netID)
 	require.ErrorIs(err, database.ErrNotFound)
+}
+
+func TestWriteValidatorMetadata(t *testing.T) {
+	require := require.New(t)
+	state := newValidatorState()
+
+	primaryDB := memdb.New()
+	chainDB := memdb.New()
+
+	// write empty uptimes
+	require.NoError(state.WriteValidatorMetadata(primaryDB, chainDB))
+
+	// load uptime
+	nodeID := ids.GenerateTestNodeID()
+	netID := ids.GenerateTestID()
+	testUptimeReward := &validatorMetadata{
+		UpDuration:      time.Hour,
+		lastUpdated:     time.Now(),
+		PotentialReward: 100,
+		txID:            ids.GenerateTestID(),
+	}
+	state.LoadValidatorMetadata(nodeID, netID, testUptimeReward)
+
+	// write state, should not reflect to DB yet
+	require.NoError(state.WriteValidatorMetadata(primaryDB, chainDB))
+	require.False(primaryDB.Has(testUptimeReward.txID[:]))
+	require.False(chainDB.Has(testUptimeReward.txID[:]))
+
+	// get uptime should still return the loaded value
+	upDuration, lastUpdated, err := state.GetUptime(nodeID, netID)
+	require.NoError(err)
+	require.Equal(testUptimeReward.UpDuration, upDuration)
+	require.Equal(testUptimeReward.lastUpdated, lastUpdated)
+
+	// update uptimes
+	newUpDuration := testUptimeReward.UpDuration + 1
+	newLastUpdated := testUptimeReward.lastUpdated.Add(time.Hour)
+	require.NoError(state.SetUptime(nodeID, netID, newUpDuration, newLastUpdated))
+
+	// write uptimes, should reflect to net DB
+	require.NoError(state.WriteValidatorMetadata(primaryDB, chainDB))
+	require.False(primaryDB.Has(testUptimeReward.txID[:]))
+	require.True(chainDB.Has(testUptimeReward.txID[:]))
 }
 
 func TestValidatorDelegateeRewards(t *testing.T) {
@@ -99,180 +150,96 @@ func TestValidatorDelegateeRewards(t *testing.T) {
 	require.NoError(err)
 	require.Equal(newDelegateeReward, delegateeReward)
 
-	// set delegatee reward for non-existent
-	err = state.SetDelegateeReward(netID, ids.GenerateTestNodeID(), 1)
-	require.ErrorIs(err, database.ErrNotFound)
+	// load delegatee reward changes
+	newTestMetadata := &validatorMetadata{
+		PotentialDelegateeReward: testMetadata.PotentialDelegateeReward + 100000,
+	}
+	state.LoadValidatorMetadata(nodeID, netID, newTestMetadata)
+
+	// get new delegatee reward
+	delegateeReward, err = state.GetDelegateeReward(netID, nodeID)
+	require.NoError(err)
+	require.Equal(newTestMetadata.PotentialDelegateeReward, delegateeReward)
 
 	// delete delegatee reward
 	state.DeleteValidatorMetadata(nodeID, netID)
 
 	// get deleted delegatee reward
-	_, err = state.GetDelegateeReward(netID, nodeID)
+	_, _, err = state.GetUptime(nodeID, netID)
 	require.ErrorIs(err, database.ErrNotFound)
 }
 
-func TestWriteValidatorMetadata(t *testing.T) {
-	require := require.New(t)
-	state := newValidatorState()
-	c := pvmcodectest.NewMetadataCodec()
-
-	primaryDB := memdb.New()
-	netDB := memdb.New()
-	// write empty uptimes
-	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
-
-	// load metadata for a chain validator. Load alone does NOT mark the
-	// entry as updated — only Set* mutations trigger a subsequent write.
-	nodeID := ids.GenerateTestNodeID()
-	netID := ids.GenerateTestID()
-	testUptimeReward := &validatorMetadata{
-		UpDuration:      time.Hour,
-		lastUpdated:     time.Now(),
-		PotentialReward: 100,
-		txID:            ids.GenerateTestID(),
-	}
-	state.LoadValidatorMetadata(nodeID, netID, testUptimeReward)
-
-	// Without a Set, WriteValidatorMetadata is a no-op for this txID.
-	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
-	netDBHas, err := netDB.Has(testUptimeReward.txID[:])
-	require.NoError(err)
-	require.False(netDBHas)
-
-	// Mark the entry as updated via SetUptime, then re-write — now the
-	// chain validator's row should land in netDB (not primaryDB).
-	require.NoError(state.SetUptime(nodeID, netID, testUptimeReward.UpDuration+1, testUptimeReward.lastUpdated))
-	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
-	netDBHas, err = netDB.Has(testUptimeReward.txID[:])
-	require.NoError(err)
-	require.True(netDBHas)
-	primaryDBHas, err := primaryDB.Has(testUptimeReward.txID[:])
-	require.NoError(err)
-	require.False(primaryDBHas)
-
-	// Same for a primary-network validator — Set then Write lands in primaryDB.
-	primaryNodeID := ids.GenerateTestNodeID()
-	primaryNetID := ids.Empty // primary network ID
-	testUptimeReward2 := &validatorMetadata{
-		UpDuration:      time.Hour,
-		lastUpdated:     time.Now(),
-		PotentialReward: 100,
-		txID:            ids.GenerateTestID(),
-	}
-	state.LoadValidatorMetadata(primaryNodeID, primaryNetID, testUptimeReward2)
-	require.NoError(state.SetUptime(primaryNodeID, primaryNetID, testUptimeReward2.UpDuration+1, testUptimeReward2.lastUpdated))
-	require.NoError(state.WriteValidatorMetadata(c, primaryDB, netDB, CodecVersion1))
-	primaryDBHas, err = primaryDB.Has(testUptimeReward2.txID[:])
-	require.NoError(err)
-	require.True(primaryDBHas)
-}
-
 func TestParseValidatorMetadata(t *testing.T) {
-	c := pvmcodectest.NewMetadataCodec()
+	// full is a fully-populated record round-tripped through the native wire.
+	full := &validatorMetadata{
+		UpDuration:               6000000,
+		LastUpdated:              900000,
+		PotentialReward:          100000,
+		PotentialDelegateeReward: 20000,
+		StakerStartTime:          12345,
+	}
+	fullBytes, err := marshalValidatorMetadata(full)
+	require.NoError(t, err)
+
 	type test struct {
-		name        string
-		bytes       []byte
-		expected    *validatorMetadata
-		expectErr   bool
+		name    string
+		bytes   []byte
+		initial *validatorMetadata // caller-supplied defaults before parse
+		want    *validatorMetadata
+		wantErr bool
 	}
 	tests := []test{
 		{
-			name:  "nil",
-			bytes: nil,
-			expected: &validatorMetadata{
-				lastUpdated: time.Unix(0, 0),
-			},
-		},
-		{
-			name: "potential reward only",
-			bytes: []byte{
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x86, 0xA0,
-			},
-			expected: &validatorMetadata{
-				PotentialReward: 100000,
-				lastUpdated:     time.Unix(0, 0),
-			},
-		},
-		{
-			name: "pre-delegatee reward",
-			// Regenerated post-LP-023 ZAP cutover (LE wire format).
-			bytes: []byte{
-				0x00, 0x00, 0x80, 0x8d, 0x5b, 0x00, 0x00, 0x00,
-				0x00, 0x00, 0xa0, 0xbb, 0x0d, 0x00, 0x00, 0x00,
-				0x00, 0x00, 0xa0, 0x86, 0x01, 0x00, 0x00, 0x00,
-				0x00, 0x00,
-			},
-			expected: &validatorMetadata{
-				UpDuration:      time.Duration(6000000),
+			// Empty ⇒ nothing persisted; caller's tx-derived defaults are kept,
+			// only lastUpdated is derived from LastUpdated.
+			name:    "nil keeps defaults",
+			bytes:   nil,
+			initial: &validatorMetadata{StakerStartTime: 900000, LastUpdated: 900000},
+			want: &validatorMetadata{
+				StakerStartTime: 900000,
 				LastUpdated:     900000,
-				PotentialReward: 100000,
 				lastUpdated:     time.Unix(900000, 0),
 			},
 		},
 		{
-			name: "potential delegatee reward",
-			// Regenerated post-LP-023 ZAP cutover (LE wire format).
-			bytes: []byte{
-				0x00, 0x00, 0x80, 0x8d, 0x5b, 0x00, 0x00, 0x00,
-				0x00, 0x00, 0xa0, 0xbb, 0x0d, 0x00, 0x00, 0x00,
-				0x00, 0x00, 0xa0, 0x86, 0x01, 0x00, 0x00, 0x00,
-				0x00, 0x00, 0x20, 0x4e, 0x00, 0x00, 0x00, 0x00,
-				0x00, 0x00,
-			},
-			expected: &validatorMetadata{
-				UpDuration:               time.Duration(6000000),
+			name:    "empty keeps defaults",
+			bytes:   []byte{},
+			initial: &validatorMetadata{},
+			want:    &validatorMetadata{lastUpdated: time.Unix(0, 0)},
+		},
+		{
+			// Full native buffer overwrites every serialized field, including the
+			// caller's tx-default StakerStartTime.
+			name:    "full native round-trip",
+			bytes:   fullBytes,
+			initial: &validatorMetadata{StakerStartTime: 999},
+			want: &validatorMetadata{
+				UpDuration:               6000000,
 				LastUpdated:              900000,
 				PotentialReward:          100000,
 				PotentialDelegateeReward: 20000,
+				StakerStartTime:          12345,
 				lastUpdated:              time.Unix(900000, 0),
 			},
 		},
 		{
-			name: "invalid codec version",
-			bytes: []byte{
-				// codec version
-				0x00, 0x02,
-				// up duration
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x5B, 0x8D, 0x80,
-				// last updated
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0xBB, 0xA0,
-				// potential reward
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x86, 0xA0,
-				// potential delegatee reward
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x20,
-			},
-			expected:  nil,
-			expectErr: true,
-		},
-		{
-			name: "short byte len",
-			bytes: []byte{
-				// codec version
-				0x00, 0x00,
-				// up duration
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x5B, 0x8D, 0x80,
-				// last updated
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0xBB, 0xA0,
-				// potential reward
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x86, 0xA0,
-				// potential delegatee reward
-				0x00, 0x00, 0x00, 0x00, 0x4E, 0x20,
-			},
-			expected:  nil,
-			expectErr: true,
+			name:    "truncated buffer errors",
+			bytes:   fullBytes[:len(fullBytes)-1],
+			initial: &validatorMetadata{},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
-			var metadata validatorMetadata
-			err := parseValidatorMetadata(c, tt.bytes, &metadata)
-			if tt.expectErr {
+			metadata := tt.initial
+			err := parseValidatorMetadata(tt.bytes, metadata)
+			if tt.wantErr {
 				require.Error(err)
 				return
 			}
 			require.NoError(err)
-			require.Equal(tt.expected, &metadata)
+			require.Equal(tt.want, metadata)
 		})
 	}
 }

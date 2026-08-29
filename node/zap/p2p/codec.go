@@ -39,6 +39,19 @@ const (
 	tagBFT                     = 26
 )
 
+// BFT payload discriminators, in the order the variants are declared.
+const (
+	bftBlockProposal = iota + 1
+	bftVote
+	bftEmptyVote
+	bftFinalizeVote
+	bftNotarization
+	bftEmptyNotarization
+	bftFinalization
+	bftReplicationRequest
+	bftReplicationResponse
+)
+
 var (
 	ErrInvalidMessage = errors.New("invalid wire message")
 	ErrUnknownTag     = errors.New("unknown message tag")
@@ -82,6 +95,14 @@ func (b *Buffer) WriteUint64(v uint64) {
 
 func (b *Buffer) WriteInt32(v int32) {
 	b.WriteUint32(uint32(v))
+}
+
+func (b *Buffer) WriteBool(v bool) {
+	if v {
+		b.WriteUint8(1)
+		return
+	}
+	b.WriteUint8(0)
 }
 
 func (b *Buffer) WriteBytes(data []byte) {
@@ -168,6 +189,11 @@ func (r *Reader) ReadUint64() (uint64, error) {
 	v := binary.BigEndian.Uint64(r.data[r.offset:])
 	r.offset += 8
 	return v, nil
+}
+
+func (r *Reader) ReadBool() (bool, error) {
+	v, err := r.ReadUint8()
+	return v == 1, err
 }
 
 func (r *Reader) ReadBytes() ([]byte, error) {
@@ -315,7 +341,9 @@ func Marshal(m *Message) ([]byte, error) {
 		marshalError(buf, m.GetError())
 	case m.GetBFT() != nil:
 		buf.WriteUint8(tagBFT)
-		marshalBFT(buf, m.GetBFT())
+		if err := marshalBFT(buf, m.GetBFT()); err != nil {
+			return nil, err
+		}
 	default:
 		return nil, ErrInvalidMessage
 	}
@@ -497,6 +525,7 @@ func marshalHandshake(b *Buffer, m *Handshake) {
 		b.WriteUint8(0)
 	}
 	b.WriteBytes(m.IpBlsSig)
+	b.WriteBool(m.AllChains)
 	// IpMldsaSig is append-only: legacy decoders that ran on the
 	// pre-PQ wire format simply stop after IpBlsSig and the reader
 	// returns io.ErrUnexpectedEOF when it tries to keep going.
@@ -526,6 +555,7 @@ func marshalGetPeerList(b *Buffer, m *GetPeerList) {
 	} else {
 		b.WriteUint8(0)
 	}
+	b.WriteBool(m.AllChains)
 }
 
 func marshalPeerList(b *Buffer, m *PeerList) {
@@ -645,6 +675,7 @@ func marshalChits(b *Buffer, m *Chits) {
 	b.WriteBytes(m.PreferredId)
 	b.WriteBytes(m.PreferredIdAtHeight)
 	b.WriteBytes(m.AcceptedId)
+	b.WriteUint64(m.AcceptedHeight)
 }
 
 func marshalRequest(b *Buffer, m *Request) {
@@ -672,27 +703,59 @@ func marshalError(b *Buffer, m *Error) {
 	b.WriteString(m.ErrorMessage)
 }
 
-func marshalBFT(b *Buffer, m *BFT) {
+func marshalBFT(b *Buffer, m *BFT) error {
 	b.WriteBytes(m.ChainId)
-	// BFT message type tag + data
 	switch msg := m.Message.(type) {
 	case *BFT_BlockProposal:
-		b.WriteUint8(1)
+		b.WriteUint8(bftBlockProposal)
 		b.WriteBytes(msg.BlockProposal.Block)
 	case *BFT_Vote:
-		b.WriteUint8(2)
-		b.WriteBytes(msg.Vote.BlockHash)
-		b.WriteBytes(msg.Vote.Signature)
+		b.WriteUint8(bftVote)
+		marshalVote(b, msg.Vote)
+	case *BFT_EmptyVote:
+		b.WriteUint8(bftEmptyVote)
+		b.WriteUint64(msg.EmptyVote.View)
+		b.WriteUint64(msg.EmptyVote.Seq)
+		b.WriteBytes(msg.EmptyVote.Signature)
+	case *BFT_FinalizeVote:
+		b.WriteUint8(bftFinalizeVote)
+		marshalVote(b, msg.FinalizeVote)
+	case *BFT_Notarization:
+		b.WriteUint8(bftNotarization)
+		marshalQuorumCertificate(b, msg.Notarization)
+	case *BFT_EmptyNotarization:
+		b.WriteUint8(bftEmptyNotarization)
+		b.WriteUint64(msg.EmptyNotarization.View)
+		b.WriteUint64(msg.EmptyNotarization.Seq)
+		b.WriteBytes(msg.EmptyNotarization.AggregatedSignature)
+		b.WriteBytes(msg.EmptyNotarization.Signers)
+	case *BFT_Finalization:
+		b.WriteUint8(bftFinalization)
+		marshalQuorumCertificate(b, msg.Finalization)
 	case *BFT_ReplicationRequest:
-		b.WriteUint8(8)
+		b.WriteUint8(bftReplicationRequest)
 		b.WriteUint64Slice(msg.ReplicationRequest.Seqs)
 		b.WriteUint64(msg.ReplicationRequest.LatestRound)
 	case *BFT_ReplicationResponse:
-		b.WriteUint8(9)
+		b.WriteUint8(bftReplicationResponse)
 		b.WriteBytesSlice(msg.ReplicationResponse.Messages)
 	default:
-		b.WriteUint8(0) // unknown/nil
+		return ErrInvalidMessage
 	}
+	return nil
+}
+
+func marshalVote(b *Buffer, m *Vote) {
+	b.WriteBytes(m.BlockHash)
+	b.WriteBytes(m.Signature)
+}
+
+func marshalQuorumCertificate(b *Buffer, m *QuorumCertificate) {
+	b.WriteBytes(m.BlockHash)
+	b.WriteUint64(m.View)
+	b.WriteUint64(m.Seq)
+	b.WriteBytes(m.AggregatedSignature)
+	b.WriteBytes(m.Signers)
 }
 
 // Unmarshal helpers
@@ -831,6 +894,10 @@ func unmarshalHandshake(r *Reader) (*Handshake, error) {
 	if err != nil {
 		return nil, err
 	}
+	m.AllChains, err = r.ReadBool()
+	if err != nil {
+		return nil, err
+	}
 	// IpMldsaSig is append-only on the wire. Legacy peers don't write it;
 	// their handshake frame ends after IpBlsSig. New peers write a
 	// length-prefixed blob (possibly empty). HasMore() lets us tell them
@@ -891,6 +958,10 @@ func unmarshalGetPeerList(r *Reader) (*GetPeerList, error) {
 		if err != nil {
 			return nil, err
 		}
+	}
+	m.AllChains, err = r.ReadBool()
+	if err != nil {
+		return nil, err
 	}
 	return m, nil
 }
@@ -1230,6 +1301,10 @@ func unmarshalChits(r *Reader) (*Chits, error) {
 		return nil, err
 	}
 	m.AcceptedId, err = r.ReadBytes()
+	if err != nil {
+		return nil, err
+	}
+	m.AcceptedHeight, err = r.ReadUint64()
 	return m, err
 }
 
@@ -1304,28 +1379,63 @@ func unmarshalBFT(r *Reader) (*BFT, error) {
 	if err != nil {
 		return nil, err
 	}
-	msgType, err := r.ReadUint8()
+	kind, err := r.ReadUint8()
 	if err != nil {
 		return nil, err
 	}
-	switch msgType {
-	case 1: // BlockProposal
+	switch kind {
+	case bftBlockProposal:
 		block, err := r.ReadBytes()
 		if err != nil {
 			return nil, err
 		}
 		m.Message = &BFT_BlockProposal{BlockProposal: &BlockProposal{Block: block}}
-	case 2: // Vote
-		hash, err := r.ReadBytes()
+	case bftVote:
+		v, err := unmarshalVote(r)
 		if err != nil {
 			return nil, err
 		}
-		sig, err := r.ReadBytes()
+		m.Message = &BFT_Vote{Vote: v}
+	case bftEmptyVote:
+		v, err := unmarshalEmptyVote(r)
 		if err != nil {
 			return nil, err
 		}
-		m.Message = &BFT_Vote{Vote: &Vote{BlockHash: hash, Signature: sig}}
-	case 8: // ReplicationRequest
+		m.Message = &BFT_EmptyVote{EmptyVote: v}
+	case bftFinalizeVote:
+		v, err := unmarshalVote(r)
+		if err != nil {
+			return nil, err
+		}
+		m.Message = &BFT_FinalizeVote{FinalizeVote: v}
+	case bftNotarization:
+		qc, err := unmarshalQuorumCertificate(r)
+		if err != nil {
+			return nil, err
+		}
+		m.Message = &BFT_Notarization{Notarization: qc}
+	case bftEmptyNotarization:
+		v := &EmptyNotarization{}
+		if v.View, err = r.ReadUint64(); err != nil {
+			return nil, err
+		}
+		if v.Seq, err = r.ReadUint64(); err != nil {
+			return nil, err
+		}
+		if v.AggregatedSignature, err = r.ReadBytes(); err != nil {
+			return nil, err
+		}
+		if v.Signers, err = r.ReadBytes(); err != nil {
+			return nil, err
+		}
+		m.Message = &BFT_EmptyNotarization{EmptyNotarization: v}
+	case bftFinalization:
+		qc, err := unmarshalQuorumCertificate(r)
+		if err != nil {
+			return nil, err
+		}
+		m.Message = &BFT_Finalization{Finalization: qc}
+	case bftReplicationRequest:
 		seqs, err := r.ReadUint64Slice()
 		if err != nil {
 			return nil, err
@@ -1335,12 +1445,56 @@ func unmarshalBFT(r *Reader) (*BFT, error) {
 			return nil, err
 		}
 		m.Message = &BFT_ReplicationRequest{ReplicationRequest: &ReplicationRequest{Seqs: seqs, LatestRound: round}}
-	case 9: // ReplicationResponse
+	case bftReplicationResponse:
 		msgs, err := r.ReadBytesSlice()
 		if err != nil {
 			return nil, err
 		}
 		m.Message = &BFT_ReplicationResponse{ReplicationResponse: &ReplicationResponse{Messages: msgs}}
+	default:
+		return nil, ErrUnknownTag
 	}
 	return m, nil
+}
+
+func unmarshalVote(r *Reader) (*Vote, error) {
+	m := &Vote{}
+	var err error
+	if m.BlockHash, err = r.ReadBytes(); err != nil {
+		return nil, err
+	}
+	m.Signature, err = r.ReadBytes()
+	return m, err
+}
+
+func unmarshalEmptyVote(r *Reader) (*EmptyVote, error) {
+	m := &EmptyVote{}
+	var err error
+	if m.View, err = r.ReadUint64(); err != nil {
+		return nil, err
+	}
+	if m.Seq, err = r.ReadUint64(); err != nil {
+		return nil, err
+	}
+	m.Signature, err = r.ReadBytes()
+	return m, err
+}
+
+func unmarshalQuorumCertificate(r *Reader) (*QuorumCertificate, error) {
+	m := &QuorumCertificate{}
+	var err error
+	if m.BlockHash, err = r.ReadBytes(); err != nil {
+		return nil, err
+	}
+	if m.View, err = r.ReadUint64(); err != nil {
+		return nil, err
+	}
+	if m.Seq, err = r.ReadUint64(); err != nil {
+		return nil, err
+	}
+	if m.AggregatedSignature, err = r.ReadBytes(); err != nil {
+		return nil, err
+	}
+	m.Signers, err = r.ReadBytes()
+	return m, err
 }

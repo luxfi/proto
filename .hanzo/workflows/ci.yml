@@ -1,0 +1,30 @@
+name: CI
+
+# .hanzo/workflows, not .github/workflows: git.hanzo.ai reads only this path and
+# it is what carries the runners. The GitHub copy this replaces ran nowhere —
+# nothing on that side has a runner for this fleet.
+#
+# It does what that copy did and no more: build the packages. vet stays off
+# while the test scaffolding absorbed from the sdk merge is reconciled, which
+# is the reason the GitHub lane gave and is still the reason.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: [lux-build-linux-amd64]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          # go.mod is the one place the version is written.
+          go-version-file: go.mod
+      - run: go build ./...

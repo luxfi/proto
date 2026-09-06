@@ -555,6 +555,8 @@ func marshalGetPeerList(b *Buffer, m *GetPeerList) {
 	} else {
 		b.WriteUint8(0)
 	}
+	// AllChains, append-only. Every GetPeerList repeats the request the
+	// Handshake opened with, so the same bit has to survive here too.
 	b.WriteBool(m.AllChains)
 }
 
@@ -675,6 +677,10 @@ func marshalChits(b *Buffer, m *Chits) {
 	b.WriteBytes(m.PreferredId)
 	b.WriteBytes(m.PreferredIdAtHeight)
 	b.WriteBytes(m.AcceptedId)
+	// AcceptedHeight is append-only on the same terms as the Handshake tail: a
+	// peer too old to write it ends the frame here and unmarshalChits leaves the
+	// field at zero, which is what every Chits carried while it went unwritten —
+	// height zero, whatever frontier the responder actually answered from.
 	b.WriteUint64(m.AcceptedHeight)
 }
 
@@ -939,6 +945,15 @@ func unmarshalHandshake(r *Reader) (*Handshake, error) {
 			m.Chains = append(m.Chains, c)
 		}
 	}
+	// AllChains, append-only. Absent means a peer too old to ask, which reads
+	// as not asking — the same answer that bit carried before it was written.
+	if r.HasMore() {
+		allChains, err := r.ReadUint8()
+		if err != nil {
+			return nil, err
+		}
+		m.AllChains = allChains == 1
+	}
 	return m, nil
 }
 
@@ -959,9 +974,11 @@ func unmarshalGetPeerList(r *Reader) (*GetPeerList, error) {
 			return nil, err
 		}
 	}
-	m.AllChains, err = r.ReadBool()
-	if err != nil {
-		return nil, err
+	if r.HasMore() {
+		m.AllChains, err = r.ReadBool()
+		if err != nil {
+			return nil, err
+		}
 	}
 	return m, nil
 }
@@ -1304,7 +1321,9 @@ func unmarshalChits(r *Reader) (*Chits, error) {
 	if err != nil {
 		return nil, err
 	}
-	m.AcceptedHeight, err = r.ReadUint64()
+	if r.HasMore() {
+		m.AcceptedHeight, err = r.ReadUint64()
+	}
 	return m, err
 }
 

@@ -100,25 +100,31 @@ func TestHandshakeChainsEmptyIsNotAbsent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// A legacy frame is this one with the 4-byte count chopped off the tail.
-	legacy := stated[:len(stated)-4]
-
-	if len(stated)-len(legacy) != 4 {
-		t.Fatalf("stating zero chains cost %d bytes, want 4", len(stated)-len(legacy))
-	}
-	if !bytes.Equal(stated[len(stated)-4:], []byte{0, 0, 0, 0}) {
+	// Chains is the append-only tail: its 4-byte count is written last, so a
+	// peer too old to say it ends the frame before it. AllChains is not part
+	// of that tail — it sits mid-frame at a declared offset and every peer
+	// writes it — so truncating before it is not a vintage the wire promises.
+	countAt := len(stated) - 4
+	if !bytes.Equal(stated[countAt:], []byte{0, 0, 0, 0}) {
 		t.Error("an empty chain list is not encoded as a zero count")
 	}
 
-	var back Message
-	if err := Unmarshal(legacy, &back); err != nil {
-		t.Fatalf("a legacy frame must still decode: %v", err)
-	}
-	if n := len(back.GetHandshake().Chains); n != 0 {
-		t.Errorf("legacy frame decoded %d chains, want 0", n)
-	}
-	if !bytes.Equal(back.GetHandshake().IpMldsaSig, handshake(nil).IpMldsaSig) {
-		t.Error("a legacy frame lost a field it did carry")
+	for name, legacy := range map[string][]byte{
+		"before Chains": stated[:countAt],
+	} {
+		var back Message
+		if err := Unmarshal(legacy, &back); err != nil {
+			t.Fatalf("a frame ending %s must still decode: %v", name, err)
+		}
+		if n := len(back.GetHandshake().Chains); n != 0 {
+			t.Errorf("frame ending %s decoded %d chains, want 0", name, n)
+		}
+		if back.GetHandshake().AllChains {
+			t.Errorf("frame ending %s decoded AllChains as set", name)
+		}
+		if !bytes.Equal(back.GetHandshake().IpMldsaSig, handshake(nil).IpMldsaSig) {
+			t.Errorf("frame ending %s lost a field it did carry", name)
+		}
 	}
 }
 
@@ -130,7 +136,8 @@ func TestHandshakeChainsLyingCountIsBounded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	binary.BigEndian.PutUint32(raw[len(raw)-4:], 0xFFFFFFFF)
+	// The count sits ahead of the 1-byte AllChains flag that follows it.
+	binary.BigEndian.PutUint32(raw[len(raw)-5:], 0xFFFFFFFF)
 
 	var back Message
 	if err := Unmarshal(raw, &back); err == nil {

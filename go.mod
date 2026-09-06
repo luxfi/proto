@@ -1,6 +1,6 @@
 module github.com/luxfi/proto
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/cloudflare/circl v1.6.3
@@ -174,6 +174,7 @@ require (
 	github.com/supranational/blst v0.3.16 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
 	github.com/tinylib/msgp v1.6.4 // indirect
+	github.com/zap-proto/go v1.8.2
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel v1.44.0 // indirect
 	go.opentelemetry.io/otel/metric v1.44.0 // indirect

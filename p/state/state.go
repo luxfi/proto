@@ -44,6 +44,10 @@ import (
 	"github.com/luxfi/timer"
 	"github.com/luxfi/upgrade"
 	lux "github.com/luxfi/utxo"
+	// lux.ParseUTXO is a registry that something has to fill. The
+	// components/lux init is what fills it, and this package is one of the
+	// callers, so it says so rather than inheriting it from whoever linked it.
+	_ "github.com/luxfi/proto/components/lux"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/validators/uptime"
 	"github.com/luxfi/vm/components/gas"
@@ -251,7 +255,6 @@ type State interface {
 	Close() error
 }
 
-
 /*
  * VMDB
  * |-. validators
@@ -332,8 +335,6 @@ type State interface {
  */
 type state struct {
 	validatorState
-
-
 
 	validators validators.Manager
 	runtime    *runtime.Runtime
@@ -745,7 +746,6 @@ func New(
 
 	s := &state{
 		validatorState: newValidatorState(),
-
 
 		validators: validators,
 		runtime:    rt,

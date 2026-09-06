@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/chains"
+
 	"github.com/luxfi/proto/p/reward"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/proto/p/validators/fee"
@@ -23,7 +23,7 @@ import (
 // internally set by the node.
 type Internal struct {
 	// The node's chain manager
-	Chains chains.Manager
+	Chains ChainCreator
 
 	// Node's validator set maps chainID -> validators of the chain
 	//
@@ -101,7 +101,7 @@ func (c *Internal) CreateChain(blockchainID ids.ID, tx *txs.CreateChainTx) {
 		return
 	}
 
-	chainParams := chains.ChainParameters{
+	chainParams := ChainParameters{
 		ID:          blockchainID,
 		ChainID:     tx.ValidateNetworkID,
 		GenesisData: tx.GenesisData,

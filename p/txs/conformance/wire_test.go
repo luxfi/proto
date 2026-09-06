@@ -16,11 +16,11 @@ import (
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 
-	nodefx "github.com/luxfi/node/vms/platformvm/fx"
-	nodesec "github.com/luxfi/node/vms/platformvm/security"
-	nodesigner "github.com/luxfi/node/vms/platformvm/signer"
-	nodetxs "github.com/luxfi/node/vms/platformvm/txs"
-	nodemsg "github.com/luxfi/node/vms/platformvm/warp/message"
+	nodefx "github.com/luxfi/proto/p/fx"
+	nodesec "github.com/luxfi/proto/p/security"
+	nodesigner "github.com/luxfi/proto/p/signer"
+	nodetxs "github.com/luxfi/proto/p/txs"
+	nodemsg "github.com/luxfi/proto/p/warp/message"
 
 	protosec "github.com/luxfi/proto/p/security"
 	protosigner "github.com/luxfi/proto/p/signer"

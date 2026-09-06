@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/proto/p/block"
 	"github.com/luxfi/proto/p/txs"
 	txexecutor "github.com/luxfi/proto/p/txs/executor"
-	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/proto/p/warp"
 	validators "github.com/luxfi/validators"
 )
 

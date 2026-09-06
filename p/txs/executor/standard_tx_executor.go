@@ -24,6 +24,10 @@ import (
 	"github.com/luxfi/proto/p/warp/message"
 	"github.com/luxfi/proto/p/warp/payload"
 	lux "github.com/luxfi/utxo"
+	// lux.ParseUTXO is a registry that something has to fill. The
+	// components/lux init is what fills it, and this package is one of the
+	// callers, so it says so rather than inheriting it from whoever linked it.
+	_ "github.com/luxfi/proto/components/lux"
 	"github.com/luxfi/utxo/secp256k1fx"
 	chainatomic "github.com/luxfi/vm/chains/atomic"
 	"github.com/luxfi/vm/components/gas"
@@ -45,8 +49,8 @@ var (
 	errEmptyNodeID                     = errors.New("validator nodeID cannot be empty")
 	errMaxStakeDurationTooLarge        = errors.New("max stake duration must be less than or equal to the global max stake duration")
 	errMissingStartTimePreDurango      = errors.New("staker transactions must have a StartTime pre-Durango")
-	errQuasarUpgradeNotActive            = errors.New("attempting to use a Quasar Edition upgrade feature prior to activation")
-	errTransformChainTxPostQuasar        = errors.New("TransformChainTx is not permitted post-Quasar")
+	errQuasarUpgradeNotActive          = errors.New("attempting to use a Quasar Edition upgrade feature prior to activation")
+	errTransformChainTxPostQuasar      = errors.New("TransformChainTx is not permitted post-Quasar")
 	errMaxNumActiveValidators          = errors.New("already at the max number of active validators")
 	errCouldNotLoadChainToL1Conversion = errors.New("could not load chain conversion")
 	errWrongWarpMessageSourceChainID   = errors.New("wrong warp message source chain ID")

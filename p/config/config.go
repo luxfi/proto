@@ -10,7 +10,6 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/chains"
 )
 
 var Default = Config{
@@ -56,7 +55,7 @@ type Config struct {
 	MempoolPruneFrequency         time.Duration   `json:"mempool-prune-frequency"`
 	SybilProtectionEnabled        bool            `json:"sybil-protection-enabled"`
 	TrackedChains                 set.Set[ids.ID] `json:"tracked-chains"`
-	Chains                        chains.Manager  `json:"-"`
+	Chains                        ChainCreator    `json:"-"`
 
 	// Transaction fees
 	TxFee                  uint64 `json:"tx-fee"`

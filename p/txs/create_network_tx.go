@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/proto/p/signer"
 	"github.com/luxfi/proto/p/warp/message"
 	"github.com/luxfi/runtime"
-	"github.com/luxfi/utils"
+	"github.com/luxfi/util"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/vm/types"

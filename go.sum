@@ -453,6 +453,8 @@ github.com/x448/float16 v0.8.4/go.mod h1:14CWIYCyZA/cWjXOioeEpHeN/83MdbZDRQHoFcY
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.4.1/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
+github.com/zap-proto/go v1.8.2 h1:2OlTkS1XJ4iXV/hmEEPIRu6uwN1MO8P0Gm4+v7W0wGo=
+github.com/zap-proto/go v1.8.2/go.mod h1:fbNeWcssRRbTkQEDCrmUmzqJA1gKcAlgi1z4QrtEFZg=
 github.com/zap-proto/http v0.0.0-20260506200741-fd6047874433 h1:7WsCr/pZvWozimdYNffL3B9K6gLr8w0Z7WAi1+eZWtc=
 github.com/zap-proto/http v0.0.0-20260506200741-fd6047874433/go.mod h1:xySyVTIwjknmVE+p+6rukkX86rFZtXeAu/QY7KXMYqw=
 github.com/zeebo/assert v1.3.0 h1:g7C04CbJuIDKNPFHmsk4hwZDO5O+kntRxzaUoNXj+IQ=

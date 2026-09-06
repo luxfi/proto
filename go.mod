@@ -28,7 +28,7 @@ require (
 	github.com/luxfi/runtime v1.3.1
 	github.com/luxfi/timer v1.1.1
 	github.com/luxfi/upgrade v1.0.3
-	github.com/luxfi/utils v1.3.1
+	github.com/luxfi/util v1.3.4
 	github.com/luxfi/utxo v0.5.8
 	github.com/luxfi/validators v1.3.1
 	github.com/luxfi/vm v1.3.16
@@ -83,6 +83,7 @@ require (
 	github.com/luxfi/magnetar v1.2.3 // indirect
 	github.com/luxfi/mlwe v0.3.0 // indirect
 	github.com/luxfi/pulsar v1.9.2 // indirect
+	github.com/luxfi/utils v1.3.1 // indirect
 	github.com/mimoo/StrobeGo v0.0.0-20220103164710-9a04d6ca976b // indirect
 	github.com/montanaflynn/stats v0.9.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.29.0 // indirect

@@ -14,10 +14,10 @@ import (
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/utxo/wire"
 
-	nodewarp "github.com/luxfi/node/vms/platformvm/warp"
-	nodewarpmsg "github.com/luxfi/node/vms/platformvm/warp/message"
-	nodewarppayload "github.com/luxfi/node/vms/platformvm/warp/payload"
-	nodextxs "github.com/luxfi/node/vms/xvm/txs"
+	nodewarp "github.com/luxfi/proto/p/warp"
+	nodewarpmsg "github.com/luxfi/proto/p/warp/message"
+	nodewarppayload "github.com/luxfi/proto/p/warp/payload"
+	nodextxs "github.com/luxfi/proto/x/txs"
 
 	protowarp "github.com/luxfi/proto/p/warp"
 	protowarpmsg "github.com/luxfi/proto/p/warp/message"

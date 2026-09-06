@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/ids"
-	nodestakeable "github.com/luxfi/node/vms/platformvm/stakeable"
+	nodestakeable "github.com/luxfi/proto/p/stakeable"
 	protostakeable "github.com/luxfi/proto/p/stakeable"
 	"github.com/luxfi/utxo/secp256k1fx"
 )

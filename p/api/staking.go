@@ -5,7 +5,7 @@ package api
 
 import (
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/json"
+	"github.com/luxfi/util/json"
 	"github.com/luxfi/proto/p/signer"
 	"github.com/luxfi/vm/types"
 )

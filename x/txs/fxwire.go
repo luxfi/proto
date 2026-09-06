@@ -15,7 +15,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	componentslux "github.com/luxfi/node/vms/components/lux"
+	componentslux "github.com/luxfi/proto/components/lux"
 	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/proto/x/fxs"
 	lux "github.com/luxfi/utxo"

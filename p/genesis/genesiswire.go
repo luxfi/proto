@@ -16,6 +16,10 @@ import (
 	"fmt"
 
 	lux "github.com/luxfi/utxo"
+	// lux.ParseUTXO is a registry that something has to fill. The
+	// components/lux init is what fills it, and this package is one of the
+	// callers, so it says so rather than inheriting it from whoever linked it.
+	_ "github.com/luxfi/proto/components/lux"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/zap"
 )

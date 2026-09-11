@@ -1,9 +1,5 @@
 name: CI
 
-# .hanzo/workflows, not .github/workflows: git.hanzo.ai reads only this path and
-# it is what carries the runners. The GitHub copy this replaces ran nowhere —
-# nothing on that side has a runner for this fleet.
-#
 # It does what that copy did and no more: build the packages. vet stays off
 # while the test scaffolding absorbed from the sdk merge is reconciled, which
 # is the reason the GitHub lane gave and is still the reason.

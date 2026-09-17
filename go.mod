@@ -1,6 +1,6 @@
 module github.com/luxfi/proto
 
-go 1.26.5
+go 1.27.1
 
 require (
 	github.com/cloudflare/circl v1.6.3
